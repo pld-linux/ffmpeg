@@ -5,19 +5,19 @@
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
-Version:	0.4.7
+Version:	0.4.8
 Release:	1
 License:	LGPL/GPL
 Group:		Daemons
 Source0:	http://dl.sourceforge.net/ffmpeg/%{name}-%{version}.tar.gz
-# Source0-md5:	bd9ab3e27f6c92fa06286b8f40277994
+# Source0-md5:	e00d47614ba1afd99ad2ea387e782dd9
 Patch0:		%{name}-opt.patch
 Patch1:		%{name}-imlib2.patch
 Patch2:		%{name}-libtool.patch
 URL:		http://ffmpeg.sourceforge.net/
 BuildRequires:	SDL-devel
 BuildRequires:	freetype-devel
-%{!?_without_imlib:BuildRequires:	imlib2-devel}
+%{!?_without_imlib:BuildRequires:	imlib2-devel >= 1.1.0-2}
 BuildRequires:	libtool >= 2:1.4d-3
 %ifarch i586 i686 athlon
 BuildRequires:	nasm
@@ -113,7 +113,11 @@ Statyczne biblioteki ffmpeg (libavcodec i libavformat).
 %patch2 -p1
 
 %build
-# note: it's not autoconf configure
+# notes:
+# - it's not autoconf configure
+# - -fomit-frame-pointer is always needed on x86 due to lack of registers
+#   (-fPIC takes one)
+# - --disable-debug, --disable-opts, tune=generic causes not to override our optflags
 ./configure \
 	--prefix=%{_prefix} \
 	--mandir=%{_mandir} \
@@ -121,15 +125,16 @@ Statyczne biblioteki ffmpeg (libavcodec i libavformat).
 	--enable-a52bin \
 	--enable-faadbin \
 %ifnarch i586 i686 athlon
-	--disable-mmx
+	--disable-mmx \
 %endif
+	--cc="%{__cc}" \
+	--extra-cflags="%{rpmcflags} -fomit-frame-pointer" \
+	--extra-ldflags="%{rpmldflags}" \
+	--disable-debug \
+	--disable-opts \
+	--tune=generic
 
-# note: -fomit-frame-pointer is always needed on x86 due to lack of registers
-#       (-fPIC takes one)
-%{__make} \
-	CC="%{__cc}" \
-	OPT="%{rpmcflags} -fomit-frame-pointer -I/usr/X11R6/include" \
-	LDOPT="%{rpmldflags} -L/usr/X11R6/lib"
+%{__make}
 
 %{__make} -C doc
 
