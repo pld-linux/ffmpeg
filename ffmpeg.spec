@@ -1,7 +1,7 @@
 Summary:	realtime audio/video encoder and streaming server
 Summary(pl):	koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
-Version:	0.3.2
+Version:	0.3.4
 Release:	1
 License:	GPL
 Group:		Daemons
@@ -40,7 +40,7 @@ install ffmpeg		$RPM_BUILD_ROOT%{_bindir}
 install ffserver	$RPM_BUILD_ROOT%{_sbindir}
 install doc/*.conf	$RPM_BUILD_ROOT%{_sysconfdir}
 
-gzip -9nf README Change* doc/{BUGS,ffmpeg.txt,ffserver.txt,README*,TODO}
+gzip -9nf README Change* doc/{bench.txt,ffmpeg.txt,ffserver.txt,README*,TODO}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
