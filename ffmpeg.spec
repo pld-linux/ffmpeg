@@ -2,7 +2,7 @@ Summary:	Realtime audio/video encoder and streaming server
 Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.5
-Release:	1
+Release:	2
 License:	GPL
 Group:		Daemons
 Group(de):	Server
@@ -11,7 +11,7 @@ Source0:	http://prdownloads.sourceforge.net/ffmpeg/%{name}-%{version}.tar.gz
 Patch0:		%{name}-opt.patch
 URL:		http://ffmpeg.sourceforge.net/
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
-%ifarch i586 i686
+%ifarch i586 i686 athlon
 BuildRequires:	nasm
 %endif
 
@@ -36,7 +36,7 @@ strumienia kompatybilnego z AC3.
 
 %build
 ./configure \
-%ifnarch i586 i686
+%ifnarch i586 i686 athlon
 	--disable-mmx
 %endif
 
