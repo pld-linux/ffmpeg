@@ -1,0 +1,11 @@
+--- ffmpeg-0.4.9-pre1/libavcodec/Makefile.orig	2004-10-20 11:55:50.000000000 +0200
++++ ffmpeg-0.4.9-pre1/libavcodec/Makefile	2004-10-20 12:06:58.565138240 +0200
+@@ -89,7 +89,7 @@
+ 
+ ifeq ($(CONFIG_PP),yes)
+ ifeq ($(SHARED_PP),yes)
+-EXTRALIBS += libpostproc/libpostproc.la
++EXTRALIBS += -lpostproc
+ else
+ # LIBS += libpostproc/libpostproc.a ... should be fixed
+ OBJS += libpostproc/postprocess.lo
