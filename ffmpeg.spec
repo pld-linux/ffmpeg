@@ -28,6 +28,8 @@ BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	nasm
 %endif
 %endif
+BuildRequires:	perl-tools-pod
+BuildRequires:	tetex
 BuildRequires:	texinfo
 BuildRequires:	zlib-devel
 Obsoletes:	libpostproc
