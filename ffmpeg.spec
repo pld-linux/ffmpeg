@@ -15,6 +15,7 @@ Patch0:		%{name}-opt.patch
 Patch1:		%{name}-imlib2.patch
 Patch2:		%{name}-libtool.patch
 Patch3:		%{name}-lib64.patch
+Patch4:		%{name}-gcc34.patch
 URL:		http://ffmpeg.sourceforge.net/
 BuildRequires:	SDL-devel
 BuildRequires:	freetype-devel
@@ -119,6 +120,7 @@ Statyczne biblioteki ffmpeg (libavcodec i libavformat).
 %ifarch amd64
 %patch3 -p1
 %endif
+%patch4 -p1
 
 %build
 # notes:
@@ -143,7 +145,6 @@ Statyczne biblioteki ffmpeg (libavcodec i libavformat).
 	--tune=generic
 
 %{__make}
-
 %{__make} -C doc
 
 %install
