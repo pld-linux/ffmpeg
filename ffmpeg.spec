@@ -36,9 +36,10 @@ strumienia kompatybilnego z AC3.
 
 %build
 ./configure \
-%ifarch i586 i686
-	disable-mmx
+%ifnarch i586 i686
+	--disable-mmx
 %endif
+
 %{__make} \
 	OPT="%{rpmcflags}" \
 	LDOPT="%{rpmldflags}"
