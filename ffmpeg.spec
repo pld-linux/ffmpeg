@@ -10,7 +10,7 @@ Version:	0.4.6
 Release:	1
 License:	LGPL/GPL
 Group:		Daemons
-Source0:	ftp://ftp.sourceforge.net/pub/sourceforge/ffmpeg/%{name}-%{version}.tar.gz
+Source0:	http://dl.sourceforge.net/ffmpeg/%{name}-%{version}.tar.gz
 Patch0:		%{name}-opt.patch
 Patch1:		%{name}-imlib2.patch
 Patch2:		%{name}-libtool.patch
