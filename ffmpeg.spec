@@ -1,6 +1,6 @@
 #
 # Conditional build:
-%bcond_without	imlib	# we can safely play without it :-)
+%bcond_without	imlib2	# we can safely play without it :-)
 #
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
@@ -23,7 +23,7 @@ BuildRequires:	freetype-devel
 # require version with altivec support fixed
 BuildRequires:	gcc >= 5:3.3.2-3
 %endif
-%{?with_imlib:BuildRequires:	imlib2-devel >= 1.1.0-2}
+%{?with_imlib2:BuildRequires:	imlib2-devel >= 1.1.0-2}
 BuildRequires:	libtool >= 2:1.4d-3
 %ifarch %{ix86}
 %ifnarch i386 i486
@@ -60,7 +60,7 @@ libavformat).
 Summary:	FFplay - SDL-based media player
 Summary(pl):	FFplay - odtwarzacz mediów oparty na SDL
 Group:		Applications/Multimedia
-Requires:	%{name} = %{version}
+Requires:	%{name} = %{version}-%{release}
 
 %description ffplay
 FFplay is a very simple and portable media player using the FFmpeg
@@ -76,7 +76,7 @@ testowania ró¿nych API FFmpeg.
 Summary:	imlib2 based hook
 Summary(pl):	Modu³ przej¶ciowy oparty o imlib2
 Group:		Libraries
-Requires:	%{name} = %{version}
+Requires:	%{name} = %{version}-%{release}
 
 %description vhook-imlib2
 This module implements a text overlay for a video image. Currently it
@@ -94,7 +94,7 @@ obrazie.
 Summary:	ffmpeg header files
 Summary(pl):	Pliki nag³ówkowe ffmpeg
 Group:		Development/Libraries
-Requires:	%{name} = %{version}
+Requires:	%{name} = %{version}-%{release}
 
 %description devel
 ffmpeg header files.
@@ -106,7 +106,7 @@ Pliki nag³ówkowe ffmpeg.
 Summary:	ffmpeg static libraries
 Summary(pl):	Statyczne biblioteki ffmpeg
 Group:		Development/Libraries
-Requires:	%{name}-devel = %{version}
+Requires:	%{name}-devel = %{version}-%{release}
 
 %description static
 ffmpeg static libraries (libavcodec and libavformat).
@@ -188,7 +188,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/ffplay
 %{_mandir}/man1/ffplay.1*
 
-%if %{with imlib}
+%if %{with imlib2}
 %files vhook-imlib2
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/vhook/imlib2.so
