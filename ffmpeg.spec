@@ -17,6 +17,7 @@ Patch2:		%{name}-libtool.patch
 URL:		http://ffmpeg.sourceforge.net/
 BuildRequires:	SDL-devel
 BuildRequires:	freetype-devel
+BuildRequires:	libstdc++-devel
 %{!?_without_imlib:BuildRequires:	imlib2-devel >= 1.1.0-2}
 BuildRequires:	libtool >= 2:1.4d-3
 %ifarch i586 i686 athlon
