@@ -1,7 +1,7 @@
 
 # Conditional build:
 # _without_imlib	- we can safetly play without it :-)
-# 
+#
 
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
