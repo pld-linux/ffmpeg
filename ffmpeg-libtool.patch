@@ -124,7 +124,7 @@
 -	rm -f $@
 -	$(AR) rc $@ $(OBJS)
 -	$(RANLIB) $@
-+	libtool --mode=link --tag CXX $(CC) $(LDFLAGS) -o $@ $(OBJS) $(RPATH) $(EXTRALIBS) -release $(VERSION)
++	libtool --mode=link --tag CC $(CC) $(LDFLAGS) -o $@ $(OBJS) $(RPATH) $(EXTRALIBS) -release $(VERSION)
  
 -$(SLIB): $(OBJS)
 -	$(CC) $(SHFLAGS) -o $@ $(OBJS) $(EXTRALIBS)
@@ -136,23 +136,23 @@
 -%_sse.o : %_sse.c
 -	$(CC) $(CFLAGS) -msse -c -o $@ $< 
 +%_sse.lo : %_sse.c
-+	libtool --mode=compile  --tag CXX $(CC) $(CFLAGS) -msse -c -o $@ $< 
++	libtool --mode=compile  --tag CC $(CC) $(CFLAGS) -msse -c -o $@ $< 
  
  # specific 3dnow code
 -%_3dnow.o : %_3dnow.c
 -	$(CC) $(CFLAGS) -m3dnow -c -o $@ $< 
 +%_3dnow.lo : %_3dnow.c
-+	libtool --mode=compile --tag CXX  $(CC) $(CFLAGS) -m3dnow -c -o $@ $< 
++	libtool --mode=compile --tag CC  $(CC) $(CFLAGS) -m3dnow -c -o $@ $< 
  
 -%.o: %.c
 -	$(CC) $(CFLAGS) -c -o $@ $< 
 +%.lo: %.c
-+	libtool --mode=compile --tag CXX $(CC) $(CFLAGS) -c -o $@ $< 
++	libtool --mode=compile --tag CC $(CC) $(CFLAGS) -c -o $@ $< 
  
 -%.o: %.S
 -	$(CC) $(CFLAGS) -c -o $@ $<
 +%.lo: %.S
-+	libtool --mode=compile --tag CXX $(CC) $(CFLAGS) -c -o $@ $<
++	libtool --mode=compile --tag CC $(CC) $(CFLAGS) -c -o $@ $<
  
  # motion_est_alpha uses the MVI extension, which is not available with
  # -mcpu=ev4 (default) or ev5/ev56. Thus, force -mcpu=pca56 in those
@@ -164,7 +164,7 @@
  	case x"$$cpu" in x|xev[45]*) newcpu=pca56;; *) newcpu=$$cpu;; esac; \
  	echo $(CC) $(CFLAGS) -mcpu=$$newcpu -c -o $@ $<;\
 -	$(CC) $(CFLAGS) -mcpu=$$newcpu -c -o $@ $<
-+	libtool --mode=compile --tag CXX $(CC) $(CFLAGS) -mcpu=$$newcpu -c -o $@ $<
++	libtool --mode=compile --tag CC $(CC) $(CFLAGS) -mcpu=$$newcpu -c -o $@ $<
  endif
  
  # depend only used by mplayer now
@@ -194,31 +194,31 @@
  # api example program
  apiexample: apiexample.c $(LIB)
 -	$(CC) $(CFLAGS) -o $@ $< $(LIB) $(EXTRALIBS) -lm
-+	libtool --mode=link  --tag CXX $(CC) $(LDFLAGS) $(CFLAGS) -o $@ $< $(LIB) $(EXTRALIBS) -lm
++	libtool --mode=link  --tag CC $(CC) $(LDFLAGS) $(CFLAGS) -o $@ $< $(LIB) $(EXTRALIBS) -lm
  
  # cpuid test
  cpuid_test: i386/cputest.c
 -	$(CC) $(CFLAGS) -D__TEST__ -o $@ $<
-+	libtool --mode=link --tag CXX  $(CC) $(LDFLAGS) $(CFLAGS) -D__TEST__ -o $@ $<
++	libtool --mode=link --tag CC  $(CC) $(LDFLAGS) $(CFLAGS) -D__TEST__ -o $@ $<
  
  # testing progs
  
  imgresample-test: imgresample.c
 -	$(CC) $(CFLAGS) -DTEST -o $@ $^ -lm
-+	libtool --mode=link --tag CXX  $(CC) $(LDFLAGS) $(CFLAGS) -DTEST -o $@ $^ -lm
++	libtool --mode=link --tag CC  $(CC) $(LDFLAGS) $(CFLAGS) -DTEST -o $@ $^ -lm
  
  dct-test: dct-test.o jfdctfst.o jfdctint.o i386/fdct_mmx.o\
            fdctref.o jrevdct.o i386/idct_mmx.o simple_idct.o i386/simple_idct_mmx.o
 -	$(CC) -o $@ $^ -lm
-+	libtool --mode=link --tag CXX  $(CC) $(LDFLAGS) -o $@ $^ -lm
++	libtool --mode=link --tag CC  $(CC) $(LDFLAGS) -o $@ $^ -lm
  
  motion-test: motion_test.o $(LIB)
 -	$(CC) -o $@ $^ -lm
-+	libtool --mode=link --tag CXX  $(CC) $(LDFLAGS) -o $@ $^ -lm
++	libtool --mode=link --tag CC  $(CC) $(LDFLAGS) -o $@ $^ -lm
  
  fft-test: fft-test.o fft.o mdct.o
 -	$(CC) -o $@ $^ -lm
-+	libtool --mode=link --tag CXX  $(CC) $(LDFLAGS) -o $@ $^ -lm
++	libtool --mode=link --tag CC  $(CC) $(LDFLAGS) -o $@ $^ -lm
  
  install: all
  ifeq ($(BUILD_SHARED),yes)
@@ -317,7 +317,7 @@
 -                $(SRC_PATH)/libav/rtp.h $(SRC_PATH)/libav/rtsp.h \
 -                $(SRC_PATH)/libav/rtspcodes.h \
 -                $(prefix)/include/ffmpeg
-+	libtool --mode=link --tag CXX $(CC) $(LDOPT) -o $@ $(OBJS) ../libavcodec/libavcodec.la -rpath $(prefix)/lib -release $(VERSION)
++	libtool --mode=link --tag CC $(CC) $(LDOPT) -o $@ $(OBJS) ../libavcodec/libavcodec.la -rpath $(prefix)/lib -release $(VERSION)
 +
 +install: all
 +	install -d $(DESTDIR)$(prefix)/lib
@@ -333,12 +333,12 @@
 -%.o: %.c
 -	$(CC) $(CFLAGS) -c -o $@ $< 
 +%.lo: %.c
-+	libtool --mode=compile --tag CXX $(CC) $(CFLAGS) -c -o $@ $< 
++	libtool --mode=compile --tag CC $(CC) $(CFLAGS) -c -o $@ $< 
  
  # BeOS: remove -Wall to get rid of all the "multibyte constant" warnings
  %.o: %.cpp
 -	g++ $(subst -Wall,,$(CFLAGS)) -c -o $@ $< 
-+	libtool --mode=compile --tag CXX g++ $(subst -Wall,,$(CFLAGS)) -c -o $@ $< 
++	libtool --mode=compile --tag CC g++ $(subst -Wall,,$(CFLAGS)) -c -o $@ $< 
  
  clean: 
 -	rm -f *.o *~ *.a 
@@ -374,13 +374,13 @@
 -ffmpeg$(EXE): ffmpeg_g$(EXE)
 -	cp -p $< $@ ; $(STRIP) $@
 +ffmpeg$(EXE): ffmpeg.o $(DEP_LIBS)
-+	libtool --mode=link  --tag CXX $(CC) $(LDFLAGS) -o $@ ffmpeg.o $(DEP_LIBS) $(EXTRALIBS)
++	libtool --mode=link  --tag CC $(CC) $(LDFLAGS) -o $@ ffmpeg.o $(DEP_LIBS) $(EXTRALIBS)
  
  ffserver$(EXE): ffserver.o $(DEP_LIBS)
 -	$(CC) $(LDFLAGS) $(FFSLDFLAGS) \
 -		-o $@ ffserver.o -L./libavcodec -L./libavformat \
 -              -lavformat -lavcodec $(EXTRALIBS) 
-+	libtool --mode=link --tag CXX $(CC) $(LDFLAGS) $(FFSLDFLAGS) \
++	libtool --mode=link --tag CC $(CC) $(LDFLAGS) $(FFSLDFLAGS) \
 +		-o $@ ffserver.o $(DEP_LIBS) $(EXTRALIBS)
  
  ffplay: ffmpeg$(EXE)

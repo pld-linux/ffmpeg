@@ -105,6 +105,7 @@ Statyczne biblioteki ffmpeg (libavcodec i libavformat).
 # note: -fomit-frame-pointer is always needed on x86 due to lack of registers
 #       (-fPIC takes one)
 %{__make} \
+	CC="%{__cc}" \
 	OPT="%{rpmcflags} -fomit-frame-pointer -I/usr/X11R6/include" \
 	LDOPT="%{rpmldflags} -L/usr/X11R6/lib"
 
