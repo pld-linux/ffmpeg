@@ -1,43 +1,58 @@
-diff -Nur ffmpeg.orig/Makefile ffmpeg/Makefile
---- ffmpeg.orig/Makefile	Wed Jul 11 00:59:36 2001
-+++ ffmpeg/Makefile	Sat Aug 11 22:11:08 2001
-@@ -1,6 +1,6 @@
- PROFILE=-p
--CFLAGS= -O2 -Wall -g $(PROFILE) -I./libavcodec -I./libav 
--LDFLAGS= -g $(PROFILE)
+diff -urN ffmpeg/Makefile ffmpeg.new/Makefile
+--- ffmpeg/Makefile	Wed Aug 15 15:12:07 2001
++++ ffmpeg.new/Makefile	Wed Sep  5 13:51:41 2001
+@@ -3,8 +3,8 @@
+ #
+ include config.mak
+ 
+-CFLAGS= $(OPTFLAGS) -Wall -g -I./libavcodec -I./libav 
+-LDFLAGS= -g 
 +CFLAGS= $(OPT) -Wall -I./libavcodec -I./libav 
 +LDFLAGS= $(LDOPT)
- PREFIX= /usr/local
- PROG= ffmpeg ffserver
+ ifeq ($(TARGET_GPROF),yes)
+ CFLAGS+=-p
+ LDFLAGS+=-p
+@@ -19,16 +19,16 @@
+ 	$(MAKE) -C libav all
  
-@@ -20,7 +20,7 @@
- 	gcc $(CFLAGS) -c -o $@ $< 
+ ffmpeg: ffmpeg.o libav/libav.a libavcodec/libavcodec.a
+-	gcc $(LDFLAGS) -o $@ $^ -lm
++	$(CC) $(LDFLAGS) -o $@ $^ -lm
+ 
+ ffserver: ffserver.o libav/libav.a libavcodec/libavcodec.a
+-	gcc $(LDFLAGS) -o $@ $^ -lm
++	$(CC) $(LDFLAGS) -o $@ $^ -lm
+ 
+ %.o: %.c
+-	gcc $(CFLAGS) -c -o $@ $< 
++	$(CC) $(CFLAGS) -c -o $@ $< 
  
  install: all
--	install -s -m 755 $(PROG) $(PREFIX)/bin
-+	install -m 755 $(PROG) $(PREFIX)/bin
+-	install -s -m 755 $(PROG) $(prefix)/bin
++	install -m 755 $(PROG) $(prefix)/bin
  
  clean: 
- 	make -C libavcodec clean
-diff -Nur ffmpeg.orig/libav/Makefile ffmpeg/libav/Makefile
---- ffmpeg.orig/libav/Makefile	Sat Jul 14 19:37:51 2001
-+++ ffmpeg/libav/Makefile	Sat Aug 11 22:11:26 2001
-@@ -1,4 +1,4 @@
--CFLAGS= -O2 -Wall -g -I../libavcodec
-+CFLAGS= $(OPT) -Wall -I../libavcodec
- CC=gcc
+ 	$(MAKE) -C libavcodec clean
+diff -urN ffmpeg/libav/Makefile ffmpeg.new/libav/Makefile
+--- ffmpeg/libav/Makefile	Wed Aug 15 00:32:50 2001
++++ ffmpeg.new/libav/Makefile	Wed Sep  5 13:47:25 2001
+@@ -1,5 +1,5 @@
+ include ../config.mak
+-CFLAGS= $(OPTFLAGS) -Wall -g -I../libavcodec -DHAVE_AV_CONFIG_H
++CFLAGS= $(OPT) -Wall -I../libavcodec -DHAVE_AV_CONFIG_H
  
- OBJS= rm.o mpeg.o asf.o avienc.o jpegenc.o swf.o wav.o raw.o \
-diff -Nur ffmpeg.orig/libavcodec/Makefile ffmpeg/libavcodec/Makefile
---- ffmpeg.orig/libavcodec/Makefile	Sat Jul 14 22:17:32 2001
-+++ ffmpeg/libavcodec/Makefile	Sat Aug 11 22:12:13 2001
-@@ -1,7 +1,6 @@
--CFLAGS= -O2 -Wall -g
+ OBJS= rm.o mpeg.o asf.o avienc.o jpeg.o swf.o wav.o raw.o \
+ 	 avidec.o ffm.o \
+diff -urN ffmpeg/libavcodec/Makefile ffmpeg.new/libavcodec/Makefile
+--- ffmpeg/libavcodec/Makefile	Mon Aug 13 00:52:36 2001
++++ ffmpeg.new/libavcodec/Makefile	Wed Sep  5 13:47:34 2001
+@@ -1,7 +1,7 @@
+ include ../config.mak
+ 
+-CFLAGS= $(OPTFLAGS) -Wall -g -DHAVE_AV_CONFIG_H
 -LDFLAGS= -g
-+CFLAGS= $(OPT) -Wall
++CFLAGS= $(OPT) -Wall -DHAVE_AV_CONFIG_H
 +LDFLAGS= $(LDOPT)
- CC=gcc
--CONFIG_MMX=y
  
  OBJS= common.o utils.o mpegvideo.o h263.o jrevdct.o jfdctfst.o \
-       mpegaudio.o ac3enc.o mjpegenc.o resample.o dsputil.o \
+       mpegaudio.o ac3enc.o mjpeg.o resample.o dsputil.o \
