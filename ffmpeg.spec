@@ -30,7 +30,7 @@ strumienia kompatybilnego z AC3.
 %setup -q -n %{name}
 
 %build
-%{__make} CFLAGS="%{?debug:-O0 -g}%{!?debug:$RPM_OPT_FLAGS} -Ilibav"
+%{__make} CFLAGS="%{rpmcflags} -Ilibav"
 
 %install
 rm -rf $RPM_BUILD_ROOT
