@@ -5,8 +5,6 @@ Version:	0.4.5
 Release:	2
 License:	GPL
 Group:		Daemons
-Group(de):	Server
-Group(pl):	Serwery
 Source0:	http://prdownloads.sourceforge.net/ffmpeg/%{name}-%{version}.tar.gz
 Patch0:		%{name}-opt.patch
 URL:		http://ffmpeg.sourceforge.net/
