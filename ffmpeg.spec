@@ -25,8 +25,10 @@ BuildRequires:	gcc >= 5:3.3.2-3
 %endif
 %{?with_imlib:BuildRequires:	imlib2-devel >= 1.1.0-2}
 BuildRequires:	libtool >= 2:1.4d-3
-%ifarch i586 i686 athlon
+%ifarch %{ix86}
+%ifnarch i386 i486
 BuildRequires:	nasm
+%endif
 %endif
 BuildRequires:	zlib-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -134,7 +136,10 @@ Statyczne biblioteki ffmpeg (libavcodec i libavformat).
 	--enable-shared \
 	--enable-a52bin \
 	--enable-faadbin \
-%ifnarch i586 i686 athlon
+%ifnarch %{ix86}
+	--disable-mmx \
+%endif
+%ifarch i386 i486
 	--disable-mmx \
 %endif
 	--cc="%{__cc}" \
