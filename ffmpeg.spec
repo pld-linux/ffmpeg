@@ -1,5 +1,4 @@
 #
-# TODO: separate libpostproc* or add Obsoletes: libpostproc*
 # Conditional build:
 %bcond_without	imlib2	# we can safely play without it :-)
 #
@@ -31,6 +30,7 @@ BuildRequires:	nasm
 %endif
 BuildRequires:	texinfo
 BuildRequires:	zlib-devel
+Obsoletes:	libpostproc
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		_noautoreqdep	libGL.so.1 libGLU.so.1
@@ -55,6 +55,31 @@ strumienia kompatybilnego z AC3.
 
 Ten pakiet zawiera tak¿e biblioteki wspó³dzielone ffmpeg (libavcodec i
 libavformat).
+
+%package devel
+Summary:	ffmpeg header files
+Summary(pl):	Pliki nag³ówkowe ffmpeg
+Group:		Development/Libraries
+Requires:	%{name} = %{version}-%{release}
+Obsoletes:	libpostproc-devel
+
+%description devel
+ffmpeg header files.
+
+%description devel -l pl
+Pliki nag³ówkowe ffmpeg.
+
+%package static
+Summary:	ffmpeg static libraries
+Summary(pl):	Statyczne biblioteki ffmpeg
+Group:		Development/Libraries
+Requires:	%{name}-devel = %{version}-%{release}
+
+%description static
+ffmpeg static libraries (libavcodec and libavformat).
+
+%description static -l pl
+Statyczne biblioteki ffmpeg (libavcodec i libavformat).
 
 %package ffplay
 Summary:	FFplay - SDL-based media player
@@ -89,30 +114,6 @@ Ten modu³ implementuje tekstow± nak³adkê dla obrazu. Aktualnie
 obs³uguje sta³± nak³adkê lub wczytywanie tekstu z pliku. £añcuch jest
 przepuszczany przez strftime, wiêc ³atwo umie¶ciæ datê i czas na
 obrazie.
-
-%package devel
-Summary:	ffmpeg header files
-Summary(pl):	Pliki nag³ówkowe ffmpeg
-Group:		Development/Libraries
-Requires:	%{name} = %{version}-%{release}
-
-%description devel
-ffmpeg header files.
-
-%description devel -l pl
-Pliki nag³ówkowe ffmpeg.
-
-%package static
-Summary:	ffmpeg static libraries
-Summary(pl):	Statyczne biblioteki ffmpeg
-Group:		Development/Libraries
-Requires:	%{name}-devel = %{version}-%{release}
-
-%description static
-ffmpeg static libraries (libavcodec and libavformat).
-
-%description static -l pl
-Statyczne biblioteki ffmpeg (libavcodec i libavformat).
 
 %prep
 %setup -q -n ffmpeg-0.4.9-pre1
@@ -184,17 +185,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/ffmpeg.1*
 %{_mandir}/man1/ffserver.1*
 
-%files ffplay
-%defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/ffplay
-%{_mandir}/man1/ffplay.1*
-
-%if %{with imlib2}
-%files vhook-imlib2
-%defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/vhook/imlib2.so
-%endif
-
 %files devel
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libavcodec.so
@@ -207,3 +197,14 @@ rm -rf $RPM_BUILD_ROOT
 %files static
 %defattr(644,root,root,755)
 %{_libdir}/lib*.a
+
+%files ffplay
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/ffplay
+%{_mandir}/man1/ffplay.1*
+
+%if %{with imlib2}
+%files vhook-imlib2
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/vhook/imlib2.so
+%endif
