@@ -15,6 +15,7 @@ Source0:	http://dl.sourceforge.net/ffmpeg/%{name}-%{version}-pre1.tar.gz
 Patch0:		%{name}-imlib2.patch
 Patch1:		%{name}-libtool.patch
 URL:		http://ffmpeg.sourceforge.net/
+BuildConflicts:	libpostproc
 BuildRequires:	SDL-devel
 BuildRequires:	freetype-devel
 %ifarch ppc
