@@ -7,15 +7,13 @@ Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.9
 Release:	0.pre1.0.1
-License:	LGPL/GPL
+# LGPL or GPL, chosen at configure time (GPL version is more featured)
+License:	GPL
 Group:		Daemons
 Source0:	http://dl.sourceforge.net/ffmpeg/%{name}-%{version}-pre1.tar.gz
 # Source0-md5:	ea5587e3c66d50b1503b82ac4179c303
-Patch0:		%{name}-opt.patch
-Patch1:		%{name}-imlib2.patch
-Patch2:		%{name}-libtool.patch
-Patch3:		%{name}-lib64.patch
-Patch4:		%{name}-gcc34.patch
+Patch0:		%{name}-imlib2.patch
+Patch1:		%{name}-libtool.patch
 URL:		http://ffmpeg.sourceforge.net/
 BuildRequires:	SDL-devel
 BuildRequires:	freetype-devel
@@ -30,6 +28,7 @@ BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	nasm
 %endif
 %endif
+BuildRequires:	texinfo
 BuildRequires:	zlib-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -102,27 +101,22 @@ ffmpeg header files.
 %description devel -l pl
 Pliki nag³ówkowe ffmpeg.
 
-# %package static
-# Summary:	ffmpeg static libraries
-# Summary(pl):	Statyczne biblioteki ffmpeg
-# Group:		Development/Libraries
-# Requires:	%{name}-devel = %{version}-%{release}
-# 
-# %description static
-# ffmpeg static libraries (libavcodec and libavformat).
-# 
-# %description static -l pl
-# Statyczne biblioteki ffmpeg (libavcodec i libavformat).
+%package static
+Summary:	ffmpeg static libraries
+Summary(pl):	Statyczne biblioteki ffmpeg
+Group:		Development/Libraries
+Requires:	%{name}-devel = %{version}-%{release}
+
+%description static
+ffmpeg static libraries (libavcodec and libavformat).
+
+%description static -l pl
+Statyczne biblioteki ffmpeg (libavcodec i libavformat).
 
 %prep
 %setup -q -n ffmpeg-0.4.9-pre1
-# %patch0 -p1
-# %patch1 -p1
-# %patch2 -p1
-%ifarch amd64
-%patch3 -p1
-%endif
-# %patch4 -p1
+%patch0 -p1
+%patch1 -p1
 
 %build
 # notes:
@@ -132,11 +126,14 @@ Pliki nag³ówkowe ffmpeg.
 # - --disable-debug, --disable-opts, tune=generic causes not to override our optflags
 ./configure \
 	--prefix=%{_prefix} \
+	--libdir=%{_libdir} \
 	--mandir=%{_mandir} \
-	--enable-gpl \
-	--enable-shared \
 	--enable-a52bin \
 	--enable-faadbin \
+	--enable-gpl \
+	--enable-pp \
+	--enable-shared \
+	--enable-shared-pp \
 %ifnarch %{ix86}
 	--disable-mmx \
 %endif
@@ -150,28 +147,15 @@ Pliki nag³ówkowe ffmpeg.
 	--disable-opts \
 	--tune=generic
 
-%{__make} 
-%{__make} -C doc
-%{__make} -C libavcodec/libpostproc 
+%{__make} \
+	BUILD_DOC=yes
 
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{%{_sysconfdir},%{_sbindir}}
 
 %{__make} install \
-	DESTDIR=$RPM_BUILD_ROOT \
-	mandir=$RPM_BUILD_ROOT%{_mandir} \
-	prefix=$RPM_BUILD_ROOT%{_prefix} \
-	bindir=$RPM_BUILD_ROOT%{_bindir} \
-	SHARED_PP=yes
-
-%{__make} -C libavcodec/libpostproc install \
-        DESTDIR=$RPM_BUILD_ROOT \
-        mandir=$RPM_BUILD_ROOT%{_mandir} \
-        prefix=$RPM_BUILD_ROOT%{_prefix} \
-        bindir=$RPM_BUILD_ROOT%{_bindir} \
-	SHARED_PP=yes
-			
+	DESTDIR=$RPM_BUILD_ROOT
 
 mv -f $RPM_BUILD_ROOT{%{_bindir},%{_sbindir}}/ffserver
 install doc/*.conf $RPM_BUILD_ROOT%{_sysconfdir}
@@ -214,10 +198,10 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/libavcodec.so
 %attr(755,root,root) %{_libdir}/libavformat.so
 %attr(755,root,root) %{_libdir}/libpostproc.so
-# %{_libdir}/lib*.la
+%{_libdir}/lib*.la
 %{_includedir}/ffmpeg
 %{_includedir}/postproc
 
-# %files static
-# %defattr(644,root,root,755)
-# %{_libdir}/lib*.a
+%files static
+%defattr(644,root,root,755)
+%{_libdir}/lib*.a
