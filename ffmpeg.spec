@@ -1,12 +1,12 @@
 #
 # Conditional build:
-# _without_imlib	- we can safely play without it :-)
+%bcond_without	imlib	# we can safely play without it :-)
 #
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.8
-Release:	3
+Release:	4
 License:	LGPL/GPL
 Group:		Daemons
 Source0:	http://dl.sourceforge.net/ffmpeg/%{name}-%{version}.tar.gz
@@ -18,7 +18,11 @@ Patch3:		%{name}-lib64.patch
 URL:		http://ffmpeg.sourceforge.net/
 BuildRequires:	SDL-devel
 BuildRequires:	freetype-devel
-%{!?_without_imlib:BuildRequires:	imlib2-devel >= 1.1.0-2}
+%ifarch ppc
+# require version with altivec support fixed
+BuildRequires:	gcc >= 5:3.3.2-3
+%endif
+%{?with_imlib:BuildRequires:	imlib2-devel >= 1.1.0-2}
 BuildRequires:	libtool >= 2:1.4d-3
 %ifarch i586 i686 athlon
 BuildRequires:	nasm
@@ -122,7 +126,6 @@ Statyczne biblioteki ffmpeg (libavcodec i libavformat).
 # - -fomit-frame-pointer is always needed on x86 due to lack of registers
 #   (-fPIC takes one)
 # - --disable-debug, --disable-opts, tune=generic causes not to override our optflags
-# - [temporary!!!] altivec disabled because of gcc 3.3.x bug target/11793
 ./configure \
 	--prefix=%{_prefix} \
 	--mandir=%{_mandir} \
@@ -131,9 +134,6 @@ Statyczne biblioteki ffmpeg (libavcodec i libavformat).
 	--enable-faadbin \
 %ifnarch i586 i686 athlon
 	--disable-mmx \
-%endif
-%ifarch ppc
-	--disable-altivec \
 %endif
 	--cc="%{__cc}" \
 	--extra-cflags="%{rpmcflags} -fomit-frame-pointer" \
@@ -182,7 +182,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/ffplay
 %{_mandir}/man1/ffplay.1*
 
-%if %{!?_without_imlib:1}0
+%if %{with imlib}
 %files vhook-imlib2
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/vhook/imlib2.so
