@@ -1,14 +1,14 @@
 Summary:	realtime audio/video encoder and streaming server
 Summary(pl):	koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
-Version:	0.3.4
+Version:	0.4.4
 Release:	1
 License:	GPL
 Group:		Daemons
 Group(de):	Server
 Group(pl):	Serwery
-Source0:	http://download.projectmayo.com/dnload/ffmpeg/%{name}-%{version}.tar.gz
-URL:		http://www.projectmayo.com/streaming/ffmpeg/index.php
+Source0:	http://prdownloads.sourceforge.net/ffmpeg/%{name}-%{version}.tar.gz
+URL:		http://ffmpeg.sourceforge.net/
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -30,7 +30,7 @@ strumienia kompatybilnego z AC3.
 %setup -q -n %{name}
 
 %build
-%{__make} CFLAGS="%{rpmcflags} -Ilibav"
+%{__make}
 
 %install
 rm -rf $RPM_BUILD_ROOT
