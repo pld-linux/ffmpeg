@@ -1,3 +1,8 @@
+
+# Conditional build:
+# _without_imlib	- we can safetly play without it :-)
+# 
+
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
@@ -10,7 +15,7 @@ Patch0:		%{name}-opt.patch
 Patch1:		%{name}-imlib2.patch
 Patch2:		%{name}-libtool.patch
 URL:		http://ffmpeg.sourceforge.net/
-BuildRequires:	imlib2-devel
+%{!?_without_imlib:BuildRequires:	imlib2-devel}
 BuildRequires:	libtool >= 1:1.4.2-9
 %ifarch i586 i686 athlon
 BuildRequires:	nasm
