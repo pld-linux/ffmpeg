@@ -16,7 +16,7 @@ Patch1:		%{name}-imlib2.patch
 Patch2:		%{name}-libtool.patch
 URL:		http://ffmpeg.sourceforge.net/
 %{!?_without_imlib:BuildRequires:	imlib2-devel}
-BuildRequires:	libtool >= 1:1.4.2-9
+BuildRequires:	libtool >= 2:1.4d-3
 %ifarch i586 i686 athlon
 BuildRequires:	nasm
 %endif
