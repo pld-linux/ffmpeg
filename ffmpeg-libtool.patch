@@ -280,7 +280,7 @@ diff -Nur ffmpeg-0.4.8.orig/libavcodec/Makefile ffmpeg-0.4.8/libavcodec/Makefile
  
 -%.o: %.S
 -	$(CC) $(CFLAGS) -c -o $@ $<
-+%.o: %.S
++%.lo: %.S
 +	libtool --mode=compile --tag CC $(CC) $(CFLAGS) -c -o $@ $<
  
  depend: $(SRCS)
