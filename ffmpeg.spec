@@ -1,5 +1,5 @@
-Summary:	realtime audio/video encoder and streaming server
-Summary(pl):	koder audio/wideo czasu rzeczywistego oraz serwer strumieni
+Summary:	Realtime audio/video encoder and streaming server
+Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.4
 Release:	1
@@ -8,9 +8,12 @@ Group:		Daemons
 Group(de):	Server
 Group(pl):	Serwery
 Source0:	http://prdownloads.sourceforge.net/ffmpeg/%{name}-%{version}.tar.gz
+Patch0:		%{name}-opt.patch
 URL:		http://ffmpeg.sourceforge.net/
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
-BuildRequires:  nasm
+%ifarch i586 i686
+BuildRequires:	nasm
+%endif
 
 %description
 ffmpeg is a hyper fast realtime audio/video encoder and streaming
@@ -23,15 +26,21 @@ compatible stream.
 ffmpeg jest bardzo szybkim koderem audio/wideo w czasie rzeczywistym
 oraz serwerem strumieni multimedialnych. ffmpeg potrafi zrzucaæ dane
 ze standardowego urz±dzenia Video4Linux i przekonwertowaæ je w kilka
-formatów plików bazuj±cych na kodowaniu DCT/kompensacyji ruchu. Dzwiêk
+formatów plików bazuj±cych na kodowaniu DCT/kompensacji ruchu. D¼wiêk
 jest kompresowany do strumienia MPEG audio layer 2 lub u¿ywaj±c
 strumienia kompatybilnego z AC3.
 
 %prep
 %setup -q -n %{name}
+%patch -p1
 
 %build
-%{__make}
+%{__make} \
+	OPT="%{rpmcflags}" \
+	LDOPT="%{rpmldflags}" \
+%ifarch i586 i686
+	CONFIG_MMX=y
+%endif
 
 %install
 rm -rf $RPM_BUILD_ROOT
