@@ -14,6 +14,7 @@ Source0:	http://dl.sourceforge.net/ffmpeg/%{name}-%{version}.tar.gz
 Patch0:		%{name}-opt.patch
 Patch1:		%{name}-imlib2.patch
 Patch2:		%{name}-libtool.patch
+Patch3:		%{name}-lib64.patch
 URL:		http://ffmpeg.sourceforge.net/
 BuildRequires:	SDL-devel
 BuildRequires:	freetype-devel
@@ -111,6 +112,9 @@ Statyczne biblioteki ffmpeg (libavcodec i libavformat).
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
+%ifarch amd64
+%patch3 -p1
+%endif
 
 %build
 # notes:
