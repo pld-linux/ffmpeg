@@ -1,7 +1,7 @@
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
-Version:	0.4.4
+Version:	0.4.5
 Release:	1
 License:	GPL
 Group:		Daemons
@@ -35,12 +35,13 @@ strumienia kompatybilnego z AC3.
 %patch -p1
 
 %build
+./configure \
+%ifarch i586 i686
+	disable-mmx
+%endif
 %{__make} \
 	OPT="%{rpmcflags}" \
-	LDOPT="%{rpmldflags}" \
-%ifarch i586 i686
-	CONFIG_MMX=y
-%endif
+	LDOPT="%{rpmldflags}"
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -50,7 +51,7 @@ install ffmpeg		$RPM_BUILD_ROOT%{_bindir}
 install ffserver	$RPM_BUILD_ROOT%{_sbindir}
 install doc/*.conf	$RPM_BUILD_ROOT%{_sysconfdir}
 
-gzip -9nf README Change* doc/{bench.txt,ffmpeg.txt,ffserver.txt,README*,TODO}
+gzip -9nf README Change* doc/{bench.txt,ffmpeg.txt,ffserver.txt,README*,TODO,FAQ}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
