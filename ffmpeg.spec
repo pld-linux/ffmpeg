@@ -1,21 +1,22 @@
-
-# Conditional build:
-# _without_imlib	- we can safetly play without it :-)
 #
-
+# Conditional build:
+# _without_imlib	- we can safely play without it :-)
+#
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
-Version:	0.4.6
+Version:	0.4.7
 Release:	1
 License:	LGPL/GPL
 Group:		Daemons
 Source0:	http://dl.sourceforge.net/ffmpeg/%{name}-%{version}.tar.gz
-# Source0-md5: bdd96d28327d3abe02e886c13e633878
+# Source0-md5:	bd9ab3e27f6c92fa06286b8f40277994
 Patch0:		%{name}-opt.patch
 Patch1:		%{name}-imlib2.patch
 Patch2:		%{name}-libtool.patch
 URL:		http://ffmpeg.sourceforge.net/
+BuildRequires:	SDL-devel
+BuildRequires:	freetype-devel
 %{!?_without_imlib:BuildRequires:	imlib2-devel}
 BuildRequires:	libtool >= 2:1.4d-3
 %ifarch i586 i686 athlon
@@ -23,6 +24,8 @@ BuildRequires:	nasm
 %endif
 BuildRequires:	zlib-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+
+%define		_noautoreqdep	libGL.so.1 libGLU.so.1
 
 %description
 ffmpeg is a hyper fast realtime audio/video encoder and streaming
@@ -44,6 +47,22 @@ strumienia kompatybilnego z AC3.
 
 Ten pakiet zawiera tak¿e biblioteki wspó³dzielone ffmpeg (libavcodec i
 libavformat).
+
+%package ffplay
+Summary:	FFplay - SDL-based media player
+Summary(pl):	FFplay - odtwarzacz mediów oparty na SDL
+Group:		Applications/Multimedia
+Requires:	%{name} = %{version}
+
+%description ffplay
+FFplay is a very simple and portable media player using the FFmpeg
+libraries and the SDL library. It is mostly used as a test bench for
+the various APIs of FFmpeg.
+
+%description ffplay -l pl
+FFplay to bardzo prosty i przeno¶ny odtwarzacz mediów u¿ywaj±cy
+bibliotek FFmpeg oraz biblioteki SDL. Jest u¿ywany g³ównie do
+testowania ró¿nych API FFmpeg.
 
 %package vhook-imlib2
 Summary:	imlib2 based hook
@@ -97,8 +116,10 @@ Statyczne biblioteki ffmpeg (libavcodec i libavformat).
 # note: it's not autoconf configure
 ./configure \
 	--prefix=%{_prefix} \
+	--mandir=%{_mandir} \
 	--enable-shared \
 	--enable-a52bin \
+	--enable-faadbin \
 %ifnarch i586 i686 athlon
 	--disable-mmx
 %endif
@@ -131,14 +152,22 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %doc Changelog README doc/*.html
-%attr(755,root,root) %{_bindir}/*
-%attr(755,root,root) %{_sbindir}/*
+%attr(755,root,root) %{_bindir}/ffmpeg
+%attr(755,root,root) %{_sbindir}/ffserver
 %attr(755,root,root) %{_libdir}/libavcodec-*.so
 %attr(755,root,root) %{_libdir}/libavformat-*.so
 %dir %{_libdir}/vhook
-%attr(755,root,root) %{_libdir}/vhook/null.so
+%attr(755,root,root) %{_libdir}/vhook/drawtext.so
 %attr(755,root,root) %{_libdir}/vhook/fish.so
-%config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/*.conf
+%attr(755,root,root) %{_libdir}/vhook/null.so
+%config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/ffserver.conf
+%{_mandir}/man1/ffmpeg.1*
+%{_mandir}/man1/ffserver.1*
+
+%files ffplay
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/ffplay
+%{_mandir}/man1/ffplay.1*
 
 %if %{!?_without_imlib:1}0
 %files vhook-imlib2

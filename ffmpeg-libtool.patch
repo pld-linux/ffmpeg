@@ -1,24 +1,125 @@
---- ffmpeg-0.4.6/libavcodec/Makefile.orig	Sun Jan  5 02:32:23 2003
-+++ ffmpeg-0.4.6/libavcodec/Makefile	Sun Jan  5 02:49:11 2003
-@@ -10,33 +10,33 @@
+diff -Nur ffmpeg-0.4.7.orig/libavcodec/libpostproc/Makefile ffmpeg-0.4.7/libavcodec/libpostproc/Makefile
+--- ffmpeg-0.4.7.orig/libavcodec/libpostproc/Makefile	2003-08-25 00:29:50.000000000 +0200
++++ ffmpeg-0.4.7/libavcodec/libpostproc/Makefile	2003-09-04 20:25:27.891853304 +0200
+@@ -1,26 +1,21 @@
+ 
+ include ../../config.mak
+ 
+-ifeq ($(SHARED_PP),yes)
+-SPPLIB = libpostproc.so
+-SPPVERSION = 0.0.1
+-endif
+-PPLIB = libpostproc.a
++PPLIB = libpostproc.la
+ 
+-PPOBJS=postprocess.o
+-SPPOBJS=postprocess_pic.o
++PPOBJS=postprocess.lo
+ 
+-CFLAGS  = $(OPTFLAGS) $(MLIB_INC) -I. -I.. $(EXTRA_INC)
++CFLAGS  = $(OPT) $(MLIB_INC) -I. -I.. $(EXTRA_INC)
+ # -I/usr/X11R6/include/
+ 
+ .SUFFIXES: .c .o
+ 
+ # .PHONY: all clean
+ 
+-.c.o:
+-	$(CC) -c $(CFLAGS) -I.. -I../.. -o $@ $<
++.c.lo:
++	libtool --mode=compile $(CC) -c $(CFLAGS) -I.. -I../.. -o $@ $<
+ 
+-all:    $(SWSLIB) $(PPLIB) $(SPPLIB)
++all:    $(SWSLIB) $(PPLIB)
+ 
+ clean:
+ 	rm -f *.o *.a *~ *.so
+@@ -34,27 +29,20 @@
+ 	$(CC) -MM $(CFLAGS) postprocess.c 1>.depend
+ 
+ ifeq ($(SHARED_PP),yes)
+-postprocess_pic.o: postprocess.c
+-	$(CC) -c $(CFLAGS) -fomit-frame-pointer -fPIC -DPIC -I.. -I../.. -o $@ $<
+-
+-$(SPPLIB): $(SPPOBJS)
+-	$(CC) -shared -Wl,-soname,$(SPPLIB).0 \
+-	-o $(SPPLIB) $(SPPOBJS)
++RPATH= -rpath $(prefix)/lib
++else
++RPATH=
+ endif
+ 
+ $(PPLIB): $(PPOBJS)
+-	rm -f $@
+-	$(AR) rc $@ $(PPOBJS)
+-	$(RANLIB) $@
++	libtool --mode=link $(CC) -o $(PPLIB) $(PPOBJS) $(RPATH) -version-info 0:1:0
+ 
+ install: all
+ ifeq ($(SHARED_PP),yes)
+-	install -d $(prefix)/lib
+-	install -s -m 755 $(SPPLIB) $(prefix)/lib/$(SPPLIB).$(SPPVERSION)
+-	ln -sf $(SPPLIB).$(SPPVERSION) $(prefix)/lib/$(SPPLIB)
+-	ldconfig || true
+-	mkdir -p $(prefix)/include/postproc
+-	install -m 644 postprocess.h $(prefix)/include/postproc/postprocess.h
++	install -d $(DESTDIR)$(prefix)/lib
++	libtool --mode=install install -m 755 $(PPLIB) $(DESTDIR)$(prefix)/lib
++	install -d  $(DESTDIR)$(prefix)/include/postproc
++	install -m 644 postprocess.h $(DESTDIR)$(prefix)/include/postproc/postprocess.h
+ endif
+ 
+ 
+diff -Nur ffmpeg-0.4.7.orig/libavcodec/Makefile ffmpeg-0.4.7/libavcodec/Makefile
+--- ffmpeg-0.4.7.orig/libavcodec/Makefile	2003-09-04 19:57:13.000000000 +0200
++++ ffmpeg-0.4.7/libavcodec/Makefile	2003-09-04 20:22:58.144618344 +0200
+@@ -10,23 +10,23 @@
  CFLAGS= $(OPT) -Wall -DHAVE_AV_CONFIG_H -I.. -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_GNU_SOURCE
  LDFLAGS= $(LDOPT)
  
 -OBJS= common.o utils.o mem.o allcodecs.o \
--      mpegvideo.o h263.o jrevdct.o jfdctfst.o jfdctint.o\
+-      mpegvideo.o jrevdct.o jfdctfst.o jfdctint.o\
 -      mpegaudio.o ac3enc.o mjpeg.o resample.o dsputil.o \
--      motion_est.o imgconvert.o imgresample.o msmpeg4.o \
--      mpeg12.o h263dec.o svq1.o rv10.o mpegaudiodec.o pcm.o simple_idct.o \
+-      motion_est.o imgconvert.o imgresample.o \
+-      mpeg12.o mpegaudiodec.o pcm.o simple_idct.o \
 -      ratecontrol.o adpcm.o eval.o dv.o error_resilience.o \
--      wmadec.o fft.o mdct.o mace.o huffyuv.o
+-      fft.o mdct.o mace.o huffyuv.o cyuv.o opts.o raw.o h264.o golomb.o \
+-      vp3.o asv1.o 4xm.o cabac.o ffv1.o ra144.o ra288.o vcr1.o cljr.o
 +OBJS= common.lo utils.lo mem.lo allcodecs.lo \
-+      mpegvideo.lo h263.lo jrevdct.lo jfdctfst.lo jfdctint.lo\
++      mpegvideo.lo jrevdct.lo jfdctfst.lo jfdctint.lo\
 +      mpegaudio.lo ac3enc.lo mjpeg.lo resample.lo dsputil.lo \
-+      motion_est.lo imgconvert.lo imgresample.lo msmpeg4.lo \
-+      mpeg12.lo h263dec.lo svq1.lo rv10.lo mpegaudiodec.lo pcm.lo simple_idct.lo \
++      motion_est.lo imgconvert.lo imgresample.lo \
++      mpeg12.lo mpegaudiodec.lo pcm.lo simple_idct.lo \
 +      ratecontrol.lo adpcm.lo eval.lo dv.lo error_resilience.lo \
-+      wmadec.lo fft.lo mdct.lo mace.lo huffyuv.lo
- ASM_OBJS=
++      fft.lo mdct.lo mace.lo huffyuv.lo cyuv.lo opts.lo raw.lo h264.lo golomb.lo \
++      vp3.lo asv1.lo 4xm.lo cabac.lo ffv1.lo ra144.lo ra288.lo vcr1.lo cljr.lo
+ 
+ ifeq ($(AMR_NB),yes)
+ ifeq ($(AMR_NB_FIXED),yes)
+-OBJS+= amr.o
+-AMREXTRALIBS+= amr/*.o
++OBJS+= amr.lo
++AMREXTRALIBS+= amr/*.lo
+ AMRLIBS=amrlibs
+ CLEANAMR=cleanamr
+ else
+-OBJS+= amr.o amr_float/sp_dec.o amr_float/sp_enc.o amr_float/interf_dec.o amr_float/interf_enc.o
++OBJS+= amr.lo amr_float/sp_dec.lo amr_float/sp_enc.lo amr_float/interf_dec.lo amr_float/interf_enc.lo
+ CLEANAMR=cleanamrfloat
+ endif
+ endif
+@@ -35,26 +35,26 @@
+ 
+ # codecs which are patented in some non free countries like the us
+ ifeq ($(CONFIG_RISKY),yes)
+-OBJS+= h263.o msmpeg4.o h263dec.o svq1.o rv10.o wmadec.o indeo3.o
++OBJS+= h263.lo msmpeg4.lo h263dec.lo svq1.lo rv10.lo wmadec.lo indeo3.lo
+ endif
+ 
+ ifeq ($(HAVE_XVMC_ACCEL),yes)
+-OBJS+= xvmcvideo.o
++OBJS+= xvmcvideo.lo
+ endif
  
  # currently using liba52 for ac3 decoding
  ifeq ($(CONFIG_AC3),yes)
@@ -28,9 +129,28 @@
  # using builtin liba52 or runtime linked liba52.so.0
  ifneq ($(CONFIG_A52BIN),yes)
 -OBJS+= liba52/bit_allocate.o liba52/bitstream.o liba52/downmix.o \
--	liba52/imdct.o  liba52/parse.o
+-	liba52/imdct.o  liba52/parse.o liba52/crc.o liba52/resample.o
 +OBJS+= liba52/bit_allocate.lo liba52/bitstream.lo liba52/downmix.lo \
-+	liba52/imdct.lo  liba52/parse.lo
++	liba52/imdct.lo  liba52/parse.lo liba52/crc.lo liba52/resample.lo
+ endif
+ endif
+ 
+ ifeq ($(CONFIG_FAAD),yes)
+-OBJS+= faad.o
++OBJS+= faad.lo
+ ifeq ($(CONFIG_FAADBIN),yes)
+ # no libs needed
+ else
+@@ -64,20 +64,20 @@
+ 
+ ifeq ($(CONFIG_PP),yes)
+ ifeq ($(SHARED_PP),yes)
+-EXTRALIBS += -lpostproc
++EXTRALIBS += libpostproc/libpostproc.la
+ else
+ # LIBS += libpostproc/libpostproc.a ... should be fixed
+-OBJS += libpostproc/postprocess.o
++OBJS += libpostproc/postprocess.lo
  endif
  endif
  
@@ -46,25 +166,29 @@
  EXTRALIBS += -lvorbis -lvorbisenc
  endif
  
-@@ -47,52 +47,54 @@
+@@ -88,10 +88,10 @@
  
  # i386 mmx specific stuff
  ifeq ($(TARGET_MMX),yes)
 -OBJS += i386/fdct_mmx.o i386/cputest.o \
 -	i386/dsputil_mmx.o i386/mpegvideo_mmx.o \
 -	i386/idct_mmx.o i386/motion_est_mmx.o \
--	i386/simple_idct_mmx.o
+-	i386/simple_idct_mmx.o i386/fft_sse.o
 +OBJS += i386/fdct_mmx.lo i386/cputest.lo \
 +	i386/dsputil_mmx.lo i386/mpegvideo_mmx.lo \
 +	i386/idct_mmx.lo i386/motion_est_mmx.lo \
-+	i386/simple_idct_mmx.lo
++	i386/simple_idct_mmx.lo i386/fft_sse.lo
+ ifdef TARGET_BUILTIN_VECTOR
+-i386/fft_sse.o: CFLAGS+= -msse
++i386/fft_sse.lo: CFLAGS+= -msse
  endif
+@@ -99,49 +99,51 @@
  
  # armv4l specific stuff
  ifeq ($(TARGET_ARCH_ARMV4L),yes)
--ASM_OBJS += armv4l/jrevdct_arm.o
+-ASM_OBJS += armv4l/jrevdct_arm.o armv4l/simple_idct_arm.o
 -OBJS += armv4l/dsputil_arm.o armv4l/mpegvideo_arm.o
-+ASM_OBJS += armv4l/jrevdct_arm.lo
++ASM_OBJS += armv4l/jrevdct_arm.lo armv4l/simple_idct_arm.lo
 +OBJS += armv4l/dsputil_arm.lo armv4l/mpegvideo_arm.lo
  endif
  
@@ -98,60 +222,58 @@
  endif
  
  ifeq ($(TARGET_ALTIVEC),yes)
- CFLAGS += -faltivec
--OBJS += ppc/dsputil_altivec.o ppc/mpegvideo_altivec.o ppc/idct_altivec.o
-+OBJS += ppc/dsputil_altivec.lo ppc/mpegvideo_altivec.lo ppc/idct_altivec.lo
+-OBJS += ppc/dsputil_altivec.o ppc/mpegvideo_altivec.o ppc/idct_altivec.o \
+-        ppc/fft_altivec.o ppc/gmc_altivec.o
++OBJS += ppc/dsputil_altivec.lo ppc/mpegvideo_altivec.lo ppc/idct_altivec.lo \
++        ppc/fft_altivec.lo ppc/gmc_altivec.lo
  endif
+ 
+ ifeq ($(TARGET_ARCH_SH4),yes)
+-OBJS+= sh4/idct_sh4.o sh4/dsputil_sh4.o sh4/dsputil_align.o
++OBJS+= sh4/idct_sh4.lo sh4/dsputil_sh4.lo sh4/dsputil_align.lo
+ endif
+ 
  
 -SRCS := $(OBJS:.o=.c) $(ASM_OBJS:.o=.S)
 +SRCS := $(OBJS:.lo=.c) $(ASM_OBJS:.lo=.S)
  OBJS := $(OBJS) $(ASM_OBJS)
  
--LIB= libavcodec.a
+-LIB= $(LIBPREF)avcodec$(LIBSUF)
 +LIB= libavcodec.la
  ifeq ($(BUILD_SHARED),yes)
--SLIB= libavcodec.so
-+RPATH= -rpath $(prefix)/lib libavcodec.so
+-SLIB= $(SLIBPREF)avcodec$(SLIBSUF)
++RPATH= -rpath $(prefix)/lib
 +else
 +RPATH=
  endif
  TESTS= imgresample-test dct-test motion-test fft-test
  
-@@ -101,38 +103,33 @@
+@@ -153,33 +155,28 @@
  tests: apiexample cpuid_test $(TESTS)
  
- $(LIB): $(OBJS)
+ $(LIB): $(OBJS) $(AMRLIBS)
 -	rm -f $@
--	$(AR) rc $@ $(OBJS)
+-	$(AR) rc $@ $(OBJS) $(AMREXTRALIBS)
 -	$(RANLIB) $@
-+	libtool --mode=link --tag CC $(CC) $(LDFLAGS) -o $@ $(OBJS) $(RPATH) $(EXTRALIBS) -release $(VERSION)
- 
--$(SLIB): $(OBJS)
--	$(CC) $(SHFLAGS) -o $@ $(OBJS) $(EXTRALIBS)
 -
+-$(SLIB): $(OBJS)
+-	$(CC) $(SHFLAGS) -o $@ $(OBJS) $(EXTRALIBS) $(AMREXTRALIBS)
++	libtool --mode=link $(CC) $(LDFLAGS) -o $@ $(OBJS) $(AMREXTRALIBS) $(RPATH) $(EXTRALIBS) -release $(VERSION)
+ 
 -dsputil.o: dsputil.c dsputil.h
 +dsputil.lo: dsputil.c dsputil.h
  
- # specific sse code
--%_sse.o : %_sse.c
--	$(CC) $(CFLAGS) -msse -c -o $@ $< 
-+%_sse.lo : %_sse.c
-+	libtool --mode=compile  --tag CC $(CC) $(CFLAGS) -msse -c -o $@ $< 
- 
- # specific 3dnow code
--%_3dnow.o : %_3dnow.c
--	$(CC) $(CFLAGS) -m3dnow -c -o $@ $< 
-+%_3dnow.lo : %_3dnow.c
-+	libtool --mode=compile --tag CC  $(CC) $(CFLAGS) -m3dnow -c -o $@ $< 
+-libpostproc/libpostproc.a:
++libpostproc/libpostproc.la:
+ 	$(MAKE) -C libpostproc
  
 -%.o: %.c
 -	$(CC) $(CFLAGS) -c -o $@ $< 
 +%.lo: %.c
-+	libtool --mode=compile --tag CC $(CC) $(CFLAGS) -c -o $@ $< 
++	libtool --mode=compile $(CC) $(CFLAGS) -c -o $@ $< 
  
--%.o: %.S
+ %.o: %.S
 -	$(CC) $(CFLAGS) -c -o $@ $<
-+%.lo: %.S
 +	libtool --mode=compile --tag CC $(CC) $(CFLAGS) -c -o $@ $<
  
  # motion_est_alpha uses the MVI extension, which is not available with
@@ -167,58 +289,64 @@
 +	libtool --mode=compile --tag CC $(CC) $(CFLAGS) -mcpu=$$newcpu -c -o $@ $<
  endif
  
- # depend only used by mplayer now
-@@ -142,13 +139,13 @@
- 	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
+ depend: $(SRCS)
+@@ -188,14 +185,14 @@
+ dep:	depend
  
- clean: 
--	rm -f *.o *~ .depend $(LIB) $(SLIB) *.so i386/*.o i386/*~ \
+ clean: $(CLEANAMR)
+-	rm -f *.o *.d *~ .depend $(LIB) $(SLIB) *.so i386/*.o i386/*~ \
 -	   armv4l/*.o armv4l/*~ \
 -	   mlib/*.o mlib/*~ \
 -	   alpha/*.o alpha/*~ \
 -	   ppc/*.o ppc/*~ \
 -	   ps2/*.o ps2/*~ \
+-	   sh4/*.o sh4/*~ \
 -	   liba52/*.o liba52/*~ \
-+	rm -f *.*o *~ .depend $(LIB) $(SLIB) *.so *.la i386/*.*o i386/*~ \
++	rm -f *.*o *.d *~ .depend $(LIB) $(SLIB) *.so* *.la i386/*.*o i386/*~ \
 +	   armv4l/*.*o armv4l/*~ \
 +	   mlib/*.*o mlib/*~ \
 +	   alpha/*.*o alpha/*~ \
 +	   ppc/*.*o ppc/*~ \
 +	   ps2/*.*o ps2/*~ \
++	   sh4/*.*o sh4/*~ \
 +	   liba52/*.*o liba52/*~ \
  	   apiexample $(TESTS)
+ 	$(MAKE) -C libpostproc clean
  
- distclean: clean
-@@ -156,43 +153,41 @@
+@@ -206,46 +203,44 @@
+ 	$(MAKE) -C amr clean
+ 
+ cleanamrfloat:
+-	rm -f amr_float/*.o
++	rm -f amr_float/*.*o
  
  # api example program
  apiexample: apiexample.c $(LIB)
 -	$(CC) $(CFLAGS) -o $@ $< $(LIB) $(EXTRALIBS) -lm
-+	libtool --mode=link  --tag CC $(CC) $(LDFLAGS) $(CFLAGS) -o $@ $< $(LIB) $(EXTRALIBS) -lm
++	libtool --mode=link $(CC) $(CFLAGS) -o $@ $< $(LIB) $(EXTRALIBS) -lm
  
  # cpuid test
  cpuid_test: i386/cputest.c
 -	$(CC) $(CFLAGS) -D__TEST__ -o $@ $<
-+	libtool --mode=link --tag CC  $(CC) $(LDFLAGS) $(CFLAGS) -D__TEST__ -o $@ $<
++	libtool --mode=link $(CC) $(CFLAGS) -D__TEST__ -o $@ $<
  
  # testing progs
  
  imgresample-test: imgresample.c
 -	$(CC) $(CFLAGS) -DTEST -o $@ $^ -lm
-+	libtool --mode=link --tag CC  $(CC) $(LDFLAGS) $(CFLAGS) -DTEST -o $@ $^ -lm
++	libtool --mode=link $(CC) $(CFLAGS) -DTEST -o $@ $^ -lm
  
- dct-test: dct-test.o jfdctfst.o jfdctint.o i386/fdct_mmx.o\
-           fdctref.o jrevdct.o i386/idct_mmx.o simple_idct.o i386/simple_idct_mmx.o
+ dct-test: dct-test.o fdctref.o $(LIB)
 -	$(CC) -o $@ $^ -lm
-+	libtool --mode=link --tag CC  $(CC) $(LDFLAGS) -o $@ $^ -lm
++	libtool --mode=link $(CC) -o $@ $^ -lm
  
  motion-test: motion_test.o $(LIB)
 -	$(CC) -o $@ $^ -lm
-+	libtool --mode=link --tag CC  $(CC) $(LDFLAGS) -o $@ $^ -lm
++	libtool --mode=link $(CC) -o $@ $^ -lm
  
- fft-test: fft-test.o fft.o mdct.o
+ fft-test: fft-test.o $(LIB)
 -	$(CC) -o $@ $^ -lm
-+	libtool --mode=link --tag CC  $(CC) $(LDFLAGS) -o $@ $^ -lm
++	libtool --mode=link $(CC) -o $@ $^ -lm
  
  install: all
  ifeq ($(BUILD_SHARED),yes)
@@ -247,23 +375,43 @@
  
  #
  # include dependency files if they exist
---- ffmpeg-0.4.6/libavformat/Makefile.orig	Sun Jan  5 02:32:23 2003
-+++ ffmpeg-0.4.6/libavformat/Makefile	Sun Jan  5 02:53:50 2003
-@@ -8,65 +8,66 @@
+diff -Nur ffmpeg-0.4.7.orig/libavformat/Makefile ffmpeg-0.4.7/libavformat/Makefile
+--- ffmpeg-0.4.7.orig/libavformat/Makefile	2003-09-04 19:57:13.000000000 +0200
++++ ffmpeg-0.4.7/libavformat/Makefile	2003-09-04 20:29:57.622847960 +0200
+@@ -8,114 +8,107 @@
  
  CFLAGS= $(OPT) -Wall -I.. -I$(SRC_PATH) -I$(SRC_PATH)/libavcodec -DHAVE_AV_CONFIG_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_GNU_SOURCE
  
 -OBJS= utils.o cutils.o allformats.o
 +OBJS= utils.lo cutils.lo allformats.lo
+ PPOBJS=
  
  # mux and demuxes
--OBJS+=mpeg.o mpegts.o ffm.o crc.o img.o raw.o rm.o asf.o \
--      avienc.o avidec.o wav.o swf.o au.o gif.o mov.o jpeg.o dv.o framehook.o
-+OBJS+=mpeg.lo mpegts.lo ffm.lo crc.lo img.lo raw.lo rm.lo asf.lo \
-+      avienc.lo avidec.lo wav.lo swf.lo au.lo gif.lo mov.lo jpeg.lo dv.lo framehook.lo
+-OBJS+=mpeg.o mpegts.o mpegtsenc.o ffm.o crc.o img.o raw.o rm.o \
+-      avienc.o avidec.o wav.o swf.o au.o gif.o mov.o mpjpeg.o dv.o \
+-      yuv4mpeg.o 4xm.o flvenc.o flvdec.o
++OBJS+=mpeg.lo mpegts.lo mpegtsenc.lo ffm.lo crc.lo img.lo raw.lo rm.lo \
++      avienc.lo avidec.lo wav.lo swf.lo au.lo gif.lo mov.lo mpjpeg.lo dv.lo \
++      yuv4mpeg.lo 4xm.lo flvenc.lo flvdec.lo
+ 
+ ifeq ($(CONFIG_RISKY),yes)
+-OBJS+= asf.o
++OBJS+= asf.lo
+ endif
+ 
+ ifeq ($(AMR_NB),yes)
+-OBJS+= amr.o
++OBJS+= amr.lo
+ endif
+ 
+ # image formats
+-OBJS+= pnm.o yuv.o png.o jpeg.o gifdec.o
++OBJS+= pnm.lo yuv.lo png.lo jpeg.lo gifdec.lo
  # file I/O
 -OBJS+= avio.o aviobuf.o file.o 
-+OBJS+= avio.lo aviobuf.lo file.lo 
+-OBJS+= framehook.o 
++OBJS+= avio.lo aviobuf.lo file.lo
++OBJS+= framehook.lo 
  
  ifeq ($(BUILD_STRPTIME),yes)
 -OBJS+= strptime.o
@@ -275,20 +423,28 @@
 +OBJS+= grab.lo
  endif
  
+ ifeq ($(CONFIG_DV1394),yes)
+-OBJS+= dv1394.o
++OBJS+= dv1394.lo
+ endif
+ 
  ifeq ($(CONFIG_AUDIO_OSS),yes)
 -OBJS+= audio.o 
-+OBJS+= audio.lo 
++OBJS+= audio.lo
  endif
  
  ifeq ($(CONFIG_AUDIO_BEOS),yes)
--OBJS+= beosaudio.o
-+OBJS+= beosaudio.lo
+-PPOBJS+= beosaudio.o
++PPOBJS+= beosaudio.lo
+ EXTRALIBS+=-lbe -lmedia
+-# this should be the default !
+-EXTRALIBS+=-lavcodec -L../libavcodec
  endif
  
  ifeq ($(CONFIG_NETWORK),yes)
 -OBJS+= udp.o tcp.o http.o rtsp.o rtp.o rtpproto.o
 +OBJS+= udp.lo tcp.lo http.lo rtsp.lo rtp.lo rtpproto.lo
- # BeOS network stuff
+ # BeOS and Darwin network stuff
  ifeq ($(NEED_INET_ATON),yes)
 -OBJS+= barpainet.o
 +OBJS+= barpainet.lo
@@ -300,103 +456,169 @@
 +OBJS+= ogg.lo
  endif
  
--LIB= libavformat.a
+-LIB= $(LIBPREF)avformat$(LIBSUF)
 +LIB= libavformat.la
+ ifeq ($(BUILD_SHARED),yes)
+-SLIB= $(SLIBPREF)avformat$(SLIBSUF)
++RPATH= -rpath $(prefix)/lib
++else
++RPATH=
+ endif
  
- all: $(LIB)
+-SRCS := $(OBJS:.o=.c) $(PPOBJS:.o=.cpp)
++SRCS := $(OBJS:.lo=.c) $(PPOBJS:.lo=.cpp)
  
- $(LIB): $(OBJS)
+ all: $(LIB) $(SLIB)
+ 
+ $(LIB): $(OBJS) $(PPOBJS)
 -	rm -f $@
--	$(AR) rc $@ $(OBJS)
+-	$(AR) rc $@ $(OBJS) $(PPOBJS)
 -	$(RANLIB) $@
 -
--installlib: all
--	install -m 644 $(LIB) $(prefix)/lib
+-$(SLIB): $(OBJS)
+-	$(CC) $(SHFLAGS) -o $@ $(OBJS) $(PPOBJS) $(EXTRALIBS) $(AMREXTRALIBS)
++	libtool --mode=link $(CC) $(LDOPT) -o $@ $(OBJS) $(PPOBJS) ../libavcodec/libavcodec.la $(RPATH) -release $(VERSION)
+ 
+ depend: $(SRCS)
+ 	$(CC) -MM $(CFLAGS) $^ 1>.depend
+ 
+ install: all
+ ifeq ($(BUILD_SHARED),yes)
+-	install -d $(prefix)/lib
+-	install -s -m 755 $(SLIB) $(prefix)/lib/libavformat-$(VERSION).so
+-	ln -sf libavformat-$(VERSION).so $(prefix)/lib/libavformat.so
+-	ldconfig || true
 -	mkdir -p $(prefix)/include/ffmpeg
--	install -m 644 $(SRC_PATH)/libav/avformat.h $(SRC_PATH)/libav/avio.h \
--                $(SRC_PATH)/libav/rtp.h $(SRC_PATH)/libav/rtsp.h \
--                $(SRC_PATH)/libav/rtspcodes.h \
--                $(prefix)/include/ffmpeg
-+	libtool --mode=link --tag CC $(CC) $(LDOPT) -o $@ $(OBJS) ../libavcodec/libavcodec.la -rpath $(prefix)/lib -release $(VERSION)
-+
-+install: all
+-	install -m 644 $(VPATH)/avformat.h $(prefix)/include/ffmpeg/avformat.h
+-	install -m 644 $(VPATH)/avio.h $(prefix)/include/ffmpeg/avio.h
+-	install -m 644 $(VPATH)/rtp.h $(prefix)/include/ffmpeg/rtp.h
+-	install -m 644 $(VPATH)/rtsp.h $(prefix)/include/ffmpeg/rtsp.h
+-	install -m 644 $(VPATH)/rtspcodes.h $(prefix)/include/ffmpeg/rtspcodes.h
 +	install -d $(DESTDIR)$(prefix)/lib
 +	libtool --mode=install install $(LIB) $(DESTDIR)$(prefix)/lib
 +	install -d $(DESTDIR)$(prefix)/include/ffmpeg
-+	install -m 644 $(SRC_PATH)/libavformat/avformat.h $(SRC_PATH)/libavformat/avio.h \
-+                $(SRC_PATH)/libavformat/rtp.h $(SRC_PATH)/libavformat/rtsp.h \
-+                $(SRC_PATH)/libavformat/rtspcodes.h \
++	install -m 644 $(VPATH)/avformat.h $(DESTDIR)$(prefix)/include/ffmpeg/avformat.h
++	install -m 644 $(VPATH)/avio.h $(DESTDIR)$(prefix)/include/ffmpeg/avio.h
++	install -m 644 $(VPATH)/rtp.h $(DESTDIR)$(prefix)/include/ffmpeg/rtp.h
++	install -m 644 $(VPATH)/rtsp.h $(DESTDIR)$(prefix)/include/ffmpeg/rtsp.h
++	install -m 644 $(VPATH)/rtspcodes.h $(DESTDIR)$(prefix)/include/ffmpeg/rtspcodes.h
+ endif
+ 
+ installlib: all
+-	install -m 644 $(LIB) $(prefix)/lib
+-	mkdir -p $(prefix)/include/ffmpeg
++	libtool --mode=install install $(LIB) $(DESTDIR)$(prefix)/lib
++	install -d $(DESTDIR)$(prefix)/include/ffmpeg
+ 	install -m 644 $(SRC_PATH)/libavformat/avformat.h $(SRC_PATH)/libavformat/avio.h \
+                 $(SRC_PATH)/libavformat/rtp.h $(SRC_PATH)/libavformat/rtsp.h \
+                 $(SRC_PATH)/libavformat/rtspcodes.h \
+-                $(prefix)/include/ffmpeg
 +                $(DESTDIR)$(prefix)/include/ffmpeg
-+
-+installlib: install
  
 -%.o: %.c
 -	$(CC) $(CFLAGS) -c -o $@ $< 
 +%.lo: %.c
-+	libtool --mode=compile --tag CC $(CC) $(CFLAGS) -c -o $@ $< 
++	libtool --mode=compile $(CC) $(CFLAGS) -c -o $@ $< 
  
  # BeOS: remove -Wall to get rid of all the "multibyte constant" warnings
  %.o: %.cpp
 -	g++ $(subst -Wall,,$(CFLAGS)) -c -o $@ $< 
-+	libtool --mode=compile --tag CC g++ $(subst -Wall,,$(CFLAGS)) -c -o $@ $< 
++	libtool --mode=compile --tag CXX g++ $(subst -Wall,,$(CFLAGS)) -c -o $@ $< 
  
  clean: 
--	rm -f *.o *~ *.a 
-+	rm -f *.o *.lo *~ *.a *.la *.so
---- ffmpeg-0.4.6/Makefile.orig	Sun Jan  5 02:32:23 2003
-+++ ffmpeg-0.4.6/Makefile	Sun Jan  5 03:01:25 2003
-@@ -19,7 +19,7 @@
- PROG=ffmpeg$(EXE)
- else
- EXT=
--PROG=ffmpeg ffplay
-+PROG=ffmpeg
- ifeq ($(CONFIG_FFSERVER),yes)
- PROG+=ffserver
- endif
-@@ -30,7 +30,7 @@
+-	rm -f *.o *.d .depend *~ *.a $(LIB)
++	rm -f *.*o *.d .depend *~ *.*a $(LIB)
+ 
+ #
+ # include dependency files if they exist
+diff -Nur ffmpeg-0.4.7.orig/Makefile ffmpeg-0.4.7/Makefile
+--- ffmpeg-0.4.7.orig/Makefile	2003-09-04 19:57:13.000000000 +0200
++++ ffmpeg-0.4.7/Makefile	2003-09-04 20:36:41.299479784 +0200
+@@ -39,14 +39,10 @@
+ EXTRALIBS+=-lmedia -lbe
  endif
  
- ifeq ($(BUILD_SHARED),yes)
--DEP_LIBS=libavcodec/libavcodec.so libavformat/libavformat.a
+-ifeq ($(BUILD_SHARED),yes)
+-DEP_LIBS=libavcodec/$(SLIBPREF)avcodec$(SLIBSUF) libavformat/$(SLIBPREF)avformat$(SLIBSUF)
+-else
+-DEP_LIBS=libavcodec/$(LIBPREF)avcodec$(LIBSUF) libavformat/$(LIBPREF)avformat$(LIBSUF)
 +DEP_LIBS=libavcodec/libavcodec.la libavformat/libavformat.la
- else
- DEP_LIBS=libavcodec/libavcodec.a libavformat/libavformat.a
  ifeq ($(CONFIG_MP3LAME),yes)
-@@ -56,17 +56,12 @@
+ EXTRALIBS+=-lmp3lame
+ endif
+-endif
+ 
+ ifeq ($(CONFIG_VORBIS),yes)
+ EXTRALIBS+=-logg -lvorbis -lvorbisenc
+@@ -74,7 +70,7 @@
+ 
+ OBJS = ffmpeg.o ffserver.o cmdutils.o ffplay.o
+ SRCS = $(OBJS:.o=.c) $(ASM_OBJS:.o=.s)
+-FFLIBS = -L./libavformat -lavformat -L./libavcodec -lavcodec
++FFLIBS = libavformat/libavformat.la libavcodec/libavcodec.la
+ 
+ all: lib $(PROG) $(PROGTEST) $(VHOOK)
+ 
+@@ -82,25 +78,17 @@
  	$(MAKE) -C libavcodec all
  	$(MAKE) -C libavformat all
  
--ffmpeg_g$(EXE): ffmpeg.o $(DEP_LIBS)
--	$(CC) $(LDFLAGS) -o $@ ffmpeg.o -L./libavcodec -L./libavformat \
--              -lavformat -lavcodec $(EXTRALIBS)
+-ffmpeg_g$(EXE): ffmpeg.o cmdutils.o .libs
+-	$(CC) $(LDFLAGS) -o $@ ffmpeg.o cmdutils.o $(FFLIBS) $(EXTRALIBS)
 -
 -ffmpeg$(EXE): ffmpeg_g$(EXE)
--	cp -p $< $@ ; $(STRIP) $@
-+ffmpeg$(EXE): ffmpeg.o $(DEP_LIBS)
-+	libtool --mode=link  --tag CC $(CC) $(LDFLAGS) -o $@ ffmpeg.o $(DEP_LIBS) $(EXTRALIBS)
+-	cp -p $< $@
+-	$(STRIP) $@
++ffmpeg$(EXE): ffmpeg.o cmdutils.o
++	libtool --mode=link $(CC) $(LDFLAGS) -o $@ ffmpeg.o cmdutils.o $(FFLIBS) $(EXTRALIBS)
  
- ffserver$(EXE): ffserver.o $(DEP_LIBS)
--	$(CC) $(LDFLAGS) $(FFSLDFLAGS) \
--		-o $@ ffserver.o -L./libavcodec -L./libavformat \
--              -lavformat -lavcodec $(EXTRALIBS) 
-+	libtool --mode=link --tag CC $(CC) $(LDFLAGS) $(FFSLDFLAGS) \
-+		-o $@ ffserver.o $(DEP_LIBS) $(EXTRALIBS)
+-ffserver$(EXE): ffserver.o .libs
+-	$(CC) $(LDFLAGS) $(FFSLDFLAGS) -o $@ ffserver.o $(FFLIBS) $(EXTRALIBS) 
++ffserver$(EXE): ffserver.o
++	libtool --mode=link $(CC) $(LDFLAGS) $(FFSLDFLAGS) -o $@ ffserver.o $(FFLIBS) $(EXTRALIBS)
  
- ffplay: ffmpeg$(EXE)
- 	ln -sf $< $@
-@@ -79,14 +74,15 @@
+-ffplay_g$(EXE): ffplay.o cmdutils.o .libs
+-	$(CC) $(LDFLAGS) -o $@ ffplay.o cmdutils.o $(FFLIBS) $(EXTRALIBS) $(SDL_LIBS)
++ffplay$(EXE): ffplay.o cmdutils.o
++	libtool --mode=link $(CC) $(LDFLAGS) -o $@ ffplay.o cmdutils.o $(FFLIBS) $(EXTRALIBS) $(SDL_LIBS)
  
--install: all $(INSTALLVHOOK)
-+install: $(INSTALLVHOOK)
+-ffplay$(EXE): ffplay_g$(EXE)
+-	cp -p $< $@
+-	$(STRIP) $@
+-
+-output_example$(EXE): output_example.o .libs
+-	$(CC) $(LDFLAGS) -o $@ output_example.o $(FFLIBS) $(EXTRALIBS)
++output_example$(EXE): output_example.o
++	libtool --mode=link $(CC) $(LDFLAGS) -o $@ output_example.o $(FFLIBS) $(EXTRALIBS)
+ 
+ ffplay.o: ffplay.c
+ 	$(CC) $(CFLAGS) $(SDL_CFLAGS) -c -o $@ $< 
+@@ -108,27 +96,27 @@
+ %.o: %.c
+ 	$(CC) $(CFLAGS) -c -o $@ $< 
+ 
+-videohook: .libs
++videohook:
+ 	$(MAKE) -C vhook all
+ 
+-install: all install-man $(INSTALLVHOOK)
++install: install-man $(INSTALLVHOOK)
  	$(MAKE) -C libavcodec install
+ 	$(MAKE) -C libavformat install
 -	install -d $(prefix)/bin
--	install -s -m 755 $(PROG) $(prefix)/bin
--	ln -sf ffmpeg $(prefix)/bin/ffplay 
-+	$(MAKE) -C libavformat install
+-	install -c -s -m 755 $(PROG) $(prefix)/bin
 +	install -d $(DESTDIR)$(prefix)/bin
-+	libtool --mode=install install $(PROG) $(DESTDIR)$(prefix)/bin
-+	ln -sf ffmpeg $(DESTDIR)$(prefix)/bin/ffplay 
++	libtool --mode=install install -c -m 755 $(PROG) $(DESTDIR)$(prefix)/bin
+ 
+ # install man from source dir if available
+ install-man:
+ 	if [ -f $(SRC_PATH)/doc/ffmpeg.1 ] ; then \
+-	    install -d $(mandir)/man1 ; \
++	    install -d $(DESTDIR)$(mandir)/man1 ; \
+ 	    install -m 644 $(SRC_PATH)/doc/ffmpeg.1 $(SRC_PATH)/doc/ffplay.1 \
+-                           $(SRC_PATH)/doc/ffserver.1 $(mandir)/man1 ; \
++                           $(SRC_PATH)/doc/ffserver.1 $(DESTDIR)$(mandir)/man1 ; \
+ 	fi
  
 -install-vhook: $(prefix)/lib/vhook
 -	$(MAKE) -C vhook install INSTDIR=$(prefix)/lib/vhook
@@ -408,3 +630,20 @@
  	install -d $@
  
  installlib:
+@@ -147,15 +135,11 @@
+ .depend: $(SRCS)
+ 	$(CC) -MM $(CFLAGS) $^ 1>.depend
+ 
+-.libs: lib
+-	@test -f .libs || touch .libs
+-	@for i in $(DEP_LIBS) ; do if $(TEST) $$i -nt .libs ; then touch .libs; fi ; done
+-
+ clean: $(CLEANVHOOK)
+ 	$(MAKE) -C libavcodec clean
+ 	$(MAKE) -C libavformat clean
+ 	$(MAKE) -C tests clean
+-	rm -f *.o *.d *~ .libs .depend gmon.out TAGS ffmpeg_g$(EXE) ffplay_g$(EXE) $(PROG) 
++	rm -f *.o *.d *~ .depend gmon.out TAGS $(PROG) 
+ 
+ clean-vhook:
+ 	$(MAKE) -C vhook clean

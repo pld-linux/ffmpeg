@@ -35,8 +35,8 @@
  
  OBJS= utils.o cutils.o allformats.o
  
---- ffmpeg-0.4.6/vhook/Makefile.orig	Fri Dec 27 15:35:47 2002
-+++ ffmpeg-0.4.6/vhook/Makefile	Sun Jan  5 02:56:56 2003
+--- ffmpeg-0.4.7/vhook/Makefile.orig	2003-08-25 00:29:51.000000000 +0200
++++ ffmpeg-0.4.7/vhook/Makefile	2003-09-04 19:47:04.081085776 +0200
 @@ -2,7 +2,7 @@
  
  VPATH=$(SRC_PATH)/vhook
@@ -46,8 +46,8 @@
  
  ifeq ($(CONFIG_DARWIN),yes)
  SHFLAGS+=-bundle -flat_namespace -undefined suppress
-@@ -16,14 +16,14 @@
- all: $(HOOKS) 
+@@ -26,16 +26,16 @@
+ 	$(CC) -MM $(CFLAGS) $^ 1>.depend
  
  install:
 -	install -s -m 755 $(HOOKS) $(INSTDIR)
@@ -56,11 +56,14 @@
  imlib2.so: imlib2.o
 -	$(CC) -g -o $@ $(SHFLAGS) $< -lImlib2
 +	$(CC) $(LDOPT) -o $@ $(SHFLAGS) $< -lImlib2
- 	rm $<
+ 
+ drawtext.so: drawtext.o
+-	$(CC) -g -o $@ $(SHFLAGS) $< `freetype-config --libs`
++	$(CC) $(LDOPT) -o $@ $(SHFLAGS) $< `freetype-config --libs`
  
  %.so: %.o
 -	$(CC) -g -o $@ $(SHFLAGS) $<
 +	$(CC) $(LDOPT) -o $@ $(SHFLAGS) $<
  
- %.html: %.texi
- 	texi2html -monolithic -number $<
+ clean:
+ 	rm -f *.o *.d .depend *.so *~
