@@ -1,58 +1,66 @@
-diff -urN ffmpeg/Makefile ffmpeg.new/Makefile
---- ffmpeg/Makefile	Wed Aug 15 15:12:07 2001
-+++ ffmpeg.new/Makefile	Wed Sep  5 13:51:41 2001
-@@ -3,8 +3,8 @@
- #
- include config.mak
+--- ffmpeg-0.4.6/Makefile.orig	Fri Dec 27 15:35:45 2002
++++ ffmpeg-0.4.6/Makefile	Sun Jan  5 01:23:59 2003
+@@ -6,8 +6,8 @@
  
--CFLAGS= $(OPTFLAGS) -Wall -g -I./libavcodec -I./libav 
--LDFLAGS= -g 
-+CFLAGS= $(OPT) -Wall -I./libavcodec -I./libav 
-+LDFLAGS= $(LDOPT)
+ VPATH=$(SRC_PATH)
+ 
+-CFLAGS= $(OPTFLAGS) -Wall -g -I. -I$(SRC_PATH) -I$(SRC_PATH)/libavcodec -I$(SRC_PATH)/libavformat -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_GNU_SOURCE
+-LDFLAGS+= -g 
++CFLAGS= $(OPT) -Wall -I. -I$(SRC_PATH) -I$(SRC_PATH)/libavcodec -I$(SRC_PATH)/libavformat -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_GNU_SOURCE
++LDFLAGS+= $(LDOPT)
+ 
  ifeq ($(TARGET_GPROF),yes)
  CFLAGS+=-p
- LDFLAGS+=-p
-@@ -19,16 +19,16 @@
- 	$(MAKE) -C libav all
+--- ffmpeg-0.4.6/libavcodec/Makefile.orig	Fri Dec 27 15:35:45 2002
++++ ffmpeg-0.4.6/libavcodec/Makefile	Sun Jan  5 01:24:39 2003
+@@ -7,8 +7,8 @@
+ VPATH=$(SRC_PATH)/libavcodec
  
- ffmpeg: ffmpeg.o libav/libav.a libavcodec/libavcodec.a
--	gcc $(LDFLAGS) -o $@ $^ -lm
-+	$(CC) $(LDFLAGS) -o $@ $^ -lm
- 
- ffserver: ffserver.o libav/libav.a libavcodec/libavcodec.a
--	gcc $(LDFLAGS) -o $@ $^ -lm
-+	$(CC) $(LDFLAGS) -o $@ $^ -lm
- 
- %.o: %.c
--	gcc $(CFLAGS) -c -o $@ $< 
-+	$(CC) $(CFLAGS) -c -o $@ $< 
- 
- install: all
--	install -s -m 755 $(PROG) $(prefix)/bin
-+	install -m 755 $(PROG) $(prefix)/bin
- 
- clean: 
- 	$(MAKE) -C libavcodec clean
-diff -urN ffmpeg/libav/Makefile ffmpeg.new/libav/Makefile
---- ffmpeg/libav/Makefile	Wed Aug 15 00:32:50 2001
-+++ ffmpeg.new/libav/Makefile	Wed Sep  5 13:47:25 2001
-@@ -1,5 +1,5 @@
- include ../config.mak
--CFLAGS= $(OPTFLAGS) -Wall -g -I../libavcodec -DHAVE_AV_CONFIG_H
-+CFLAGS= $(OPT) -Wall -I../libavcodec -DHAVE_AV_CONFIG_H
- 
- OBJS= rm.o mpeg.o asf.o avienc.o jpeg.o swf.o wav.o raw.o \
- 	 avidec.o ffm.o \
-diff -urN ffmpeg/libavcodec/Makefile ffmpeg.new/libavcodec/Makefile
---- ffmpeg/libavcodec/Makefile	Mon Aug 13 00:52:36 2001
-+++ ffmpeg.new/libavcodec/Makefile	Wed Sep  5 13:47:34 2001
-@@ -1,7 +1,7 @@
- include ../config.mak
- 
--CFLAGS= $(OPTFLAGS) -Wall -g -DHAVE_AV_CONFIG_H
+ # NOTE: -I.. is needed to include config.h
+-CFLAGS= $(OPTFLAGS) -Wall -g -DHAVE_AV_CONFIG_H -I.. -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_GNU_SOURCE
 -LDFLAGS= -g
-+CFLAGS= $(OPT) -Wall -DHAVE_AV_CONFIG_H
++CFLAGS= $(OPT) -Wall -DHAVE_AV_CONFIG_H -I.. -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_GNU_SOURCE
 +LDFLAGS= $(LDOPT)
  
- OBJS= common.o utils.o mpegvideo.o h263.o jrevdct.o jfdctfst.o \
-       mpegaudio.o ac3enc.o mjpeg.o resample.o dsputil.o \
+ OBJS= common.o utils.o mem.o allcodecs.o \
+       mpegvideo.o h263.o jrevdct.o jfdctfst.o jfdctint.o\
+--- ffmpeg-0.4.6/libavformat/Makefile.orig	Fri Dec 27 15:35:47 2002
++++ ffmpeg-0.4.6/libavformat/Makefile	Sun Jan  5 01:25:07 2003
+@@ -6,7 +6,7 @@
+ 
+ VPATH=$(SRC_PATH)/libavformat
+ 
+-CFLAGS= $(OPTFLAGS) -Wall -g -I.. -I$(SRC_PATH) -I$(SRC_PATH)/libavcodec -DHAVE_AV_CONFIG_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_GNU_SOURCE
++CFLAGS= $(OPT) -Wall -I.. -I$(SRC_PATH) -I$(SRC_PATH)/libavcodec -DHAVE_AV_CONFIG_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_GNU_SOURCE
+ 
+ OBJS= utils.o cutils.o allformats.o
+ 
+--- ffmpeg-0.4.6/vhook/Makefile.orig	Fri Dec 27 15:35:47 2002
++++ ffmpeg-0.4.6/vhook/Makefile	Sun Jan  5 02:56:56 2003
+@@ -2,7 +2,7 @@
+ 
+ VPATH=$(SRC_PATH)/vhook
+ 
+-CFLAGS=-fPIC $(OPTFLAGS) -g -Wall -I.. -I$(SRC_PATH) -I$(SRC_PATH)/libavformat -I$(SRC_PATH)/libavcodec -DHAVE_AV_CONFIG_H
++CFLAGS=-fPIC $(OPT) -Wall -I.. -I$(SRC_PATH) -I$(SRC_PATH)/libavformat -I$(SRC_PATH)/libavcodec -DHAVE_AV_CONFIG_H
+ 
+ ifeq ($(CONFIG_DARWIN),yes)
+ SHFLAGS+=-bundle -flat_namespace -undefined suppress
+@@ -16,14 +16,14 @@
+ all: $(HOOKS) 
+ 
+ install:
+-	install -s -m 755 $(HOOKS) $(INSTDIR)
++	install -m 755 $(HOOKS) $(INSTDIR)
+ 
+ imlib2.so: imlib2.o
+-	$(CC) -g -o $@ $(SHFLAGS) $< -lImlib2
++	$(CC) $(LDOPT) -o $@ $(SHFLAGS) $< -lImlib2
+ 	rm $<
+ 
+ %.so: %.o
+-	$(CC) -g -o $@ $(SHFLAGS) $<
++	$(CC) $(LDOPT) -o $@ $(SHFLAGS) $<
+ 
+ %.html: %.texi
+ 	texi2html -monolithic -number $<
