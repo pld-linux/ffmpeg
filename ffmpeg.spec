@@ -1,6 +1,7 @@
 #
 # Conditional build:
 %bcond_without	imlib2	# we can safely play without it :-)
+%bcond_without  broken_rpm # dont BC packages because of logic error in Ac
 #
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
@@ -15,7 +16,9 @@ Source0:	http://dl.sourceforge.net/ffmpeg/%{name}-%{version}-pre1.tar.gz
 Patch0:		%{name}-imlib2.patch
 Patch1:		%{name}-libtool.patch
 URL:		http://ffmpeg.sourceforge.net/
+%if %{with broken_rpm}
 BuildConflicts:	libpostproc
+%endif
 BuildRequires:	SDL-devel
 BuildRequires:	freetype-devel
 %ifarch ppc
@@ -24,6 +27,7 @@ BuildRequires:	gcc >= 5:3.3.2-3
 %endif
 %{?with_imlib2:BuildRequires:	imlib2-devel >= 1.1.0-2}
 BuildRequires:	libtool >= 2:1.4d-3
+BuildRequires:	faac-libs
 %ifarch %{ix86}
 %ifnarch i386 i486
 BuildRequires:	nasm
@@ -33,6 +37,8 @@ BuildRequires:	perl-tools-pod
 BuildRequires:	tetex
 BuildRequires:	texinfo
 BuildRequires:	zlib-devel
+BuildRequires:	lame-libs
+BuildRequires:	libvorbis
 Obsoletes:	libpostproc
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -134,11 +140,15 @@ obrazie.
 	--libdir=%{_libdir} \
 	--mandir=%{_mandir} \
 	--enable-a52bin \
+	--enable-faac \
 	--enable-faadbin \
+	--enable-pthreads \
 	--enable-gpl \
 	--enable-pp \
 	--enable-shared \
 	--enable-shared-pp \
+	--enable-mp3lame \
+	--enable-vorbis \
 %ifnarch %{ix86}
 	--disable-mmx \
 %endif
