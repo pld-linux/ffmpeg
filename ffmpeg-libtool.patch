@@ -171,7 +171,7 @@
  ifeq ($(CONFIG_FAADBIN),yes)
  # no libs needed
  else
-@@ -83,26 +83,26 @@
+@@ -83,26 +83,27 @@
  endif
  
  ifeq ($(CONFIG_FAAC),yes)
@@ -184,6 +184,7 @@
  ifeq ($(SHARED_PP),yes)
 -EXTRALIBS += -lpostproc
 +EXTRALIBS += libpostproc/libpostproc.la
++EXTRADEPS = libpostproc/libpostproc.la
  else
  # LIBS += libpostproc/libpostproc.a ... should be fixed
 -OBJS += libpostproc/postprocess.o
@@ -203,7 +204,7 @@
  EXTRALIBS += -lvorbis -lvorbisenc
  endif
  
-@@ -113,74 +113,76 @@
+@@ -113,74 +114,76 @@
  
  # i386 mmx specific stuff
  ifeq ($(TARGET_MMX),yes)
@@ -304,10 +305,10 @@
  
  amrlibs:
  	$(MAKE) -C amr spclib fipoplib
-@@ -188,28 +190,18 @@
+@@ -188,28 +191,18 @@
  tests: apiexample cpuid_test $(TESTS)
  
- $(LIB): $(OBJS) $(AMRLIBS)
+-$(LIB): $(OBJS) $(AMRLIBS)
 -	rm -f $@
 -	$(AR) rc $@ $(OBJS) $(AMREXTRALIBS)
 -	$(RANLIB) $@
@@ -319,6 +320,7 @@
 -else
 -	$(CC) $(SHFLAGS) -o $@ $(OBJS) $(EXTRALIBS) $(AMREXTRALIBS) $(LDFLAGS)
 -endif
++$(LIB): $(OBJS) $(AMRLIBS) $(EXTRADEPS)
 +	libtool --mode=link $(CC) $(LDFLAGS) -o $@ $(OBJS) $(AMREXTRALIBS) $(RPATH) $(EXTRALIBS) -release $(VERSION)
  
 -dsputil.o: dsputil.c dsputil.h
@@ -340,7 +342,7 @@
  
  depend: $(SRCS)
  	$(CC) -MM $(CFLAGS) $^ 1>.depend
-@@ -243,7 +235,7 @@
+@@ -243,7 +236,7 @@
  
  # api example program
  apiexample: apiexample.c $(LIB)
@@ -349,7 +351,7 @@
  
  # cpuid test
  cpuid_test: i386/cputest.c
-@@ -255,37 +247,35 @@
+@@ -255,37 +248,36 @@
  	$(CC) $(CFLAGS) -DTEST -o $@ $^ -lm
  
  dct-test: dct-test.o fdctref.o $(LIB)
@@ -374,6 +376,7 @@
 -	install -s -m 755 $(SLIB) $(prefix)/lib/libavcodec-$(VERSION).so
 -	ln -sf libavcodec-$(VERSION).so $(prefix)/lib/libavcodec.so
 -	ldconfig || true
++	$(MAKE) -C libpostproc install
 +	install -d $(DESTDIR)$(libdir)
 +	libtool --mode=install install $(LIB) $(DESTDIR)$(libdir)
  endif
