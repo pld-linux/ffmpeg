@@ -5,6 +5,8 @@ Version:	0.3.2
 Release:	1
 License:	GPL
 Group:		Daemons
+Group(de):	Server
+Group(pl):	Serwery
 Source0:	http://download.projectmayo.com/dnload/ffmpeg/%{name}-%{version}.tar.gz
 URL:		http://www.projectmayo.com/streaming/ffmpeg/index.php
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -14,15 +16,15 @@ ffmpeg is a hyper fast realtime audio/video encoder and streaming
 server. It can grab from a standard Video4Linux video source and
 convert it into several file formats based on DCT/motion compensation
 encoding. Sound is compressed in MPEG audio layer 2 or using an AC3
-compatible stream.                               
+compatible stream.
 
 %description -l pl
-ffmpeg jest bardzo szybkim koderem audio/wideo w czasie rzeczywistym oraz
-serwerem strumieni multimedialnych. ffmpeg potrafi zrzucaæ dane ze
-standardowego urz±dzenia Video4Linux i przekonwertowaæ je w kilka formatów
-plików bazuj±cych na kodowaniu DCT/kompensacyji ruchu. Dzwiêk jest
-kompresowany do strumienia MPEG audio layer 2 lub u¿ywaj±c strumienia
-kompatybilnego z AC3.
+ffmpeg jest bardzo szybkim koderem audio/wideo w czasie rzeczywistym
+oraz serwerem strumieni multimedialnych. ffmpeg potrafi zrzucaæ dane
+ze standardowego urz±dzenia Video4Linux i przekonwertowaæ je w kilka
+formatów plików bazuj±cych na kodowaniu DCT/kompensacyji ruchu. Dzwiêk
+jest kompresowany do strumienia MPEG audio layer 2 lub u¿ywaj±c
+strumienia kompatybilnego z AC3.
 
 %prep
 %setup -q -n %{name}
