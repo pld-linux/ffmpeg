@@ -6,7 +6,7 @@ Summary:	Realtime audio/video encoder and streaming server
 Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.8
-Release:	1
+Release:	2
 License:	LGPL/GPL
 Group:		Daemons
 Source0:	http://dl.sourceforge.net/ffmpeg/%{name}-%{version}.tar.gz
@@ -17,7 +17,6 @@ Patch2:		%{name}-libtool.patch
 URL:		http://ffmpeg.sourceforge.net/
 BuildRequires:	SDL-devel
 BuildRequires:	freetype-devel
-BuildRequires:	libstdc++-devel
 %{!?_without_imlib:BuildRequires:	imlib2-devel >= 1.1.0-2}
 BuildRequires:	libtool >= 2:1.4d-3
 %ifarch i586 i686 athlon
@@ -119,6 +118,7 @@ Statyczne biblioteki ffmpeg (libavcodec i libavformat).
 # - -fomit-frame-pointer is always needed on x86 due to lack of registers
 #   (-fPIC takes one)
 # - --disable-debug, --disable-opts, tune=generic causes not to override our optflags
+# - [temporary!!!] altivec disabled because of gcc 3.3.x bug target/11793
 ./configure \
 	--prefix=%{_prefix} \
 	--mandir=%{_mandir} \
@@ -127,6 +127,9 @@ Statyczne biblioteki ffmpeg (libavcodec i libavformat).
 	--enable-faadbin \
 %ifnarch i586 i686 athlon
 	--disable-mmx \
+%endif
+%ifarch ppc
+	--disable-altivec \
 %endif
 	--cc="%{__cc}" \
 	--extra-cflags="%{rpmcflags} -fomit-frame-pointer" \
