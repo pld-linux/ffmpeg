@@ -10,6 +10,7 @@ Group(pl):	Serwery
 Source0:	http://prdownloads.sourceforge.net/ffmpeg/%{name}-%{version}.tar.gz
 URL:		http://ffmpeg.sourceforge.net/
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+BuildRequires:  nasm
 
 %description
 ffmpeg is a hyper fast realtime audio/video encoder and streaming
