@@ -139,9 +139,11 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/vhook/fish.so
 %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/*.conf
 
+%if %{!?_without_imlib:1}0
 %files vhook-imlib2
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/vhook/imlib2.so
+%endif
 
 %files devel
 %defattr(644,root,root,755)
