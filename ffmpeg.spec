@@ -1,4 +1,5 @@
 #
+# TODO: separate libpostproc* or add Obsoletes: libpostproc*
 # Conditional build:
 %bcond_without	imlib2	# we can safely play without it :-)
 #
@@ -14,11 +15,9 @@ Source0:	http://dl.sourceforge.net/ffmpeg/%{name}-%{version}-pre1.tar.gz
 # Source0-md5:	ea5587e3c66d50b1503b82ac4179c303
 Patch0:		%{name}-imlib2.patch
 Patch1:		%{name}-libtool.patch
-Patch2:		%{name}-postproc.patch
 URL:		http://ffmpeg.sourceforge.net/
 BuildRequires:	SDL-devel
 BuildRequires:	freetype-devel
-BuildRequires:	libpostproc-devel
 %ifarch ppc
 # require version with altivec support fixed
 BuildRequires:	gcc >= 5:3.3.2-3
@@ -119,7 +118,6 @@ Statyczne biblioteki ffmpeg (libavcodec i libavformat).
 %setup -q -n ffmpeg-0.4.9-pre1
 %patch0 -p1
 %patch1 -p1
-%patch2 -p1
 
 %build
 # notes:
@@ -176,11 +174,12 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_sbindir}/ffserver
 %attr(755,root,root) %{_libdir}/libavcodec-*.so
 %attr(755,root,root) %{_libdir}/libavformat-*.so
-#attr(755,root,root) %{_libdir}/libpostproc.so.*
+%attr(755,root,root) %{_libdir}/libpostproc.so.*
 %dir %{_libdir}/vhook
 %attr(755,root,root) %{_libdir}/vhook/drawtext.so
 %attr(755,root,root) %{_libdir}/vhook/fish.so
 %attr(755,root,root) %{_libdir}/vhook/null.so
+%attr(755,root,root) %{_libdir}/vhook/ppm.so
 %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/ffserver.conf
 %{_mandir}/man1/ffmpeg.1*
 %{_mandir}/man1/ffserver.1*
@@ -200,7 +199,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libavcodec.so
 %attr(755,root,root) %{_libdir}/libavformat.so
-#attr(755,root,root) %{_libdir}/libpostproc.so
+%attr(755,root,root) %{_libdir}/libpostproc.so
 %{_libdir}/lib*.la
 %{_includedir}/ffmpeg
 %{_includedir}/postproc
