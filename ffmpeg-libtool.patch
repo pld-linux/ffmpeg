@@ -317,7 +317,7 @@
 -                $(SRC_PATH)/libav/rtp.h $(SRC_PATH)/libav/rtsp.h \
 -                $(SRC_PATH)/libav/rtspcodes.h \
 -                $(prefix)/include/ffmpeg
-+	libtool --mode=link $(CC) $(LDOPT) -o $@ $(OBJS) ../libavcodec/libavcodec.la -rpath $(prefix)/lib -release $(VERSION)
++	libtool --mode=link --tag CXX $(CC) $(LDOPT) -o $@ $(OBJS) ../libavcodec/libavcodec.la -rpath $(prefix)/lib -release $(VERSION)
 +
 +install: all
 +	install -d $(DESTDIR)$(prefix)/lib
