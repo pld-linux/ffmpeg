@@ -1,7 +1,7 @@
 #
 # Conditional build:
-%bcond_without	imlib2	# we can safely play without it :-)
-%bcond_without  broken_rpm # dont BC packages because of logic error in Ac
+%bcond_without	imlib2		# we can safely play without it :-)
+%bcond_without	broken_rpm	# dont BC packages because of logic error in Ac
 #
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
