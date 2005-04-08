@@ -27,7 +27,7 @@ BuildRequires:	gcc >= 5:3.3.2-3
 %endif
 %{?with_imlib2:BuildRequires:	imlib2-devel >= 1.1.0-2}
 BuildRequires:	libtool >= 2:1.4d-3
-BuildRequires:	faac-libs
+BuildRequires:  faac-devel
 %ifarch %{ix86}
 %ifnarch i386 i486
 BuildRequires:	nasm
@@ -37,8 +37,8 @@ BuildRequires:	perl-tools-pod
 BuildRequires:	tetex
 BuildRequires:	texinfo
 BuildRequires:	zlib-devel
-BuildRequires:	lame-libs
-BuildRequires:	libvorbis
+BuildRequires:	lame-libs-devel
+BuildRequires:	libvorbis-devel
 Obsoletes:	libpostproc
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
