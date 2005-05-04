@@ -15,6 +15,7 @@ Source0:	http://dl.sourceforge.net/ffmpeg/%{name}-%{version}-pre1.tar.gz
 # Source0-md5:	ea5587e3c66d50b1503b82ac4179c303
 Patch0:		%{name}-imlib2.patch
 Patch1:		%{name}-libtool.patch
+Patch2:		%{name}-gcc4.patch
 URL:		http://ffmpeg.sourceforge.net/
 BuildRequires:	SDL-devel
 BuildRequires:	freetype-devel
@@ -126,6 +127,7 @@ obrazie.
 %setup -q -n ffmpeg-0.4.9-pre1
 %patch0 -p1
 %patch1 -p1
+%patch2 -p1
 
 %build
 # notes:
