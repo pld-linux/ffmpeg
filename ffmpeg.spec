@@ -18,14 +18,16 @@ Patch1:		%{name}-libtool.patch
 Patch2:		%{name}-gcc4.patch
 URL:		http://ffmpeg.sourceforge.net/
 BuildRequires:	SDL-devel
+BuildRequires:	faac-devel
 BuildRequires:	freetype-devel
 %ifarch ppc
 # require version with altivec support fixed
 BuildRequires:	gcc >= 5:3.3.2-3
 %endif
 %{?with_imlib2:BuildRequires:	imlib2-devel >= 1.1.0-2}
+BuildRequires:	lame-libs-devel
 BuildRequires:	libtool >= 2:1.4d-3
-BuildRequires:  faac-devel
+BuildRequires:	libvorbis-devel
 %ifarch %{ix86}
 %ifnarch i386 i486
 BuildRequires:	nasm
@@ -35,8 +37,6 @@ BuildRequires:	perl-tools-pod
 BuildRequires:	tetex
 BuildRequires:	texinfo
 BuildRequires:	zlib-devel
-BuildRequires:	lame-libs-devel
-BuildRequires:	libvorbis-devel
 %{?with_autoreqdep:BuildConflicts:	libpostproc}
 Obsoletes:	libpostproc
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
