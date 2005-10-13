@@ -7,15 +7,16 @@ Summary:	Realtime audio/video encoder and streaming server
 Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.9
-Release:	0.pre1.1
+%define	snap	20050806
+Release:	1.%{snap}.1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 License:	GPL
 Group:		Daemons
-Source0:	http://dl.sourceforge.net/ffmpeg/%{name}-%{version}-pre1.tar.gz
-# Source0-md5:	ea5587e3c66d50b1503b82ac4179c303
-Patch0:		%{name}-imlib2.patch
-Patch1:		%{name}-libtool.patch
-Patch2:		%{name}-gcc4.patch
+#Source0:	http://dl.sourceforge.net/ffmpeg/%{name}-%{version}-pre1.tar.gz
+Source0:	ftp://ftp2.mplayerhq.hu/MPlayer/cvs/FFMpeg-%{snap}.tar.bz2
+# Source0-md5:	f5ea3dd877c5df5b60356053642cf542
+Patch0:		%{name}-libtool.patch
+#Patch1:		%{name}-gcc4.patch # NEEDED???
 URL:		http://ffmpeg.sourceforge.net/
 BuildRequires:	SDL-devel
 BuildRequires:	faac-devel
@@ -26,6 +27,7 @@ BuildRequires:	gcc >= 5:3.3.2-3
 %endif
 %{?with_imlib2:BuildRequires:	imlib2-devel >= 1.1.0-2}
 BuildRequires:	lame-libs-devel
+BuildRequires:	libtheora-devel
 BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	libvorbis-devel
 %ifarch %{ix86}
@@ -124,10 +126,9 @@ przepuszczany przez strftime, wiêc ³atwo umie¶ciæ datê i czas na
 obrazie.
 
 %prep
-%setup -q -n ffmpeg-0.4.9-pre1
+%setup -q -n FFMpeg-%{snap}
 %patch0 -p1
-%patch1 -p1
-%patch2 -p1
+#%patch1 -p1
 
 %build
 # notes:
@@ -139,15 +140,18 @@ obrazie.
 	--prefix=%{_prefix} \
 	--libdir=%{_libdir} \
 	--mandir=%{_mandir} \
+	--disable-strip \
 	--enable-a52bin \
 	--enable-faac \
 	--enable-faadbin \
-	--enable-pthreads \
 	--enable-gpl \
+	--enable-libogg \
+	--enable-mp3lame \
 	--enable-pp \
+	--enable-pthreads \
 	--enable-shared \
 	--enable-shared-pp \
-	--enable-mp3lame \
+	--enable-theora \
 	--enable-vorbis \
 %ifnarch %{ix86}
 	--disable-mmx \
@@ -188,13 +192,15 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_sbindir}/ffserver
 %attr(755,root,root) %{_libdir}/libavcodec-*.so
 %attr(755,root,root) %{_libdir}/libavformat-*.so
-%attr(755,root,root) %{_libdir}/libpostproc.so.*
+%attr(755,root,root) %{_libdir}/libavutil-*.so
+%attr(755,root,root) %{_libdir}/libpostproc.so.*.*.*
 %dir %{_libdir}/vhook
 %attr(755,root,root) %{_libdir}/vhook/drawtext.so
 %attr(755,root,root) %{_libdir}/vhook/fish.so
 %attr(755,root,root) %{_libdir}/vhook/null.so
 %attr(755,root,root) %{_libdir}/vhook/ppm.so
-%config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/ffserver.conf
+%attr(755,root,root) %{_libdir}/vhook/watermark.so
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/ffserver.conf
 %{_mandir}/man1/ffmpeg.1*
 %{_mandir}/man1/ffserver.1*
 
@@ -202,10 +208,12 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libavcodec.so
 %attr(755,root,root) %{_libdir}/libavformat.so
+%attr(755,root,root) %{_libdir}/libavutil.so
 %attr(755,root,root) %{_libdir}/libpostproc.so
 %{_libdir}/lib*.la
 %{_includedir}/ffmpeg
 %{_includedir}/postproc
+%{_pkgconfigdir}/*.pc
 
 %files static
 %defattr(644,root,root,755)
