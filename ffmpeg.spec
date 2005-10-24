@@ -16,6 +16,7 @@ Group:		Daemons
 Source0:	ftp://ftp2.mplayerhq.hu/MPlayer/cvs/FFMpeg-%{snap}.tar.bz2
 # Source0-md5:	f5ea3dd877c5df5b60356053642cf542
 Patch0:		%{name}-libtool.patch
+Patch1:		%{name}-libdir.patch
 #Patch1:		%{name}-gcc4.patch # NEEDED???
 URL:		http://ffmpeg.sourceforge.net/
 BuildRequires:	SDL-devel
@@ -128,7 +129,7 @@ obrazie.
 %prep
 %setup -q -n FFMpeg-%{snap}
 %patch0 -p1
-#%patch1 -p1
+%patch1 -p1
 
 %build
 # notes:
