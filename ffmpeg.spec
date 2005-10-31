@@ -6,7 +6,7 @@ Summary:	Realtime audio/video encoder and streaming server
 Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.9
-Release:	0.pre1.1
+Release:	2.pre1.1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 License:	GPL
 Group:		Daemons
