@@ -6,7 +6,7 @@ Summary:	Realtime audio/video encoder and streaming server
 Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.9
-Release:	0.pre1.0.1
+Release:	2.pre1.1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 License:	GPL
 Group:		Daemons
@@ -14,11 +14,10 @@ Source0:	http://dl.sourceforge.net/ffmpeg/%{name}-%{version}-pre1.tar.gz
 # Source0-md5:	ea5587e3c66d50b1503b82ac4179c303
 Patch0:		%{name}-imlib2.patch
 Patch1:		%{name}-libtool.patch
-Patch2:		%{name}-postproc.patch
 URL:		http://ffmpeg.sourceforge.net/
+BuildConflicts:	libpostproc
 BuildRequires:	SDL-devel
 BuildRequires:	freetype-devel
-BuildRequires:	libpostproc-devel
 %ifarch ppc
 # require version with altivec support fixed
 BuildRequires:	gcc >= 5:3.3.2-3
@@ -30,8 +29,11 @@ BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	nasm
 %endif
 %endif
+BuildRequires:	perl-tools-pod
+BuildRequires:	tetex
 BuildRequires:	texinfo
 BuildRequires:	zlib-devel
+Obsoletes:	libpostproc
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		_noautoreqdep	libGL.so.1 libGLU.so.1
@@ -56,6 +58,31 @@ strumienia kompatybilnego z AC3.
 
 Ten pakiet zawiera tak¿e biblioteki wspó³dzielone ffmpeg (libavcodec i
 libavformat).
+
+%package devel
+Summary:	ffmpeg header files
+Summary(pl):	Pliki nag³ówkowe ffmpeg
+Group:		Development/Libraries
+Requires:	%{name} = %{version}-%{release}
+Obsoletes:	libpostproc-devel
+
+%description devel
+ffmpeg header files.
+
+%description devel -l pl
+Pliki nag³ówkowe ffmpeg.
+
+%package static
+Summary:	ffmpeg static libraries
+Summary(pl):	Statyczne biblioteki ffmpeg
+Group:		Development/Libraries
+Requires:	%{name}-devel = %{version}-%{release}
+
+%description static
+ffmpeg static libraries (libavcodec and libavformat).
+
+%description static -l pl
+Statyczne biblioteki ffmpeg (libavcodec i libavformat).
 
 %package ffplay
 Summary:	FFplay - SDL-based media player
@@ -91,35 +118,10 @@ obs³uguje sta³± nak³adkê lub wczytywanie tekstu z pliku. £añcuch jest
 przepuszczany przez strftime, wiêc ³atwo umie¶ciæ datê i czas na
 obrazie.
 
-%package devel
-Summary:	ffmpeg header files
-Summary(pl):	Pliki nag³ówkowe ffmpeg
-Group:		Development/Libraries
-Requires:	%{name} = %{version}-%{release}
-
-%description devel
-ffmpeg header files.
-
-%description devel -l pl
-Pliki nag³ówkowe ffmpeg.
-
-%package static
-Summary:	ffmpeg static libraries
-Summary(pl):	Statyczne biblioteki ffmpeg
-Group:		Development/Libraries
-Requires:	%{name}-devel = %{version}-%{release}
-
-%description static
-ffmpeg static libraries (libavcodec and libavformat).
-
-%description static -l pl
-Statyczne biblioteki ffmpeg (libavcodec i libavformat).
-
 %prep
 %setup -q -n ffmpeg-0.4.9-pre1
 %patch0 -p1
 %patch1 -p1
-%patch2 -p1
 
 %build
 # notes:
@@ -176,14 +178,28 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_sbindir}/ffserver
 %attr(755,root,root) %{_libdir}/libavcodec-*.so
 %attr(755,root,root) %{_libdir}/libavformat-*.so
-#attr(755,root,root) %{_libdir}/libpostproc.so.*
+%attr(755,root,root) %{_libdir}/libpostproc.so.*
 %dir %{_libdir}/vhook
 %attr(755,root,root) %{_libdir}/vhook/drawtext.so
 %attr(755,root,root) %{_libdir}/vhook/fish.so
 %attr(755,root,root) %{_libdir}/vhook/null.so
+%attr(755,root,root) %{_libdir}/vhook/ppm.so
 %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/ffserver.conf
 %{_mandir}/man1/ffmpeg.1*
 %{_mandir}/man1/ffserver.1*
+
+%files devel
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libavcodec.so
+%attr(755,root,root) %{_libdir}/libavformat.so
+%attr(755,root,root) %{_libdir}/libpostproc.so
+%{_libdir}/lib*.la
+%{_includedir}/ffmpeg
+%{_includedir}/postproc
+
+%files static
+%defattr(644,root,root,755)
+%{_libdir}/lib*.a
 
 %files ffplay
 %defattr(644,root,root,755)
@@ -195,16 +211,3 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/vhook/imlib2.so
 %endif
-
-%files devel
-%defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libavcodec.so
-%attr(755,root,root) %{_libdir}/libavformat.so
-#attr(755,root,root) %{_libdir}/libpostproc.so
-%{_libdir}/lib*.la
-%{_includedir}/ffmpeg
-%{_includedir}/postproc
-
-%files static
-%defattr(644,root,root,755)
-%{_libdir}/lib*.a
