@@ -595,7 +595,7 @@
 -	$(CC) $(SHFLAGS) -o $@ $(OBJS) $(EXTRALIBS) $(AMREXTRALIBS) $(LDFLAGS)
 -endif
 +$(LIB): $(OBJS) $(AMRLIBS) $(EXTRADEPS)
-+	libtool --mode=link $(CC) $(LDFLAGS) -o $@ $(OBJS) $(AMREXTRALIBS) $(RPATH) $(EXTRALIBS) -release $(VERSION)
++	libtool --mode=link $(CC) $(LDFLAGS) -o $@ $(OBJS) $(AMREXTRALIBS) $(RPATH) $(EXTRALIBS) -release $(LIBVERSION)
  
 -dsputil.o: dsputil.c dsputil.h
 +dsputil.lo: dsputil.c dsputil.h
@@ -809,7 +809,7 @@
 -else
 -	$(CC) $(SHFLAGS) $(LDFLAGS) -o $@ $(OBJS) $(PPOBJS) $(AVCLIBS) $(EXTRALIBS)
 -endif
-+	libtool --mode=link $(CC) $(LDOPT) -o $@ $(OBJS) $(PPOBJS) $(AVCLIBS) $(RPATH) -release $(VERSION)
++	libtool --mode=link $(CC) $(LDOPT) -o $@ $(OBJS) $(PPOBJS) $(AVCLIBS) $(RPATH) -release $(LIBVERSION)
  
  depend: $(SRCS)
  	$(CC) -MM $(CFLAGS) $^ 1>.depend
@@ -905,7 +905,7 @@
 -else
 -	$(CC) $(SHFLAGS) -o $@ $(OBJS) $(EXTRALIBS) $(AMREXTRALIBS) $(LDFLAGS)
 -endif
-+	libtool --mode=link $(CC) $(SHFLAGS) -o $@ $(OBJS) $(EXTRALIBS) $(AMREXTRALIBS) $(LDFLAGS) $(RPATH) -release $(VERSION)
++	libtool --mode=link $(CC) $(SHFLAGS) -o $@ $(OBJS) $(EXTRALIBS) $(AMREXTRALIBS) $(LDFLAGS) $(RPATH) -release $(LIBVERSION)
  
 -%.o: %.c
 -	$(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $< 
