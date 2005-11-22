@@ -8,7 +8,7 @@ Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.9
 %define	snap	20050806
-Release:	3.%{snap}.1
+Release:	3.%{snap}.2
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 License:	GPL
 Group:		Daemons
@@ -39,6 +39,7 @@ BuildRequires:	perl-tools-pod
 BuildRequires:	tetex
 BuildRequires:	texinfo
 BuildRequires:	zlib-devel
+BuildRequires:	xvid-devel
 %{?with_autoreqdep:BuildConflicts:	libpostproc}
 Obsoletes:	libpostproc
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -153,6 +154,7 @@ obrazie.
 	--enable-shared-pp \
 	--enable-theora \
 	--enable-vorbis \
+	--enable-xvid \
 %ifnarch %{ix86}
 	--disable-mmx \
 %endif
