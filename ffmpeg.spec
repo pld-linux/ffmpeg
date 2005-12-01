@@ -38,8 +38,8 @@ BuildRequires:	nasm
 BuildRequires:	perl-tools-pod
 BuildRequires:	tetex
 BuildRequires:	texinfo
-BuildRequires:	zlib-devel
 BuildRequires:	xvid-devel
+BuildRequires:	zlib-devel
 %{?with_autoreqdep:BuildConflicts:	libpostproc}
 Obsoletes:	libpostproc
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -73,6 +73,13 @@ Summary(pl):	Pliki nag³ówkowe ffmpeg
 Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
 Obsoletes:	libpostproc-devel
+# for libavcodec:
+Requires:	faac-devel
+Requires:	lame-libs-devel
+Requires:	libtheora-devel
+Requires:	libvorbis-devel
+Requires:	xvid-devel
+Requires:	zlib-devel
 
 %description devel
 ffmpeg header files.
