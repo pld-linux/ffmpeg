@@ -152,7 +152,7 @@ obrazie.
 	--libdir=%{_libdir} \
 	--mandir=%{_mandir} \
 	--disable-strip \
-	--enable-a52bin \
+	--enable-a52 \
 	--enable-faac \
 	--enable-faadbin \
 	--enable-gpl \
