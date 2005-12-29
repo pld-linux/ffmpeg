@@ -11,7 +11,7 @@ Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.9
 %define	snap	20050806
-Release:	3.%{snap}.3
+Release:	3.%{snap}.4
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 License:	GPL
 Group:		Daemons
@@ -192,6 +192,8 @@ install -d $RPM_BUILD_ROOT{%{_sysconfdir},%{_sbindir}}
 
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
+
+install xvmc_render.h $RPM_BUILD_ROOT%{_includedir}/ffmpeg
 
 mv -f $RPM_BUILD_ROOT{%{_bindir},%{_sbindir}}/ffserver
 install doc/*.conf $RPM_BUILD_ROOT%{_sysconfdir}
