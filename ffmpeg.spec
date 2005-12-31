@@ -11,7 +11,7 @@ Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.9
 %define	snap	20050806
-Release:	3.%{snap}.4
+Release:	3.%{snap}.5
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 License:	GPL
 Group:		Daemons
@@ -20,6 +20,7 @@ Source0:	ftp://ftp2.mplayerhq.hu/MPlayer/cvs/FFMpeg-%{snap}.tar.bz2
 # Source0-md5:	f5ea3dd877c5df5b60356053642cf542
 Patch0:		%{name}-libtool.patch
 Patch1:		%{name}-libdir.patch
+Patch2:		%{name}-pkgconfig-version.patch
 URL:		http://ffmpeg.sourceforge.net/
 BuildRequires:	SDL-devel
 BuildRequires:	faac-devel
@@ -140,6 +141,7 @@ obrazie.
 %setup -q -n FFMpeg-%{snap}
 %patch0 -p1
 %patch1 -p1
+%patch2 -p1
 
 %build
 # notes:
