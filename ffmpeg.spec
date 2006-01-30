@@ -8,7 +8,7 @@ Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.9
 %define	snap	20060129
-Release:	3.%{snap}.3
+Release:	3.%{snap}.4
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 License:	GPL
 Group:		Daemons
@@ -49,6 +49,14 @@ Obsoletes:	libpostproc
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		_noautoreqdep	libGL.so.1 libGLU.so.1
+
+%define		specflags	-fno-strict-aliasing
+
+# -fomit-frame-pointer is always needed on x86 due to lack of registers (-fPIC takes one)
+%define		specflags_ia32	-fomit-frame-pointer
+# -mmmx is needed to enable <mmintrin.h> code.
+%define		specflags_i586	-mmmx
+%define		specflags_i686	-mmmx
 
 %description
 ffmpeg is a hyper fast realtime audio/video encoder and streaming
@@ -175,7 +183,7 @@ obrazie.
 	--disable-mmx \
 %endif
 	--cc="%{__cc}" \
-	--extra-cflags="%{rpmcflags} -fomit-frame-pointer -fno-strict-aliasing" \
+	--extra-cflags="%{rpmcflags}" \
 	--extra-ldflags="%{rpmldflags}" \
 	--disable-debug \
 	--disable-opts \
