@@ -42,9 +42,10 @@ BuildRequires:	nasm
 BuildRequires:	perl-tools-pod
 BuildRequires:	tetex
 BuildRequires:	texinfo
-BuildRequires:	xvid-devel
+BuildRequires:	xvid-devel >= 1:1.1.0
 BuildRequires:	zlib-devel
 %{?with_autoreqdep:BuildConflicts:	libpostproc}
+Requires:	xvid >= 1:1.1.0
 Obsoletes:	libpostproc
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -90,7 +91,7 @@ Requires:	faac-devel
 Requires:	lame-libs-devel
 Requires:	libtheora-devel
 Requires:	libvorbis-devel
-Requires:	xvid-devel
+Requires:	xvid-devel >= 1:1.1.0
 Requires:	zlib-devel
 
 %description devel
