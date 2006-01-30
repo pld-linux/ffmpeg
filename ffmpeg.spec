@@ -89,6 +89,7 @@ Obsoletes:	libpostproc-devel
 # for libavcodec:
 Requires:	faac-devel
 Requires:	lame-libs-devel
+Requires:	libdts-devel
 Requires:	libtheora-devel
 Requires:	libvorbis-devel
 Requires:	xvid-devel >= 1:1.1.0
