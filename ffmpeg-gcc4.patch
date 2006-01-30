@@ -8,7 +8,7 @@
  #include "../dsputil.h"
  #include "../simple_idct.h"
  #include "../mpegvideo.h"
-@@ -617,7 +618,23 @@
+@@ -617,7 +618,22 @@
      );
  }
  
@@ -28,10 +28,9 @@
 +    *((unsigned*)(dst + (3 * dst_stride))) = _mm_cvtsi64_si32(_mm_unpackhi_pi32(row23, row23));
 +}
 +#else
-+static void transpose4x4(uint8_t *dst, uint8_t *src, int dst_stride, int src_stride){
+ static inline void transpose4x4(uint8_t *dst, uint8_t *src, int dst_stride, int src_stride){
      asm volatile( //FIXME could save 1 instruction if done as 8x4 ...
          "movd  %4, %%mm0                \n\t"
-         "movd  %5, %%mm1                \n\t"
 @@ -645,6 +662,7 @@
             "m" (*(uint32_t*)(src + 3*src_stride))
      );
