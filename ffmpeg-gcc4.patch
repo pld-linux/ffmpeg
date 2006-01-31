@@ -12,8 +12,8 @@
      );
  }
  
-+#if (__GNUC__ >= 4)
-+static inline void transpose4x4(uint8_t *dst, uint8_t *src, int dst_stride, int src_stride){
++#if ((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 1))
++static inline void transpose4x4(uint8_t *dst, uint8_t *src, long dst_stride, long src_stride) {
 +    __m64 row0 = _mm_cvtsi32_si64(*(unsigned*)(src + (0 * src_stride)));
 +    __m64 row1 = _mm_cvtsi32_si64(*(unsigned*)(src + (1 * src_stride)));
 +    __m64 row2 = _mm_cvtsi32_si64(*(unsigned*)(src + (2 * src_stride)));
