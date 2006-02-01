@@ -8,7 +8,7 @@ Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.9
 %define	snap	20060129
-Release:	3.%{snap}.4
+Release:	3.%{snap}.5
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 License:	GPL
 Group:		Daemons
@@ -156,8 +156,6 @@ obrazie.
 %build
 # notes:
 # - it's not autoconf configure
-# - -fomit-frame-pointer is always needed on x86 due to lack of registers
-#   (-fPIC takes one)
 # - --disable-debug, --disable-opts, tune=generic causes not to override our optflags
 ./configure \
 	--prefix=%{_prefix} \
@@ -165,9 +163,9 @@ obrazie.
 	--mandir=%{_mandir} \
 	--disable-strip \
 	--enable-a52 \
+	--enable-a52bin \
 	--enable-dts \
 	--enable-faac \
-	--enable-faad \
 	--enable-faadbin \
 	--enable-gpl \
 	--enable-libogg \
