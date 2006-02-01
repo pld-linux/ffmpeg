@@ -1,6 +1,15 @@
 --- FFMpeg-20050806/configure.orig	2005-08-04 21:50:09.000000000 +0200
 +++ FFMpeg-20050806/configure	2005-10-24 08:26:37.374034008 +0200
-@@ -1703,7 +1703,7 @@
+@@ -1877,7 +1877,7 @@
+ cat <<EOF >libavutil.pc
+ prefix=$prefix
+ exec_prefix=\${prefix}
+-libdir=\${exec_prefix}/lib
++libdir=$libdir
+ includedir=\${prefix}/include
+ 
+ Name: libavutil
+@@ -1908,7 +1908,7 @@
  cat <<EOF >libavcodec.pc
  prefix=$prefix
  exec_prefix=\${prefix}
@@ -9,14 +18,30 @@
  includedir=\${prefix}/include
  
  Name: libavcodec
-@@ -1711,8 +1711,8 @@
- Version: $version-$lavc_build
- Requires: $requires
+@@ -1917,7 +1917,7 @@
+ Requires: $pkg_requires libavutil = $lavu_version
  Conflicts:
--Libs: -L\${libdir} -lavcodec $extralibs
+ Libs: -L\${libdir} -lavcodec $extralibs
 -Cflags: -I\${includedir} -I\${includedir}/ffmpeg
-+Libs: -L$libdir -lavcodec $extralibs
 +Cflags: -I\${includedir}/ffmpeg
  EOF
  
  cat <<EOF >libavcodec-uninstalled.pc
+@@ -1939,7 +1939,7 @@
+ cat <<EOF >libavformat.pc
+ prefix=$prefix
+ exec_prefix=\${prefix}
+-libdir=\${exec_prefix}/lib
++libdir=$libdir
+ includedir=\${prefix}/include
+ 
+ Name: libavformat
+@@ -1971,7 +1971,7 @@
+ cat <<EOF >libpostproc.pc
+ prefix=$prefix
+ exec_prefix=\${prefix}
+-libdir=\${exec_prefix}/lib
++libdir=$libdir
+ includedir=\${prefix}/include
+ 
+ Name: libpostproc
