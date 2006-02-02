@@ -91,6 +91,7 @@ Obsoletes:	libpostproc-devel
 Requires:	faac-devel
 Requires:	lame-libs-devel
 Requires:	libdts-devel
+Requires:	libgsm-devel
 Requires:	libtheora-devel
 Requires:	libvorbis-devel
 Requires:	xvid-devel >= 1:1.1.0
