@@ -8,7 +8,7 @@ Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.9
 %define	snap	20060129
-Release:	3.%{snap}.7
+Release:	3.%{snap}.8
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 License:	GPL
 Group:		Daemons
@@ -31,6 +31,7 @@ BuildRequires:	gcc >= 5:3.3.2-3
 %{?with_imlib2:BuildRequires:	imlib2-devel >= 1.1.0-2}
 BuildRequires:	lame-libs-devel
 BuildRequires:	libdts-devel
+BuildRequires:	libgsm-devel
 BuildRequires:	libtheora-devel
 BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	libvorbis-devel
@@ -168,6 +169,7 @@ obrazie.
 	--enable-faac \
 	--enable-faadbin \
 	--enable-gpl \
+	--enable-libgsm \
 	--enable-libogg \
 	--enable-mp3lame \
 	--enable-pp \
