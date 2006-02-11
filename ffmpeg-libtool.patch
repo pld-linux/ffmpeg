@@ -23,7 +23,7 @@
 -.c.o:
 -	$(CC) -c $(CFLAGS) $(LIBOBJFLAGS) -I$(SRC_PATH)/libavcodec -I../.. -o $@ $<
 +%.lo : %.c
-+	libtool --mode=compile $(CC) -c $(CFLAGS) $(LIBOBJFLAGS) -I$(SRC_PATH)/libavcodec -I../.. -o $@ $<
++	libtool --mode=compile --tag=CC $(CC) -c $(CFLAGS) $(LIBOBJFLAGS) -I$(SRC_PATH)/libavcodec -I../.. -o $@ $<
  
 -all:    $(SWSLIB) $(LIB) $(SLIBNAME)
 +all:    $(SWSLIB) $(LIB)
@@ -48,7 +48,7 @@
 -	rm -f $@
 -	$(AR) rc $@ $(OBJS)
 -	$(RANLIB) $@
-+	libtool --mode=link $(CC) -o $(LIB) $(OBJS) $(RPATH) -version-number `echo $(LIBVERSION) | tr . :`
++	libtool --mode=link --tag=CC $(CC) -o $(LIB) $(OBJS) $(RPATH) -version-number `echo $(LIBVERSION) | tr . :`
  
  install: all
 -ifeq ($(BUILD_SHARED),yes)
@@ -586,7 +586,7 @@
 -	$(CC) -mcpu=ultrasparc -mtune=ultrasparc $(CFLAGS) -c -o $@ $<
 +OBJS+=sparc/dsputil_vis.lo
 +sparc/%.lo: sparc/%.c
-+	libtool --mode=compile $(CC) -mcpu=ultrasparc -mtune=ultrasparc $(CFLAGS) -c -o $@ $<
++	libtool --mode=compile --tag=CC $(CC) -mcpu=ultrasparc -mtune=ultrasparc $(CFLAGS) -c -o $@ $<
  endif
  ifeq ($(TARGET_ARCH_SPARC64),yes)
  CFLAGS+= -mcpu=ultrasparc -mtune=ultrasparc
@@ -633,7 +633,7 @@
 -	$(CC) $(SHFLAGS) $(LDFLAGS) -o $@ $(OBJS) $(EXTRALIBS) $(AMREXTRALIBS)
 -endif
 +$(LIB): $(OBJS) $(AMRLIBS) $(EXTRADEPS)
-+	libtool --mode=link $(CC) $(LDFLAGS) -o $@ $(OBJS) $(AMREXTRALIBS) $(RPATH) $(EXTRALIBS) -version-number `echo $(LIBVERSION) | tr . :`
++	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $(OBJS) $(AMREXTRALIBS) $(RPATH) $(EXTRALIBS) -version-number `echo $(LIBVERSION) | tr . :`
  
 -dsputil.o: dsputil.c dsputil.h
 +dsputil.lo: dsputil.c dsputil.h
@@ -645,12 +645,12 @@
 -%.o: %.c
 -	$(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
 +%.lo: %.c
-+	libtool --mode=compile $(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
++	libtool --mode=compile --tag=CC $(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
  
 -%.o: %.S
 -	$(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
 +%.lo: %.S
-+	libtool --mode=compile $(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
++	libtool --mode=compile --tag=CC $(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
  
  depend: $(SRCS)
  	$(CC) -MM $(CFLAGS) $^ 1>.depend
@@ -659,7 +659,7 @@
  # api example program
  apiexample: apiexample.c $(LIB)
 -	$(CC) $(CFLAGS) -o $@ $< $(LIB) $(LIBAVUTIL) $(EXTRALIBS) -lm
-+	libtool --mode=link $(CC) $(CFLAGS) -o $@ $< $(LIB) $(LIBAVUTIL) $(EXTRALIBS) -lm
++	libtool --mode=link --tag=CC $(CC) $(CFLAGS) -o $@ $< $(LIB) $(LIBAVUTIL) $(EXTRALIBS) -lm
  
  # cpuid test
  cpuid_test: i386/cputest.c
@@ -668,15 +668,15 @@
  
  dct-test: dct-test.o fdctref.o $(LIB)
 -	$(CC) -o $@ $^ -lm $(LIBAVUTIL)
-+	libtool --mode=link $(CC) -o $@ $^ -lm $(LIBAVUTIL)
++	libtool --mode=link --tag=CC $(CC) -o $@ $^ -lm $(LIBAVUTIL)
  
  motion-test: motion_test.o $(LIB)
 -	$(CC) -o $@ $^ -lm
-+	libtool --mode=link $(CC) -o $@ $^ -lm
++	libtool --mode=link --tag=CC $(CC) -o $@ $^ -lm
  
  fft-test: fft-test.o $(LIB)
 -	$(CC) -o $@ $^ $(LIBAVUTIL) -lm
-+	libtool --mode=link $(CC) -o $@ $^ $(LIBAVUTIL) -lm
++	libtool --mode=link --tag=CC $(CC) -o $@ $^ $(LIBAVUTIL) -lm
  
 -ifeq ($(BUILD_SHARED),yes)
  install: all install-headers
@@ -862,7 +862,7 @@
 -	-lib /machine:i386 /def:$(@:.dll=.def)
 -else
 -	$(CC) $(SHFLAGS) $(LDFLAGS) -o $@ $(OBJS) $(PPOBJS) $(AVCLIBS) $(EXTRALIBS)
-+	libtool --mode=link $(CC) $(LDFLAGS) -o $@ $(OBJS) $(PPOBJS) $(AVCLIBS) $(EXTRALIBS) $(RPATH) -version-number `echo $(LIBVERSION) | tr . :`
++	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $(OBJS) $(PPOBJS) $(AVCLIBS) $(EXTRALIBS) $(RPATH) -version-number `echo $(LIBVERSION) | tr . :`
 -endif
  
  depend: $(SRCS)
@@ -908,13 +908,13 @@
 -%.o: %.c
 -	$(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
 +%.lo: %.c
-+	libtool --mode=compile $(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
++	libtool --mode=compile --tag=CC $(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
  
  # BeOS: remove -Wall to get rid of all the "multibyte constant" warnings
 -%.o: %.cpp
 -	g++ $(subst -Wall,,$(CFLAGS)) -c -o $@ $<
 +%.lo: %.cpp
-+	libtool --mode=compile g++ $(subst -Wall,,$(CFLAGS)) -c -o $@ $<
++	libtool --mode=compile --tag=CXX g++ $(subst -Wall,,$(CFLAGS)) -c -o $@ $<
  
  clean:
  	rm -f *.o *.d *~ *.a *.lib *.so *.dylib *.dll
@@ -966,12 +966,12 @@
 -else
 -	$(CC) $(SHFLAGS) $(LDFLAGS) -o $@ $(OBJS) $(EXTRALIBS) $(AMREXTRALIBS)
 -endif
-+	libtool --mode=link $(CC) $(LDFLAGS) -o $@ $(OBJS) $(EXTRALIBS) $(AMREXTRALIBS) $(LDFLAGS) $(RPATH) -version-number `echo $(LIBVERSION) | tr . :`
++	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $(OBJS) $(EXTRALIBS) $(AMREXTRALIBS) $(LDFLAGS) $(RPATH) -version-number `echo $(LIBVERSION) | tr . :`
  
 -%.o: %.c
 -	$(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
 +%.lo: %.c
-+	libtool --mode=compile $(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
++	libtool --mode=compile --tag=CC $(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
  
  depend: $(SRCS)
  	$(CC) -MM $(CFLAGS) $^ 1>.depend
@@ -1090,17 +1090,17 @@
 -	cp -p $< $@
 -	$(STRIP) $@
 +ffmpeg$(EXESUF): ffmpeg.o cmdutils.o
-+	libtool --mode=link $(CC) $(LDFLAGS) -o $@ ffmpeg.o cmdutils.o $(FFLIBS) $(EXTRALIBS)
++	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ ffmpeg.o cmdutils.o $(FFLIBS) $(EXTRALIBS)
  
 -ffserver$(EXESUF): ffserver.o .libs
 -	$(CC) $(LDFLAGS) $(FFSLDFLAGS) -o $@ ffserver.o $(FFLIBS) $(EXTRALIBS)
 +ffserver$(EXESUF): ffserver.o
-+	libtool --mode=link $(CC) $(LDFLAGS) $(FFSLDFLAGS) -o $@ ffserver.o $(FFLIBS) $(EXTRALIBS)
++	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) $(FFSLDFLAGS) -o $@ ffserver.o $(FFLIBS) $(EXTRALIBS)
  
 -ffplay_g$(EXESUF): ffplay.o cmdutils.o .libs
 -	$(CC) $(LDFLAGS) -o $@ ffplay.o cmdutils.o $(FFLIBS) $(EXTRALIBS) $(SDL_LIBS)
 +ffplay$(EXESUF): ffplay.o cmdutils.o
-+	libtool --mode=link $(CC) $(LDFLAGS) -o $@ ffplay.o cmdutils.o $(FFLIBS) $(EXTRALIBS) $(SDL_LIBS)
++	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ ffplay.o cmdutils.o $(FFLIBS) $(EXTRALIBS) $(SDL_LIBS)
  
 -ffplay$(EXESUF): ffplay_g$(EXESUF)
 -	cp -p $< $@
@@ -1109,7 +1109,7 @@
 -output_example$(EXESUF): output_example.o .libs
 -	$(CC) $(LDFLAGS) -o $@ output_example.o $(FFLIBS) $(EXTRALIBS)
 +output_example$(EXESUF): output_example.o
-+	libtool --mode=link $(CC) $(LDFLAGS) -o $@ output_example.o $(FFLIBS) $(EXTRALIBS)
++	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ output_example.o $(FFLIBS) $(EXTRALIBS)
  
  qt-faststart$(EXESUF): qt-faststart.c
  	$(CC) $(SRC_PATH)/qt-faststart.c -o qt-faststart$(EXESUF)
