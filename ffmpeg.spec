@@ -30,11 +30,13 @@ BuildRequires:	gcc >= 5:3.3.2-3
 %endif
 %{?with_imlib2:BuildRequires:	imlib2-devel >= 1.1.0-2}
 BuildRequires:	lame-libs-devel
+BuildRequires:	libx264-devel
 BuildRequires:	libdts-devel
 BuildRequires:	libgsm-devel
 BuildRequires:	libtheora-devel
 BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	libvorbis-devel
+BuildRequires:	lzo-devel
 %ifarch %{ix86}
 %ifnarch i386 i486
 BuildRequires:	nasm
@@ -168,6 +170,7 @@ obrazie.
 	--enable-a52bin \
 	--enable-dts \
 	--enable-faac \
+	--enable-faad \
 	--enable-faadbin \
 	--enable-gpl \
 	--enable-libgsm \
@@ -179,6 +182,7 @@ obrazie.
 	--enable-theora \
 	--enable-vorbis \
 	--enable-xvid \
+	--enable-x264 \
 %ifnarch %{ix86} %{x8664}
 	--disable-mmx \
 %endif
