@@ -182,7 +182,7 @@ obrazie.
 	--enable-theora \
 	--enable-vorbis \
 	--enable-xvid \
-	--disable-x264 \ # disable for now, the version we have is too old
+	--disable-x264 \
 %ifnarch %{ix86} %{x8664}
 	--disable-mmx \
 %endif
