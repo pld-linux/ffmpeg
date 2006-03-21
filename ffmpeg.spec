@@ -182,7 +182,6 @@ obrazie.
 	--enable-theora \
 	--enable-vorbis \
 	--enable-xvid \
-	--disable-x264 \
 %ifnarch %{ix86} %{x8664}
 	--disable-mmx \
 %endif
