@@ -30,7 +30,7 @@ BuildRequires:	gcc >= 5:3.3.2-3
 %endif
 %{?with_imlib2:BuildRequires:	imlib2-devel >= 1.1.0-2}
 BuildRequires:	lame-libs-devel
-BuildRequires:	libx264-devel
+#BuildRequires:	libx264-devel
 BuildRequires:	libdts-devel
 BuildRequires:	libgsm-devel
 BuildRequires:	libtheora-devel
@@ -182,7 +182,7 @@ obrazie.
 	--enable-theora \
 	--enable-vorbis \
 	--enable-xvid \
-	--enable-x264 \
+	--disable-x264 \ # disable for now, the version we have is too old
 %ifnarch %{ix86} %{x8664}
 	--disable-mmx \
 %endif
