@@ -1,3 +1,7 @@
+# TODO:
+# - separate ffserver and its config to separate server package.
+#   Make whole init-stuff for it.
+# - separate ffmpeg binary to own tools package or make libs package?
 #
 # Conditional build:
 %bcond_without	imlib2		# we can safely play without it :-)
