@@ -11,7 +11,7 @@ Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.9
 %define	snap	20060129
-Release:	3.%{snap}.8.1
+Release:	3.%{snap}.8.2
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 License:	GPL
 Group:		Daemons
@@ -73,9 +73,6 @@ convert it into several file formats based on DCT/motion compensation
 encoding. Sound is compressed in MPEG audio layer 2 or using an AC3
 compatible stream.
 
-This package contains also ffmpeg shared libraries (libavcodec and
-libavformat).
-
 %description -l pl
 ffmpeg jest bardzo szybkim koderem audio/wideo w czasie rzeczywistym
 oraz serwerem strumieni multimedialnych. ffmpeg potrafi zrzucaæ dane
@@ -84,19 +81,16 @@ formatów plików bazuj±cych na kodowaniu DCT/kompensacji ruchu. D¼wiêk
 jest kompresowany do strumienia MPEG audio layer 2 lub u¿ywaj±c
 strumienia kompatybilnego z AC3.
 
-Ten pakiet zawiera tak¿e biblioteki wspó³dzielone ffmpeg (libavcodec i
-libavformat).
-
 %package libs
 Summary:	ffmpeg libraries
 Summary(pl):	Biblioteki ffmpeg
 Group:		Libraries
 
 %description libs
-ffmpeg libraries.
+This package contains ffmpeg shared libraries.
 
 %description libs -l pl
-Biblioteki ffmpeg.
+Ten pakiet zawiera biblioteki wspó³dzielone ffmpeg.
 
 %package devel
 Summary:	ffmpeg header files
