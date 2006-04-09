@@ -1,7 +1,6 @@
 # TODO:
 # - separate ffserver and its config to separate server package.
 #   Make whole init-stuff for it.
-# - make -libs package and leave ffmpeg binary to main
 #
 # Conditional build:
 %bcond_without	imlib2		# we can safely play without it :-)
@@ -12,7 +11,7 @@ Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.9
 %define	snap	20060129
-Release:	3.%{snap}.8
+Release:	3.%{snap}.8.1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 License:	GPL
 Group:		Daemons
@@ -53,6 +52,7 @@ BuildRequires:	xvid-devel >= 1:1.1.0
 BuildRequires:	zlib-devel
 %{?with_autoreqdep:BuildConflicts:	libpostproc}
 Requires:	xvid >= 1:1.1.0
+Requires:	%{name}-libs = %{version}-%{release}
 Obsoletes:	libpostproc
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -87,11 +87,22 @@ strumienia kompatybilnego z AC3.
 Ten pakiet zawiera tak¿e biblioteki wspó³dzielone ffmpeg (libavcodec i
 libavformat).
 
+%package libs
+Summary:	ffmpeg libraries
+Summary(pl):	Biblioteki ffmpeg
+Group:		Libraries
+
+%description libs
+ffmpeg libraries.
+
+%description libs -l pl
+Biblioteki ffmpeg.
+
 %package devel
 Summary:	ffmpeg header files
 Summary(pl):	Pliki nag³ówkowe ffmpeg
 Group:		Development/Libraries
-Requires:	%{name} = %{version}-%{release}
+Requires:	%{name}-libs = %{version}-%{release}
 Obsoletes:	libpostproc-devel
 # for libavcodec:
 Requires:	faac-devel
@@ -125,7 +136,7 @@ Statyczne biblioteki ffmpeg (libavcodec i libavformat).
 Summary:	FFplay - SDL-based media player
 Summary(pl):	FFplay - odtwarzacz mediów oparty na SDL
 Group:		Applications/Multimedia
-Requires:	%{name} = %{version}-%{release}
+Requires:	%{name}-libs = %{version}-%{release}
 
 %description ffplay
 FFplay is a very simple and portable media player using the FFmpeg
@@ -141,7 +152,7 @@ testowania ró¿nych API FFmpeg.
 Summary:	imlib2 based hook
 Summary(pl):	Modu³ przej¶ciowy oparty o imlib2
 Group:		Libraries
-Requires:	%{name} = %{version}-%{release}
+Requires:	%{name}-libs = %{version}-%{release}
 
 %description vhook-imlib2
 This module implements a text overlay for a video image. Currently it
@@ -222,9 +233,15 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%doc Changelog README doc/*.html
+%doc Changelog README doc/*.html doc/TODO
 %attr(755,root,root) %{_bindir}/ffmpeg
 %attr(755,root,root) %{_sbindir}/ffserver
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/ffserver.conf
+%{_mandir}/man1/ffmpeg.1*
+%{_mandir}/man1/ffserver.1*
+
+%files libs
+%defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libavcodec.so.*.*.*
 %attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
 %attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
@@ -235,12 +252,10 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/vhook/null.so
 %attr(755,root,root) %{_libdir}/vhook/ppm.so
 %attr(755,root,root) %{_libdir}/vhook/watermark.so
-%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/ffserver.conf
-%{_mandir}/man1/ffmpeg.1*
-%{_mandir}/man1/ffserver.1*
 
 %files devel
 %defattr(644,root,root,755)
+%doc doc/optimization.txt
 %attr(755,root,root) %{_libdir}/libavcodec.so
 %attr(755,root,root) %{_libdir}/libavformat.so
 %attr(755,root,root) %{_libdir}/libavutil.so
