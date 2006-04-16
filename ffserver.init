@@ -33,7 +33,7 @@ case "$1" in
 	# Check if the service is already running?
 	if [ ! -f /var/lock/subsys/ffserver ]; then
 		msg_starting ffserver
-		daemon --fork ffserver
+		daemon --user ffserver ffserver
 		RETVAL=$?
 		[ $RETVAL -eq 0 ] && touch /var/lock/subsys/ffserver
 	else
