@@ -1,0 +1,2 @@
+- updated to 0.4.5
+- updated opt patch, added configure (don't change to %configure - it's not compatibile)
