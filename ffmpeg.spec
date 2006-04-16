@@ -21,6 +21,7 @@ Source2:	ffserver.sysconfig
 Patch0:		%{name}-libtool.patch
 Patch1:		%{name}-libdir.patch
 Patch2:		%{name}-gcc4.patch
+Patch3:		%{name}-config.patch
 URL:		http://ffmpeg.sourceforge.net/
 BuildRequires:	SDL-devel
 BuildRequires:	faac-devel
@@ -163,8 +164,8 @@ obrazie.
 %package ffserver
 Summary:	FFserver video server
 Group:		Daemons
-Requires(post,preun):	rc-scripts >= 0.4.0.10
 Requires(post,preun):	/sbin/chkconfig
+Requires(post,preun):	rc-scripts >= 0.4.0.10
 
 %description ffserver
 FFserver is a streaming server for both audio and video. It supports
@@ -177,6 +178,7 @@ provided you specify a big enough feed storage in ffserver.conf).
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
+%patch3 -p1
 
 %build
 # notes:
@@ -233,6 +235,9 @@ install %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/ffserver
 mv -f $RPM_BUILD_ROOT{%{_bindir},%{_sbindir}}/ffserver
 install doc/*.conf $RPM_BUILD_ROOT%{_sysconfdir}
 
+sed 's/@VERSION@/%{version}/' ffmpeg-config.in > $RPM_BUILD_ROOT%{_bindir}/ffmpeg-config
+install ffmpeg-config.1 $RPM_BUILD_ROOT%{_mandir}/man1/ffmpeg-config.1
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -271,6 +276,7 @@ fi
 %files devel
 %defattr(644,root,root,755)
 %doc doc/optimization.txt
+%attr(755,root,root) %{_bindir}/ffmpeg-config
 %attr(755,root,root) %{_libdir}/libavcodec.so
 %attr(755,root,root) %{_libdir}/libavformat.so
 %attr(755,root,root) %{_libdir}/libavutil.so
@@ -279,6 +285,7 @@ fi
 %{_includedir}/ffmpeg
 %{_includedir}/postproc
 %{_pkgconfigdir}/*.pc
+%{_mandir}/man1/ffmpeg-config.1*
 
 %files static
 %defattr(644,root,root,755)
