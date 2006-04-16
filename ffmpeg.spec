@@ -45,6 +45,7 @@ BuildRequires:	nasm
 %endif
 %endif
 BuildRequires:	perl-tools-pod
+BuildRequires:	rpmbuild(macros) >= 1.268
 BuildRequires:	tetex
 BuildRequires:	texinfo
 BuildRequires:	xvid-devel >= 1:1.1.0
@@ -162,6 +163,8 @@ obrazie.
 %package ffserver
 Summary:	FFserver video server
 Group:		Daemons
+Requires(post,preun):	rc-scripts
+Requires(post,preun):	/sbin/chkconfig
 
 %description ffserver
 FFserver is a streaming server for both audio and video. It supports
@@ -235,6 +238,16 @@ rm -rf $RPM_BUILD_ROOT
 
 %post	-p /sbin/ldconfig
 %postun	-p /sbin/ldconfig
+
+%post ffserver
+/sbin/chkconfig --add ffserver
+%service ffserver restart
+
+%postun ffserver
+if [ "$1" = 0 ]; then
+	%service ffserver stop
+	/sbin/chkconfig --del ffserver
+fi
 
 %files
 %defattr(644,root,root,755)
