@@ -163,9 +163,10 @@ obrazie.
 
 %package ffserver
 Summary:	FFserver video server
+Summary(pl):	FFserver - serwer strumieni obrazu
 Group:		Daemons
 Requires(post,preun):	/sbin/chkconfig
-Requires(post,preun):	rc-scripts >= 0.4.0.10
+Requires:	rc-scripts >= 0.4.0.10
 Requires:	%{name}-libs = %{version}-%{release}
 
 %description ffserver
@@ -173,6 +174,13 @@ FFserver is a streaming server for both audio and video. It supports
 several live feeds, streaming from files and time shifting on live
 feeds (you can seek to positions in the past on each live feed,
 provided you specify a big enough feed storage in ffserver.conf).
+
+%description ffserver -l pl
+FFserver to serwer strumieni dla d¼wiêku i obrazu. Obs³uguje kilka
+¼róde³ na ¿ywo, przekazywanie strumieni z plików i przesuwanie w
+czasie dla ¼róde³ na ¿ywo (mo¿na przeskakiwaæ na po³o¿enia w
+przesz³o¶ci dla ka¿dego ¼ród³a na ¿ywo, pod warunkiem odpowiednio
+du¿ej przestrzeni na dane skonfigurowanej w ffserver.conf).
 
 %prep
 %setup -q -n %{name}
