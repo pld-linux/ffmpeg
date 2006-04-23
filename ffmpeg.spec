@@ -40,13 +40,8 @@ Source3:	ffserver.conf
 %if %{with amr}
 # AMR WB FLOAT 
 #Source4:	http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26204-600.zip
-#Source4:	http://www.3gpp.org/ftp/Specs/archive/26_series/26.204/26204-510.zip
 Source4:	http://www.3gpp.org/ftp/Specs/latest/Rel-5/26_series/26204-530.zip
 # Source4-md5:  988060bdb18b5d64b8bd82c3507d2420
-# AMR NB FIXED POINT
-#Source5:       http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26073-600.zip
-#Source5:	http://www.3gpp.org/ftp/Specs/latest/Rel-5/26_series/26073-530.zip
-# Source5-md5:  705f6993fbf890e92eb7a331e7c716d1
 # AMR NB FLOAT 
 #Source6:	http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26104-610.zip
 Source6:	http://www.3gpp.org/ftp/Specs/latest/Rel-5/26_series/26104-540.zip
@@ -231,10 +226,6 @@ mkdir amr_float
 cd amrwb_float
 unzip -j %{SOURCE4}
 unzip -j 26204-530_ANSI-C_source_code.zip
-# put 26073-xxx.zip into libavcodec/amr
-#cd ../amr
-#unzip -j %{SOURCE5}
-#unzip -j 26073-530_ANSI_C_source_code.zip
 # put 26104-xxx.zip into libavcodec/amr_float
 cd ../amr_float
 unzip -j %{SOURCE6}
