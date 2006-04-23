@@ -1,10 +1,7 @@
 #
 # TODO: only lzo 1.x is supported
-#	- cleanup 3GPP AMR stuff (we probably do not need amr nb fixed point
-#	  source)
-#	- make mplayer play .3gp mobile phone movies (ffplay plays them, but 
-#	  mplayer do not see libavcodec amr_nb provided codec - probably some
-#	  mplayer conf will do the job)
+#	- make (ffmpeg code inside) mplayer play .3gp mobile phone movies 
+#	  (ffplay and vlc plays them fine
 #	- revert amr bcond when done
 #
 # Conditional build:
@@ -13,14 +10,25 @@
 %bcond_with     amr             # build with 3GPP Adaptive Multi Rate (AMR) speech codec
 #
 %define	snap	20060129
-%define	_rel 8.7
+%define	_rel 8.8
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.9
 Release:	3.%{snap}.%{_rel}
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
-License:	GPL
+#
+# (BTW. what are the 'more' features mentioned above?)
+#
+# Some parts of the code *is* LGPL (for example libavformat amr.c) so 
+# it is possible to include /and distribute/ external 3GPP AMR codecs 
+# (some kind of public domain with patent restrictions) to the 
+# GPL-licensed stuff /and keep GPL license/.
+%if %{with amr}
+License:	GPL with LGPL/Public Domain parts
+%else
+License:	GPL with LGPL parts
+%endif
 Group:		Applications/Multimedia
 #Source0:	http://dl.sourceforge.net/ffmpeg/%{name}-%{version}-pre1.tar.gz
 #Source0:	ftp://ftp2.mplayerhq.hu/MPlayer/cvs/FFMpeg-%{snap}.tar.bz2
@@ -37,7 +45,7 @@ Source4:	http://www.3gpp.org/ftp/Specs/latest/Rel-5/26_series/26204-530.zip
 # Source4-md5:  988060bdb18b5d64b8bd82c3507d2420
 # AMR NB FIXED POINT
 #Source5:       http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26073-600.zip
-Source5:	http://www.3gpp.org/ftp/Specs/latest/Rel-5/26_series/26073-530.zip
+#Source5:	http://www.3gpp.org/ftp/Specs/latest/Rel-5/26_series/26073-530.zip
 # Source5-md5:  705f6993fbf890e92eb7a331e7c716d1
 # AMR NB FLOAT 
 #Source6:	http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26104-610.zip
@@ -224,9 +232,9 @@ cd amrwb_float
 unzip -j %{SOURCE4}
 unzip -j 26204-530_ANSI-C_source_code.zip
 # put 26073-xxx.zip into libavcodec/amr
-cd ../amr
-unzip -j %{SOURCE5}
-unzip -j 26073-530_ANSI_C_source_code.zip
+#cd ../amr
+#unzip -j %{SOURCE5}
+#unzip -j 26073-530_ANSI_C_source_code.zip
 # put 26104-xxx.zip into libavcodec/amr_float
 cd ../amr_float
 unzip -j %{SOURCE6}
