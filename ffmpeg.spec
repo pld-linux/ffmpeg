@@ -78,6 +78,7 @@ BuildRequires:	perl-tools-pod
 BuildRequires:	rpmbuild(macros) >= 1.268
 BuildRequires:	tetex
 BuildRequires:	texinfo
+%{?with_amr:BuildRequires:	unzip}
 BuildRequires:	xvid-devel >= 1:1.1.0
 BuildRequires:	zlib-devel
 %{?with_autoreqdep:BuildConflicts:	libpostproc}
