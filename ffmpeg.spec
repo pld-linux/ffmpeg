@@ -10,7 +10,7 @@
 %bcond_with     amr             # build with 3GPP Adaptive Multi Rate (AMR) speech codec
 #
 %define	snap	20060129
-%define	_rel 8.8
+%define	_rel 8.9
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
@@ -67,7 +67,7 @@ BuildRequires:	libgsm-devel
 BuildRequires:	libtheora-devel
 BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	libvorbis-devel
-#BuildRequires:	libx264-devel
+BuildRequires:	libx264-devel >= 0.1.2-1.20060430_2245.1
 BuildRequires:	lzo-devel
 %ifarch %{ix86}
 %ifnarch i386 i486
@@ -258,6 +258,7 @@ cd ../..
 	--enable-shared \
 	--enable-theora \
 	--enable-vorbis \
+	--enable-x264 \
 	--enable-xvid \
 %ifnarch %{ix86} %{x8664}
 	--disable-mmx \
