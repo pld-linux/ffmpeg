@@ -129,6 +129,7 @@ Group:		Development/Libraries
 Requires:	%{name}-libs = %{version}-%{release}
 # for libavcodec:
 Requires:	faac-devel
+Requires:	faad2-devel
 Requires:	lame-libs-devel
 Requires:	libdts-devel
 Requires:	libgsm-devel
