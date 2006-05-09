@@ -1,6 +1,6 @@
 #
 # TODO: only lzo 1.x is supported
-#	- make (ffmpeg code inside) mplayer play .3gp mobile phone movies 
+#	- make (ffmpeg code inside) mplayer play .3gp mobile phone movies
 #	  (ffplay and vlc plays them fine
 #
 # Conditional build:
@@ -67,7 +67,7 @@ BuildRequires:	libtheora-devel
 BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	libvorbis-devel
 BuildRequires:	libx264-devel >= 0.1.2-1.20060430_2245.1
-BuildRequires:	lzo-devel
+BuildRequires:	lzo-devel < 2.0
 %ifarch %{ix86}
 %ifnarch i386 i486
 BuildRequires:	nasm
@@ -135,7 +135,8 @@ Requires:	libdts-devel
 Requires:	libgsm-devel
 Requires:	libtheora-devel
 Requires:	libvorbis-devel
-Requires:	lzo-devel
+Requires:	lzo-devel < 2.0
+Requires:	libx264-devel >= 0.1.2-1.20060430_2245.1
 Requires:	xvid-devel >= 1:1.1.0
 Requires:	zlib-devel
 Obsoletes:	libpostproc-devel
