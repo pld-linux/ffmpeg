@@ -1100,7 +1100,7 @@
 -ffplay_g$(EXESUF): ffplay.o cmdutils.o .libs
 -	$(CC) $(LDFLAGS) -o $@ ffplay.o cmdutils.o $(FFLIBS) $(EXTRALIBS) $(SDL_LIBS)
 +ffplay$(EXESUF): ffplay.o cmdutils.o
-+	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ ffplay.o cmdutils.o $(FFLIBS) $(EXTRALIBS) $(SDL_LIBS)
++	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ ffplay.o cmdutils.o -lX11 $(FFLIBS) $(EXTRALIBS) $(SDL_LIBS)
  
 -ffplay$(EXESUF): ffplay_g$(EXESUF)
 -	cp -p $< $@
