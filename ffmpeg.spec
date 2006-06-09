@@ -51,7 +51,7 @@ Source6:	http://www.3gpp.org/ftp/Specs/latest/Rel-5/26_series/26104-540.zip
 Patch0:		%{name}-libtool.patch
 Patch1:		%{name}-libdir.patch
 Patch2:		%{name}-gcc4.patch
-URL:		http://ffmpeg.sourceforge.net/
+URL:		http://ffmpeg.mplayerhq.hu/
 BuildRequires:	SDL-devel
 BuildRequires:	faac-devel
 BuildRequires:	faad2-devel
