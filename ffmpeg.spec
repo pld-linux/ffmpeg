@@ -1,7 +1,5 @@
 #
 # TODO: update for lzo 2.x (currently only lzo 1.x is supported)
-#	- make (ffmpeg code inside) mplayer play .3gp mobile phone movies
-#	  (ffplay and vlc plays them fine
 #
 # Conditional build:
 %bcond_without	amr		# don't build 3GPP Adaptive Multi Rate (AMR) speech codec
@@ -14,21 +12,11 @@ Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.9
 %define		snap	20060129
-%define		_rel 11
+%define		_rel 12
 Release:	3.%{snap}.%{_rel}
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
-#
-# (BTW. what are the 'more' features mentioned above?)
-#
-# Some parts of the code *is* LGPL (for example libavformat amr.c) so 
-# it is possible to include /and distribute/ external 3GPP AMR codecs 
-# (some kind of public domain with patent restrictions) to the 
-# GPL-licensed stuff /and keep GPL license/.
-%if %{with amr}
-License:	GPL with LGPL/Public Domain parts
-%else
+# (postprocessing, a52, xvid, x264, dts, faad)
 License:	GPL with LGPL parts
-%endif
 Group:		Applications/Multimedia
 #Source0:	http://dl.sourceforge.net/ffmpeg/%{name}-%{version}-pre1.tar.gz
 #Source0:	ftp://ftp2.mplayerhq.hu/MPlayer/cvs/FFMpeg-%{snap}.tar.bz2
@@ -37,22 +25,16 @@ Source0:	%{name}-%{snap}.tar.bz2
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
-%if %{with amr}
-# AMR WB FLOAT 
-#Source4:	http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26204-600.zip
-Source4:	http://www.3gpp.org/ftp/Specs/latest/Rel-5/26_series/26204-530.zip
-# Source4-md5:  988060bdb18b5d64b8bd82c3507d2420
-# AMR NB FLOAT 
-#Source6:	http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26104-610.zip
-Source6:	http://www.3gpp.org/ftp/Specs/latest/Rel-5/26_series/26104-540.zip
-# Source6-md5:  4dcbeb2bc28bf86e7131fe4cae3e0dec
-%endif
-
 Patch0:		%{name}-libtool.patch
 Patch1:		%{name}-libdir.patch
 Patch2:		%{name}-gcc4.patch
+Patch3:		%{name}-system-amr.patch
 URL:		http://ffmpeg.mplayerhq.hu/
 BuildRequires:	SDL-devel
+%if %{with amr}
+BuildRequires:	amrnb-devel
+BuildRequires:	amrwb-devel >= 5.3.0
+%endif
 BuildRequires:	faac-devel
 BuildRequires:	faad2-devel
 BuildRequires:	freetype-devel
@@ -129,6 +111,10 @@ Summary(pl):	Pliki nag³ówkowe ffmpeg
 Group:		Development/Libraries
 Requires:	%{name}-libs = %{version}-%{release}
 # for libavcodec:
+%if %{with amr}
+Requires:	amrnb-devel
+Requires:	amrwb-devel >= 5.3.0
+%endif
 Requires:	faac-devel
 Requires:	faad2-devel
 Requires:	lame-libs-devel
@@ -220,21 +206,7 @@ du¿ej przestrzeni na dane skonfigurowanej w ffserver.conf).
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
-%if %{with amr}
-cd libavcodec
-mkdir amrwb_float
-mkdir amr
-mkdir amr_float
-# put 26204-xxx.zip into libavcodec/amrwb_float
-cd amrwb_float
-unzip -j %{SOURCE4}
-unzip -j 26204-530_ANSI-C_source_code.zip
-# put 26104-xxx.zip into libavcodec/amr_float
-cd ../amr_float
-unzip -j %{SOURCE6}
-unzip -j 26104-540_ANSI_C_source_code.zip
-cd ../..
-%endif
+%patch3 -p1
 
 %build
 # notes:
