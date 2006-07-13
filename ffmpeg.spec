@@ -12,7 +12,7 @@ Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.9
 %define		snap	20060129
-%define		_rel 12
+%define		_rel 13
 Release:	3.%{snap}.%{_rel}
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, a52, xvid, x264, dts, faad)
