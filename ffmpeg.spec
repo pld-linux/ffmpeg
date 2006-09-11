@@ -12,7 +12,7 @@ Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.9
 %define		snap	20060129
-%define		_rel 13
+%define		_rel 14
 Release:	3.%{snap}.%{_rel}
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, a52, xvid, x264, dts, faad)
@@ -29,6 +29,7 @@ Patch0:		%{name}-libtool.patch
 Patch1:		%{name}-libdir.patch
 Patch2:		%{name}-gcc4.patch
 Patch3:		%{name}-system-amr.patch
+Patch4:		%{name}-x264.patch
 URL:		http://ffmpeg.mplayerhq.hu/
 BuildRequires:	SDL-devel
 %if %{with amr}
@@ -49,7 +50,7 @@ BuildRequires:	libgsm-devel
 BuildRequires:	libtheora-devel
 BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	libvorbis-devel
-BuildRequires:	libx264-devel >= 0.1.2-1.20060430_2245.1
+BuildRequires:	libx264-devel >= 0.1.2-1.20060828_2245.1
 %{?with_lzo:BuildRequires:	lzo-devel < 2.0}
 %ifarch %{ix86}
 %ifnarch i386 i486
@@ -123,7 +124,7 @@ Requires:	libgsm-devel
 Requires:	libtheora-devel
 Requires:	libvorbis-devel
 %{?with_lzo:Requires:	lzo-devel < 2.0}
-Requires:	libx264-devel >= 0.1.2-1.20060430_2245.1
+Requires:	libx264-devel >= 0.1.2-1.20060828_2245.1
 Requires:	xvid-devel >= 1:1.1.0
 Requires:	zlib-devel
 Obsoletes:	libpostproc-devel
@@ -207,6 +208,7 @@ du¿ej przestrzeni na dane skonfigurowanej w ffserver.conf).
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
 
 %build
 # notes:
