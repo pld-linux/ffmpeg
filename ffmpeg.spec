@@ -12,7 +12,7 @@ Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.9
 %define		snap	20060129
-%define		_rel 14
+%define		_rel 15
 Release:	3.%{snap}.%{_rel}
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, a52, xvid, x264, dts, faad)
@@ -51,7 +51,7 @@ BuildRequires:	libgsm-devel
 BuildRequires:	libtheora-devel
 BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	libvorbis-devel
-BuildRequires:	libx264-devel >= 0.1.2-1.20060828_2245.1
+BuildRequires:	libx264-devel >= 0.1.2-1.20061024_2245.1
 %{?with_lzo:BuildRequires:	lzo-devel < 2.0}
 %ifarch %{ix86}
 %ifnarch i386 i486
