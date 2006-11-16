@@ -14,7 +14,7 @@ Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.9
 %define		snap	20060129
-%define		_rel 10
+%define		_rel 11
 Release:	3.%{snap}.%{_rel}
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 #
@@ -51,7 +51,7 @@ Source6:	http://www.3gpp.org/ftp/Specs/latest/Rel-5/26_series/26104-540.zip
 Patch0:		%{name}-libtool.patch
 Patch1:		%{name}-libdir.patch
 Patch2:		%{name}-gcc4.patch
-URL:		http://ffmpeg.sourceforge.net/
+URL:		http://ffmpeg.mplayerhq.hu/
 BuildRequires:	SDL-devel
 BuildRequires:	faac-devel
 BuildRequires:	faad2-devel
@@ -300,8 +300,8 @@ mv -f $RPM_BUILD_ROOT{%{_bindir},%{_sbindir}}/ffserver
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%post	-p /sbin/ldconfig
-%postun	-p /sbin/ldconfig
+%post libs	-p /sbin/ldconfig
+%postun libs	-p /sbin/ldconfig
 
 %pre ffserver
 %groupadd -g 167 ffserver
