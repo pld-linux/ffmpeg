@@ -27,9 +27,7 @@ else
 	exit 0
 fi
 
-# See how we were called.
-case "$1" in
-  start)
+start() {
 	# Check if the service is already running?
 	if [ ! -f /var/lock/subsys/ffserver ]; then
 		msg_starting ffserver
@@ -39,8 +37,9 @@ case "$1" in
 	else
 		msg_already_running ffserver
 	fi
-	;;
-  stop)
+}
+
+stop() {
 	if [ -f /var/lock/subsys/ffserver ]; then
 		# Stop daemons.
 		msg_stopping ffserver
@@ -49,11 +48,19 @@ case "$1" in
 	else
 		msg_not_running ffserver
 	fi
+}
+
+# See how we were called.
+case "$1" in
+  start)
+  	start
+	;;
+  stop)
+  	stop
 	;;
   restart)
-	$0 stop
-	$0 start
-	exit $?
+	stop
+	start
 	;;
   status)
 	status ffserver
@@ -65,6 +72,3 @@ case "$1" in
 esac
 
 exit $RETVAL
-
-# This must be last line !
-# vi:syntax=sh
