@@ -1,0 +1,12 @@
+last_coeff_flag_offset_8x8 is used outside h264.c (cabac.h in decode_significance_8x8_x86())
+--- ffmpeg-export-2006-12-04/libavcodec/h264.c	2006-12-05 00:48:00.102011341 +0200
++++ ffmpeg-export-2006-12-04/libavcodec/h264.c~	2006-11-12 22:08:09.000000000 +0200
+@@ -6034,7 +6034,7 @@
+     return ctx + 4 * cat;
+ }
+ 
+-const __attribute((used)) uint8_t last_coeff_flag_offset_8x8[63] = {
++static const __attribute((used)) uint8_t last_coeff_flag_offset_8x8[63] = {
+     0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+     2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+     3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4,
