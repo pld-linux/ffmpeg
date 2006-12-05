@@ -1306,7 +1306,7 @@ TODO: lacks (working) rule for shared lib
  
 -EXTRALIBS := -L$(BUILD_ROOT)/libavutil -lavutil$(BUILDSUF) \
 -             -lavcodec$(BUILDSUF) -L$(BUILD_ROOT)/libavcodec $(EXTRALIBS)
-+EXTRALIBS += ../libavutil/libavcodec.la ../libavutil/libavutil.la
++EXTRALIBS += ../libavcodec/libavcodec.la ../libavutil/libavutil.la
  
  ifeq ($(CONFIG_AUDIO_BEOS),yes)
  CPPOBJS+= beosaudio.lo
@@ -1732,19 +1732,261 @@ TODO: lacks (working) rule for shared lib
 -CFLAGS += $(CFLAGS-yes)
 -OBJS += $(OBJS-yes)
 -ASM_OBJS += $(ASM_OBJS-yes)
-+OBJS := $(shell echo $(OBJS-yes) | tr ' ' '\n' | sort -u)
-+ASM_OBJS := $(shell echo $(ASM_OBJS-yes) | tr ' ' '\n' | sort -u)
++OBJS += $(shell echo $(OBJS-yes) | tr ' ' '\n' | sort -u)
++ASM_OBJS += $(shell echo $(ASM_OBJS-yes) | tr ' ' '\n' | sort -u)
  
  EXTRALIBS += $(SRC_PATH)/libavutil/libavutil.la
  
---- ffmpeg-export-2006-12-04/libavformat/Makefile~	2006-12-05 09:56:26.142178042 +0200
-+++ ffmpeg-export-2006-12-04/libavformat/Makefile	2006-12-05 10:10:13.120755436 +0200
-@@ -185,7 +185,7 @@
- OBJS-$(CONFIG_GXF_MUXER)                 += gxfenc.lo
+--- ffmpeg-export-2006-12-04/Makefile~	2006-11-20 23:46:43.000000000 +0200
++++ ffmpeg-export-2006-12-04/Makefile	2006-12-05 11:25:08.441949912 +0200
+@@ -49,8 +49,8 @@
+ INSTALLMAN=install-man
  endif
  
--OBJS += $(shell echo $(OBJS-yes) | tr ' ' '\n' | sort -u)
-+OBJS := $(shell echo $(OBJS-yes) | tr ' ' '\n' | sort -u)
+-OBJS = ffmpeg.o ffserver.o cmdutils.o ffplay.o
+-SRCS = $(OBJS:.o=.c) $(ASM_OBJS:.o=.s)
++OBJS = ffmpeg.lo ffserver.lo cmdutils.lo ffplay.lo
++SRCS = $(OBJS:.lo=.c) $(ASM_OBJS:.lo=.s)
+ LDFLAGS := -L$(BUILD_ROOT)/libavformat -L$(BUILD_ROOT)/libavcodec -L$(BUILD_ROOT)/libavutil $(LDFLAGS)
+ EXTRALIBS := -lavformat$(BUILDSUF) -lavcodec$(BUILDSUF) -lavutil$(BUILDSUF) $(EXTRALIBS)
  
- NAME=avformat
+@@ -72,14 +72,14 @@
+ 	$(MAKE) -C libswscale  all
+ endif
+ 
+-ffmpeg_g$(EXESUF): ffmpeg.o cmdutils.o .libs
+-	$(CC) $(LDFLAGS) -o $@ ffmpeg.o cmdutils.o $(EXTRALIBS)
++ffmpeg_g$(EXESUF): ffmpeg.lo cmdutils.lo .libs
++	$(CC) $(LDFLAGS) -o $@ ffmpeg.lo cmdutils.lo $(EXTRALIBS)
+ 
+-ffserver$(EXESUF): ffserver.o .libs
+-	$(CC) $(LDFLAGS) $(FFSERVERLDFLAGS) -o $@ ffserver.o $(EXTRALIBS)
++ffserver$(EXESUF): ffserver.lo .libs
++	$(CC) $(LDFLAGS) $(FFSERVERLDFLAGS) -o $@ ffserver.lo $(EXTRALIBS)
+ 
+-ffplay_g$(EXESUF): ffplay.o cmdutils.o .libs
+-	$(CC) $(LDFLAGS) -o $@ ffplay.o cmdutils.o $(EXTRALIBS) $(SDL_LIBS)
++ffplay_g$(EXESUF): ffplay.lo cmdutils.lo .libs
++	$(CC) $(LDFLAGS) -o $@ ffplay.lo cmdutils.lo $(EXTRALIBS) $(SDL_LIBS)
+ 
+ %$(EXESUF): %_g$(EXESUF)
+ 	cp -p $< $@
+@@ -88,8 +88,8 @@
+ version.h:
+ 	$(SRC_PATH)/version.sh $(SRC_PATH)
+ 
+-output_example$(EXESUF): output_example.o .libs
+-	$(CC) $(LDFLAGS) -o $@ output_example.o $(EXTRALIBS)
++output_example$(EXESUF): output_example.lo .libs
++	$(CC) $(LDFLAGS) -o $@ output_example.lo $(EXTRALIBS)
+ 
+ qt-faststart$(EXESUF): qt-faststart.c
+ 	$(CC) $(CFLAGS) $< -o $@
+@@ -97,12 +97,12 @@
+ cws2fws$(EXESUF): cws2fws.c
+ 	$(CC) $< -o $@ -lz
+ 
+-ffplay.o: ffplay.c
++ffplay.lo: ffplay.c
+ 	$(CC) $(CFLAGS) $(SDL_CFLAGS) -c -o $@ $<
+ 
+-ffmpeg.o ffplay.o ffserver.o: version.h
++ffmpeg.lo ffplay.lo ffserver.lo: version.h
+ 
+-%.o: %.c
++%.lo: %.c
+ 	$(CC) $(CFLAGS) -c -o $@ $<
+ 
+ videohook: .libs
+@@ -211,7 +211,7 @@
+ 	$(MAKE) -C tests       clean
+ 	$(MAKE) -C vhook       clean
+ 	$(MAKE) -C doc         clean
+-	rm -f *.o *.d *~ .libs gmon.out TAGS $(ALLPROGS) $(ALLPROGS_G) \
++	rm -f *.lo *.d *~ .libs gmon.lout TAGS $(ALLPROGS) $(ALLPROGS_G) \
+ 	   output_example$(EXESUF) qt-faststart$(EXESUF) cws2fws$(EXESUF)
+ 
+ distclean: clean
+--- ffmpeg-export-2006-12-04/Makefile~	2006-12-05 11:25:08.441949912 +0200
++++ ffmpeg-export-2006-12-04/Makefile	2006-12-05 11:29:53.948378928 +0200
+@@ -72,40 +72,39 @@
+ 	$(MAKE) -C libswscale  all
+ endif
+ 
+-ffmpeg_g$(EXESUF): ffmpeg.lo cmdutils.lo .libs
+-	$(CC) $(LDFLAGS) -o $@ ffmpeg.lo cmdutils.lo $(EXTRALIBS)
++ffmpeg_g$(EXESUF): ffmpeg.lo cmdutils.lo
++	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS)
+ 
+-ffserver$(EXESUF): ffserver.lo .libs
+-	$(CC) $(LDFLAGS) $(FFSERVERLDFLAGS) -o $@ ffserver.lo $(EXTRALIBS)
++ffserver$(EXESUF): ffserver.lo
++	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) $(FFSERVERLDFLAGS) -o $@ $^ $(EXTRALIBS)
+ 
+-ffplay_g$(EXESUF): ffplay.lo cmdutils.lo .libs
+-	$(CC) $(LDFLAGS) -o $@ ffplay.lo cmdutils.lo $(EXTRALIBS) $(SDL_LIBS)
++ffplay_g$(EXESUF): ffplay.lo cmdutils.lo
++	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS) $(SDL_LIBS)
+ 
+-%$(EXESUF): %_g$(EXESUF)
+-	cp -p $< $@
+-	$(STRIP) $@
++ffmpeg$(EXESUF): ffmpeg.lo cmdutils.lo
++	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS)
+ 
+ version.h:
+ 	$(SRC_PATH)/version.sh $(SRC_PATH)
+ 
+-output_example$(EXESUF): output_example.lo .libs
+-	$(CC) $(LDFLAGS) -o $@ output_example.lo $(EXTRALIBS)
++output_example$(EXESUF): output_example.lo
++	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS)
+ 
+ qt-faststart$(EXESUF): qt-faststart.c
+-	$(CC) $(CFLAGS) $< -o $@
++	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $<
+ 
+ cws2fws$(EXESUF): cws2fws.c
+-	$(CC) $< -o $@ -lz
++	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $< -lz
+ 
+ ffplay.lo: ffplay.c
+-	$(CC) $(CFLAGS) $(SDL_CFLAGS) -c -o $@ $<
++	libtool --mode=compile --tag=CC $(CC) $(CFLAGS) $(SDL_CFLAGS) -c -o $@ $<
+ 
+ ffmpeg.lo ffplay.lo ffserver.lo: version.h
+ 
+ %.lo: %.c
+-	$(CC) $(CFLAGS) -c -o $@ $<
++	libtool --mode=compile --tag=CC $(CC) $(CFLAGS) -c -o $@ $<
+ 
+-videohook: .libs
++videohook:
+ 	$(MAKE) -C vhook all
+ 
+ documentation:
+@@ -198,10 +197,6 @@
+ .depend: $(SRCS) version.h
+ 	$(CC) -MM $(CFLAGS) $(SDL_CFLAGS) $(filter-out %.h,$^) 1>.depend
+ 
+-.libs: lib
+-	@test -f .libs || touch .libs
+-	@for i in $(DEP_LIBS) ; do if test $$i -nt .libs ; then touch .libs; fi ; done
+-
+ clean:
+ 	$(MAKE) -C libavutil   clean
+ 	$(MAKE) -C libavcodec  clean
+@@ -211,7 +206,7 @@
+ 	$(MAKE) -C tests       clean
+ 	$(MAKE) -C vhook       clean
+ 	$(MAKE) -C doc         clean
+-	rm -f *.lo *.d *~ .libs gmon.lout TAGS $(ALLPROGS) $(ALLPROGS_G) \
++	rm -f *.lo *.d *~ gmon.lout TAGS $(ALLPROGS) $(ALLPROGS_G) \
+ 	   output_example$(EXESUF) qt-faststart$(EXESUF) cws2fws$(EXESUF)
+ 
+ distclean: clean
+--- ffmpeg-export-2006-12-04/Makefile~	2006-12-05 11:30:20.258971357 +0200
++++ ffmpeg-export-2006-12-04/Makefile	2006-12-05 11:34:30.974616397 +0200
+@@ -51,12 +51,10 @@
+ 
+ OBJS = ffmpeg.lo ffserver.lo cmdutils.lo ffplay.lo
+ SRCS = $(OBJS:.lo=.c) $(ASM_OBJS:.lo=.s)
+-LDFLAGS := -L$(BUILD_ROOT)/libavformat -L$(BUILD_ROOT)/libavcodec -L$(BUILD_ROOT)/libavutil $(LDFLAGS)
+-EXTRALIBS := -lavformat$(BUILDSUF) -lavcodec$(BUILDSUF) -lavutil$(BUILDSUF) $(EXTRALIBS)
++EXTRALIBS := $(BUILD_ROOT)/libavformat/libavformat.la $(BUILD_ROOT)/libavcoded/libavcodec.la $(BUILD_ROOT)/libavutil/libavutil.la $(EXTRALIBS)
+ 
+ ifeq ($(CONFIG_SWSCALER),yes)
+-LDFLAGS+=-L./libswscale
+-EXTRALIBS+=-lswscale$(BUILDSUF)
++EXTRALIBS+= $(BUILD_ROOT)/libswscale/libswscale.la
+ endif
+ 
+ all: lib $(PROGS_G) $(PROGS) $(VHOOK) $(DOC)
+--- ffmpeg-export-2006-12-04/common.mak~	2006-12-05 11:52:06.638341724 +0200
++++ ffmpeg-export-2006-12-04/common.mak	2006-12-05 11:52:08.608385978 +0200
+@@ -12,11 +12,13 @@
+ OBJS := $(OBJS) $(ASM_OBJS) $(CPPOBJS)
+ STATIC_OBJS := $(OBJS) $(STATIC_OBJS)
+ SHARED_OBJS := $(OBJS) $(SHARED_OBJS)
++STATIC_OBJS_ = $(shell echo $(OBJS) $(STATIC_OBJS) | tr ' ' '\n' | sort -u)
++SHARED_OBJS_ = $(shell echo $(OBJS) $(SHARED_OBJS) | tr ' ' '\n' | sort -u)
+ 
+ all: $(EXTRADEPS) $(LIB) $(SLIBNAME)
+ 
+-$(SLIBNAME): $(SHARED_OBJS)
+-	libtool --mode=link --tag=CC $(CC) -o $(LIB) $(OBJS) -rpath $(libdir) -version-number `echo $(LIBVERSION) | tr . :`
++$(SLIBNAME): $(SHARED_OBJS_)
++	libtool --mode=link --tag=CC $(CC) -o $(LIB) $(SHARED_OBJS_) -rpath $(libdir) -version-number `echo $(LIBVERSION) | tr . :`
+ 
+ %.lo: %.c
+ 	libtool --mode=compile --tag=CC $(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
+--- ffmpeg-export-2006-12-04/Makefile~	2006-12-05 11:43:30.426746570 +0200
++++ ffmpeg-export-2006-12-04/Makefile	2006-12-05 12:10:01.682508527 +0200
+@@ -13,7 +13,6 @@
+ 
+ ifeq ($(CONFIG_FFMPEG),yes)
+ MANPAGES=doc/ffmpeg.1
+-PROGS_G+=ffmpeg_g$(EXESUF)
+ PROGS+=ffmpeg$(EXESUF)
+ endif
+ 
+@@ -24,13 +23,11 @@
+ 
+ ifeq ($(CONFIG_FFPLAY),yes)
+ MANPAGES+=doc/ffplay.1
+-PROGS_G+=ffplay_g$(EXESUF)
+ PROGS+=ffplay$(EXESUF)
+ endif
+ 
+ BASENAMES=ffmpeg ffplay ffserver
+ ALLPROGS=$(addsuffix $(EXESUF), $(BASENAMES))
+-ALLPROGS_G=$(addsuffix _g$(EXESUF), $(BASENAMES))
+ ALLMANPAGES=$(addsuffix .1, $(BASENAMES))
+ 
  ifeq ($(BUILD_SHARED),yes)
+@@ -57,7 +54,7 @@
+ EXTRALIBS+= $(BUILD_ROOT)/libswscale/libswscale.la
+ endif
+ 
+-all: lib $(PROGS_G) $(PROGS) $(VHOOK) $(DOC)
++all: lib $(PROGS) $(VHOOK) $(DOC)
+ 
+ lib:
+ 	$(MAKE) -C libavutil   all
+@@ -70,13 +67,13 @@
+ 	$(MAKE) -C libswscale  all
+ endif
+ 
+-ffmpeg_g$(EXESUF): ffmpeg.lo cmdutils.lo
++ffmpeg$(EXESUF): ffmpeg.lo cmdutils.lo
+ 	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS)
+ 
+ ffserver$(EXESUF): ffserver.lo
+ 	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) $(FFSERVERLDFLAGS) -o $@ $^ $(EXTRALIBS)
+ 
+-ffplay_g$(EXESUF): ffplay.lo cmdutils.lo
++ffplay$(EXESUF): ffplay.lo cmdutils.lo
+ 	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS) $(SDL_LIBS)
+ 
+ ffmpeg$(EXESUF): ffmpeg.lo cmdutils.lo
+@@ -204,7 +201,7 @@
+ 	$(MAKE) -C tests       clean
+ 	$(MAKE) -C vhook       clean
+ 	$(MAKE) -C doc         clean
+-	rm -f *.lo *.d *~ gmon.lout TAGS $(ALLPROGS) $(ALLPROGS_G) \
++	rm -f *.lo *.d *~ gmon.lout TAGS $(ALLPROGS) \
+ 	   output_example$(EXESUF) qt-faststart$(EXESUF) cws2fws$(EXESUF)
+ 
+ distclean: clean
+--- ffmpeg-export-2006-12-04/Makefile~	2006-12-05 12:10:01.682508527 +0200
++++ ffmpeg-export-2006-12-04/Makefile	2006-12-05 12:11:45.214836385 +0200
+@@ -76,9 +76,6 @@
+ ffplay$(EXESUF): ffplay.lo cmdutils.lo
+ 	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS) $(SDL_LIBS)
+ 
+-ffmpeg$(EXESUF): ffmpeg.lo cmdutils.lo
+-	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS)
+-
+ version.h:
+ 	$(SRC_PATH)/version.sh $(SRC_PATH)
+ 
