@@ -1,5 +1,5 @@
---- ffmpeg-export-2006-12-04.libtool2/Makefile	2006-12-05 13:08:44.141688603 +0200
-+++ ffmpeg-export-2006-12-04/Makefile	2006-12-05 13:56:42.000000000 +0200
+--- ffmpeg-export-2006-12-04/Makefile	2006-12-05 13:56:42.000000000 +0200
++++ ffmpeg-export-2006-12-04/Makefile	2006-12-06 01:28:53.860990022 +0200
 @@ -13,7 +13,6 @@
  
  ifeq ($(CONFIG_FFMPEG),yes)
@@ -107,14 +107,16 @@
  	$(MAKE) -C vhook all
  
  documentation:
-@@ -118,16 +115,16 @@
+@@ -118,16 +115,18 @@
  else
  install-progs: $(PROGS)
  endif
 -	install -d "$(bindir)"
 -	install -c $(INSTALLSTRIP) -m 755 $(PROGS) "$(bindir)"
 +	install -d "$(DESTDIR)$(bindir)"
-+	install -c $(INSTALLSTRIP) -m 755 $(PROGS) "$(DESTDIR)$(bindir)"
++	for prog in $(PROGS); do \
++		libtool --mode=install install -c $(INSTALLSTRIP) $(PROG) "$(DESTDIR)$(bindir)" \
++	done
  
  # create the window installer
  wininstaller: all install
@@ -128,7 +130,7 @@
  
  install-vhook:
  	$(MAKE) -C vhook install
-@@ -159,10 +156,10 @@
+@@ -159,10 +158,10 @@
  uninstall: uninstall-progs uninstall-libs uninstall-headers uninstall-man uninstall-vhook
  
  uninstall-progs:
@@ -141,7 +143,7 @@
  
  uninstall-vhook:
  	$(MAKE) -C vhook uninstall
-@@ -198,10 +195,6 @@
+@@ -198,10 +197,6 @@
  .depend: $(SRCS) version.h
  	$(CC) -MM $(CFLAGS) $(SDL_CFLAGS) $(filter-out %.h,$^) 1>.depend
  
@@ -152,7 +154,7 @@
  clean:
  	$(MAKE) -C libavutil   clean
  	$(MAKE) -C libavcodec  clean
-@@ -211,7 +204,7 @@
+@@ -211,7 +206,7 @@
  	$(MAKE) -C tests       clean
  	$(MAKE) -C vhook       clean
  	$(MAKE) -C doc         clean
