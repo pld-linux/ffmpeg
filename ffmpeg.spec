@@ -9,7 +9,7 @@
 #
 %define		_snap	2006-12-04
 %define		snap	%(echo %{_snap} | tr -d -)
-%define		_rel 0.1
+%define		_rel 0.3
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
@@ -207,7 +207,7 @@ du¿ej przestrzeni na dane skonfigurowanej w ffserver.conf).
 
 %prep
 %setup -q -n %{name}-export-%{_snap}
-#%patch0 -p1 NEEDS UPDATE
+%patch0 -p1
 %patch1 -p1
 %patch2 -p1
 #%patch3 -p1 NEEDS UPDATE
@@ -260,8 +260,7 @@ du¿ej przestrzeni na dane skonfigurowanej w ffserver.conf).
 #	--enable-theora \
 #	--tune=generic
 
-%{__make} \
-	BUILD_DOC=yes
+%{__make}
 
 %install
 rm -rf $RPM_BUILD_ROOT
