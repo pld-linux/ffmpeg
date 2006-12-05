@@ -221,6 +221,7 @@ du¿ej przestrzeni na dane skonfigurowanej w ffserver.conf).
 ./configure \
 	--prefix=%{_prefix} \
 	--libdir=%{_libdir} \
+	--shlibdir=%{_libdir} \
 	--mandir=%{_mandir} \
 	--disable-strip \
 	--enable-a52 \
@@ -328,7 +329,7 @@ fi
 %attr(755,root,root) %{_libdir}/libavformat.so
 %attr(755,root,root) %{_libdir}/libavutil.so
 %attr(755,root,root) %{_libdir}/libpostproc.so
-#%{_libdir}/lib*.la
+%{_libdir}/lib*.la
 %{_includedir}/ffmpeg
 %{_includedir}/postproc
 %{_pkgconfigdir}/*.pc
