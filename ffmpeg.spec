@@ -253,7 +253,8 @@ du¿ej przestrzeni na dane skonfigurowanej w ffserver.conf).
 # GONE?
 #	--enable-theora \
 
-%{__make}
+# one jobserver as it otherwise manages to create truncated .lo files ... :/
+%{__make} -j1
 
 %install
 rm -rf $RPM_BUILD_ROOT
