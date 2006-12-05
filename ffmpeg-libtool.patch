@@ -1,9 +1,234 @@
-we'll do it multiple passes
-
-1. %s#\.o#.lo#g
---- ffmpeg-export-2006-12-04/libavcodec/Makefile~	2006-11-22 11:20:16.000000000 +0200
-+++ ffmpeg-export-2006-12-04/libavcodec/Makefile	2006-12-05 01:48:11.213265503 +0200
-@@ -6,398 +6,398 @@
+--- ffmpeg-export-2006-12-04/Makefile	2006-11-20 23:46:43.000000000 +0200
++++ ffmpeg-export-2006-12-04.libtool2/Makefile	2006-12-05 13:08:44.141688603 +0200
+@@ -13,7 +13,6 @@
+ 
+ ifeq ($(CONFIG_FFMPEG),yes)
+ MANPAGES=doc/ffmpeg.1
+-PROGS_G+=ffmpeg_g$(EXESUF)
+ PROGS+=ffmpeg$(EXESUF)
+ endif
+ 
+@@ -24,13 +23,11 @@
+ 
+ ifeq ($(CONFIG_FFPLAY),yes)
+ MANPAGES+=doc/ffplay.1
+-PROGS_G+=ffplay_g$(EXESUF)
+ PROGS+=ffplay$(EXESUF)
+ endif
+ 
+ BASENAMES=ffmpeg ffplay ffserver
+ ALLPROGS=$(addsuffix $(EXESUF), $(BASENAMES))
+-ALLPROGS_G=$(addsuffix _g$(EXESUF), $(BASENAMES))
+ ALLMANPAGES=$(addsuffix .1, $(BASENAMES))
+ 
+ ifeq ($(BUILD_SHARED),yes)
+@@ -49,17 +46,15 @@
+ INSTALLMAN=install-man
+ endif
+ 
+-OBJS = ffmpeg.o ffserver.o cmdutils.o ffplay.o
+-SRCS = $(OBJS:.o=.c) $(ASM_OBJS:.o=.s)
+-LDFLAGS := -L$(BUILD_ROOT)/libavformat -L$(BUILD_ROOT)/libavcodec -L$(BUILD_ROOT)/libavutil $(LDFLAGS)
+-EXTRALIBS := -lavformat$(BUILDSUF) -lavcodec$(BUILDSUF) -lavutil$(BUILDSUF) $(EXTRALIBS)
++OBJS = ffmpeg.lo ffserver.lo cmdutils.lo ffplay.lo
++SRCS = $(OBJS:.lo=.c) $(ASM_OBJS:.lo=.s)
++EXTRALIBS := $(BUILD_ROOT)/libavformat/libavformat.la $(BUILD_ROOT)/libavcodec/libavcodec.la $(BUILD_ROOT)/libavutil/libavutil.la $(EXTRALIBS)
+ 
+ ifeq ($(CONFIG_SWSCALER),yes)
+-LDFLAGS+=-L./libswscale
+-EXTRALIBS+=-lswscale$(BUILDSUF)
++EXTRALIBS+= $(BUILD_ROOT)/libswscale/libswscale.la
+ endif
+ 
+-all: lib $(PROGS_G) $(PROGS) $(VHOOK) $(DOC)
++all: lib $(PROGS) $(VHOOK) $(DOC)
+ 
+ lib:
+ 	$(MAKE) -C libavutil   all
+@@ -72,40 +67,42 @@
+ 	$(MAKE) -C libswscale  all
+ endif
+ 
+-ffmpeg_g$(EXESUF): ffmpeg.o cmdutils.o .libs
+-	$(CC) $(LDFLAGS) -o $@ ffmpeg.o cmdutils.o $(EXTRALIBS)
++ffmpeg$(EXESUF): ffmpeg.lo cmdutils.lo
++	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS)
+ 
+-ffserver$(EXESUF): ffserver.o .libs
+-	$(CC) $(LDFLAGS) $(FFSERVERLDFLAGS) -o $@ ffserver.o $(EXTRALIBS)
++ffserver$(EXESUF): ffserver.lo libavformat/libavformat.la libavcodec/libavcodec.la
++	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) $(FFSERVERLDFLAGS) -o $@ $^ $(EXTRALIBS)
+ 
+-ffplay_g$(EXESUF): ffplay.o cmdutils.o .libs
+-	$(CC) $(LDFLAGS) -o $@ ffplay.o cmdutils.o $(EXTRALIBS) $(SDL_LIBS)
++libavformat/libavformat.la:
++	$(MAKE) -C libavformat all
++
++libavcodec/libavcodec.la:
++	$(MAKE) -C libavcodec  all
+ 
+-%$(EXESUF): %_g$(EXESUF)
+-	cp -p $< $@
+-	$(STRIP) $@
++ffplay$(EXESUF): ffplay.lo cmdutils.lo
++	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS) $(SDL_LIBS)
+ 
+ version.h:
+ 	$(SRC_PATH)/version.sh $(SRC_PATH)
+ 
+-output_example$(EXESUF): output_example.o .libs
+-	$(CC) $(LDFLAGS) -o $@ output_example.o $(EXTRALIBS)
++output_example$(EXESUF): output_example.lo
++	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS)
+ 
+ qt-faststart$(EXESUF): qt-faststart.c
+-	$(CC) $(CFLAGS) $< -o $@
++	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $<
+ 
+ cws2fws$(EXESUF): cws2fws.c
+-	$(CC) $< -o $@ -lz
++	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $< -lz
+ 
+-ffplay.o: ffplay.c
+-	$(CC) $(CFLAGS) $(SDL_CFLAGS) -c -o $@ $<
++ffplay.lo: ffplay.c
++	libtool --mode=compile --tag=CC $(CC) $(CFLAGS) $(SDL_CFLAGS) -c -o $@ $<
+ 
+-ffmpeg.o ffplay.o ffserver.o: version.h
++ffmpeg.lo ffplay.lo ffserver.lo: version.h
+ 
+-%.o: %.c
+-	$(CC) $(CFLAGS) -c -o $@ $<
++%.lo: %.c
++	libtool --mode=compile --tag=CC $(CC) $(CFLAGS) -c -o $@ $<
+ 
+-videohook: .libs
++videohook:
+ 	$(MAKE) -C vhook all
+ 
+ documentation:
+@@ -198,10 +195,6 @@
+ .depend: $(SRCS) version.h
+ 	$(CC) -MM $(CFLAGS) $(SDL_CFLAGS) $(filter-out %.h,$^) 1>.depend
+ 
+-.libs: lib
+-	@test -f .libs || touch .libs
+-	@for i in $(DEP_LIBS) ; do if test $$i -nt .libs ; then touch .libs; fi ; done
+-
+ clean:
+ 	$(MAKE) -C libavutil   clean
+ 	$(MAKE) -C libavcodec  clean
+@@ -211,7 +204,7 @@
+ 	$(MAKE) -C tests       clean
+ 	$(MAKE) -C vhook       clean
+ 	$(MAKE) -C doc         clean
+-	rm -f *.o *.d *~ .libs gmon.out TAGS $(ALLPROGS) $(ALLPROGS_G) \
++	rm -f *.lo *.d *~ gmon.lout TAGS $(ALLPROGS) \
+ 	   output_example$(EXESUF) qt-faststart$(EXESUF) cws2fws$(EXESUF)
+ 
+ distclean: clean
+--- ffmpeg-export-2006-12-04/common.mak	2006-11-25 17:44:55.000000000 +0200
++++ ffmpeg-export-2006-12-04.libtool2/common.mak	2006-12-05 13:08:44.141688603 +0200
+@@ -8,37 +8,30 @@
+ CFLAGS += -DHAVE_AV_CONFIG_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE \
+           -D_ISOC9X_SOURCE -I$(BUILD_ROOT) -I$(SRC_PATH) \
+           -I$(SRC_PATH)/libavutil $(OPTFLAGS)
+-SRCS := $(OBJS:.o=.c) $(ASM_OBJS:.o=.S) $(CPPOBJS:.o=.cpp)
++SRCS := $(OBJS:.lo=.c) $(ASM_OBJS:.lo=.S) $(CPPOBJS:.lo=.cpp)
+ OBJS := $(OBJS) $(ASM_OBJS) $(CPPOBJS)
+ STATIC_OBJS := $(OBJS) $(STATIC_OBJS)
+ SHARED_OBJS := $(OBJS) $(SHARED_OBJS)
++STATIC_OBJS_ = $(shell echo $(OBJS) $(STATIC_OBJS) | tr ' ' '\n' | sort -u)
++SHARED_OBJS_ = $(shell echo $(OBJS) $(SHARED_OBJS) | tr ' ' '\n' | sort -u)
+ 
+ all: $(EXTRADEPS) $(LIB) $(SLIBNAME)
+ 
+-$(LIB): $(STATIC_OBJS)
+-	rm -f $@
+-	$(AR) rc $@ $^ $(EXTRAOBJS)
+-	$(RANLIB) $@
+-
+-$(SLIBNAME): $(SLIBNAME_WITH_MAJOR)
+-	ln -sf $^ $@
+-
+-$(SLIBNAME_WITH_MAJOR): $(SHARED_OBJS)
+-	$(CC) $(SHFLAGS) $(LDFLAGS) -o $@ $^ $(EXTRALIBS) $(EXTRAOBJS)
+-	$(SLIB_EXTRA_CMD)
++$(SLIBNAME): $(SHARED_OBJS_)
++	libtool --mode=link --tag=CC $(CC) -o $(LIB) $(SHARED_OBJS_) -rpath $(libdir) -version-number `echo $(LIBVERSION) | tr . :`
+ 
+-%.o: %.c
+-	$(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
++%.lo: %.c
++	libtool --mode=compile --tag=CC $(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
+ 
+-%.o: %.S
+-	$(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
++%.lo: %.S
++	libtool --mode=compile --tag=CC $(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
+ 
+ # BeOS: remove -Wall to get rid of all the "multibyte constant" warnings
+-%.o: %.cpp
+-	g++ $(subst -Wall,,$(CFLAGS)) -c -o $@ $<
++%.lo: %.cpp
++	libtool --mode=compile --tag=CXX $(CC) $(subst -Wall,,$(CFLAGS)) $(LIBOBJFLAGS) -c -o $@ $<
+ 
+-%: %.o $(LIB)
+-	$(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS)
++%: %.lo $(LIB)
++	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS)
+ 
+ depend dep: $(SRCS)
+ 	$(CC) -MM $(CFLAGS) $^ 1>.depend
+@@ -62,13 +55,8 @@
+ install-libs: $(INSTLIBTARGETS)
+ 
+ install-lib-shared: $(SLIBNAME)
+-	install -d "$(shlibdir)"
+-	install $(INSTALLSTRIP) -m 755 $(SLIBNAME) \
+-		"$(shlibdir)/$(SLIBNAME_WITH_VERSION)"
+-	cd "$(shlibdir)" && \
+-		ln -sf $(SLIBNAME_WITH_VERSION) $(SLIBNAME_WITH_MAJOR)
+-	cd "$(shlibdir)" && \
+-		ln -sf $(SLIBNAME_WITH_VERSION) $(SLIBNAME)
++	install -d $(DESTDIR)$(libdir)
++	libtool --mode=install install $(INSTALLSTRIP) $(LIB) $(DESTDIR)$(libdir)
+ 
+ install-lib-static: $(LIB)
+ 	install -d "$(libdir)"
+@@ -76,10 +64,10 @@
+ 	$(LIB_INSTALL_EXTRA_CMD)
+ 
+ install-headers:
+-	install -d "$(incdir)"
+-	install -d "$(libdir)/pkgconfig"
+-	install -m 644 $(addprefix $(SRC_DIR)/,$(HEADERS)) "$(incdir)"
+-	install -m 644 $(BUILD_ROOT)/lib$(NAME).pc "$(libdir)/pkgconfig"
++	install -d "$(DESTDIR)$(incdir)"
++	install -d "$(DESTDIR)$(libdir)/pkgconfig"
++	install -m 644 $(addprefix $(SRC_DIR)/,$(HEADERS)) "$(DESTDIR)$(incdir)"
++	install -m 644 $(BUILD_ROOT)/lib$(NAME).pc "$(DESTDIR)$(libdir)/pkgconfig"
+ 
+ uninstall: uninstall-libs uninstall-headers
+ 
+--- ffmpeg-export-2006-12-04/configure	2006-11-29 01:55:24.000000000 +0200
++++ ffmpeg-export-2006-12-04.libtool2/configure	2006-12-05 13:08:44.141688603 +0200
+@@ -608,10 +608,10 @@
+ LDCONFIG="ldconfig"
+ LIBPREF="lib"
+ LIBSUF=".a"
+-LIB='$(LIBPREF)$(NAME)$(LIBSUF)'
++LIB='$(LIBPREF)$(NAME).la'
+ SLIBPREF="lib"
+ SLIBSUF=".so"
+-SLIBNAME='$(SLIBPREF)$(NAME)$(SLIBSUF)'
++SLIBNAME='$(SLIBPREF)$(NAME).la'
+ SLIBNAME_WITH_VERSION='$(SLIBNAME).$(LIBVERSION)'
+ SLIBNAME_WITH_MAJOR='$(SLIBNAME).$(LIBMAJOR)'
+ EXESUF=""
+--- ffmpeg-export-2006-12-04/libavcodec/Makefile	2006-11-22 11:20:16.000000000 +0200
++++ ffmpeg-export-2006-12-04.libtool2/libavcodec/Makefile	2006-12-05 13:08:44.141688603 +0200
+@@ -6,404 +6,403 @@
  
  CFLAGS+=-I$(SRC_PATH)/libswscale $(AMR_CFLAGS)
  
@@ -747,9 +972,18 @@ we'll do it multiple passes
 -OBJS-$(TARGET_ARCH_BFIN)               += bfin/dsputil_bfin.o \
 +OBJS-$(TARGET_ARCH_BFIN)               += bfin/dsputil_bfin.lo \
  
- CFLAGS += $(CFLAGS-yes)
- OBJS += $(OBJS-yes)
-@@ -425,21 +425,21 @@
+-CFLAGS += $(CFLAGS-yes)
+-OBJS += $(OBJS-yes)
+-ASM_OBJS += $(ASM_OBJS-yes)
++OBJS += $(shell echo $(OBJS-yes) | tr ' ' '\n' | sort -u)
++ASM_OBJS += $(shell echo $(ASM_OBJS-yes) | tr ' ' '\n' | sort -u)
+ 
+-EXTRALIBS := -L$(BUILD_ROOT)/libavutil -lavutil$(BUILDSUF) $(EXTRALIBS)
++EXTRALIBS += $(SRC_PATH)/libavutil/libavutil.la
+ 
+ NAME=avcodec
+ ifeq ($(BUILD_SHARED),yes)
+@@ -425,21 +424,21 @@
  
  clean::
  	rm -f \
@@ -782,7 +1016,7 @@ we'll do it multiple passes
  
  cpuid_test: i386/cputest.c
  	$(CC) $(CFLAGS) -D__TEST__ -o $@ $<
-@@ -447,10 +447,10 @@
+@@ -447,10 +446,10 @@
  imgresample-test: imgresample.c $(LIB)
  	$(CC) $(CFLAGS) -DTEST -o $@ $^ $(EXTRALIBS)
  
@@ -796,191 +1030,9 @@ we'll do it multiple passes
 +fft-test: fft-test.lo $(LIB)
  
  .PHONY: amrlibs tests
-
-
-2.  extralibs
---- ffmpeg-export-2006-12-04/libavcodec/Makefile~	2006-12-05 01:48:11.213265503 +0200
-+++ ffmpeg-export-2006-12-04/libavcodec/Makefile	2006-12-05 01:51:38.687926286 +0200
-@@ -403,7 +403,7 @@
- OBJS += $(OBJS-yes)
- ASM_OBJS += $(ASM_OBJS-yes)
- 
--EXTRALIBS := -L$(BUILD_ROOT)/libavutil -lavutil$(BUILDSUF) $(EXTRALIBS)
-+EXTRALIBS += $(SRC_PATH)/libavutil/libavutil.la
- 
- NAME=avcodec
- ifeq ($(BUILD_SHARED),yes)
-
-3. postproc simple subst
---- ffmpeg-export-2006-12-04/libpostproc/Makefile~	2006-11-08 02:02:15.000000000 +0200
-+++ ffmpeg-export-2006-12-04/libpostproc/Makefile	2006-12-05 09:14:18.215445309 +0200
-@@ -12,8 +12,8 @@
- LIBMAJOR=$(SPPMAJOR)
- endif
- 
--STATIC_OBJS=postprocess.o
--SHARED_OBJS=postprocess_pic.o
-+STATIC_OBJS=postprocess.lo
-+SHARED_OBJS=postprocess_pic.lo
- 
- HEADERS = postprocess.h
- 
-@@ -21,6 +21,6 @@
- 
- depend dep: postprocess.c
- 
--postprocess_pic.o: postprocess.c
-+postprocess_pic.lo: postprocess.c
- 	$(CC) -c $(CFLAGS) -fomit-frame-pointer -fPIC -DPIC -o $@ $<
- 
-3.1 postproc la
---- ffmpeg-export-2006-12-04/libpostproc/Makefile~	2006-12-05 09:14:18.215445309 +0200
-+++ ffmpeg-export-2006-12-04/libpostproc/Makefile	2006-12-05 09:16:50.228852195 +0200
-@@ -22,5 +22,4 @@
- depend dep: postprocess.c
- 
- postprocess_pic.lo: postprocess.c
--	$(CC) -c $(CFLAGS) -fomit-frame-pointer -fPIC -DPIC -o $@ $<
--
-+	libtool --mode=compile --tag=CC $(CC) -c $(CFLAGS) -fomit-frame-pointer -fPIC -DPIC -o $@ $<
- 
-#4. TODO not sure
-#--- ffmpeg/libavcodec/Makefile.orig	2006-01-27 00:42:28.000000000 +0100
-#+++ ffmpeg/libavcodec/Makefile	2006-01-29 13:45:46.901164750 +0100
-# NAME=avcodec
-#-LIBAVUTIL= $(SRC_PATH)/libavutil/$(LIBPREF)avutil$(LIBSUF)
-#-ifeq ($(BUILD_SHARED),yes)
-#+LIBAVUTIL= $(SRC_PATH)/libavutil/libavutil.la
-# LIBVERSION=$(LAVCVERSION)
-# LIBMAJOR=$(LAVCMAJOR)
-#+ifeq ($(BUILD_SHARED),yes)
-#+RPATH= -rpath $(libdir)
-#+else
-#+RPATH=
-# endif
-# TESTS= imgresample-test dct-test motion-test fft-test
-# 
-#-all: $(LIB) $(SLIBNAME)
-#+all: $(LIB)
- 
- 
-5. TODO
---- ffmpeg/libavcodec/Makefile.orig	2006-01-27 00:42:28.000000000 +0100
-+++ ffmpeg/libavcodec/Makefile	2006-01-29 13:45:46.901164750 +0100
--$(LIB): $(OBJS) $(AMRLIBS)
--	rm -f $@
--	$(AR) rc $@ $(OBJS) $(AMREXTRALIBS)
--	$(RANLIB) $@
--
--$(SLIBNAME): $(OBJS)
--ifeq ($(CONFIG_PP),yes)
--	$(MAKE) -C libpostproc
--endif
--ifeq ($(CONFIG_WIN32),yes)
--	$(CC) $(SHFLAGS) -Wl,--output-def,$(@:.dll=.def) -o $@ $(OBJS) $(EXTRALIBS) $(AMREXTRALIBS)
--	-lib /machine:i386 /def:$(@:.dll=.def)
--else
--	$(CC) $(SHFLAGS) $(LDFLAGS) -o $@ $(OBJS) $(EXTRALIBS) $(AMREXTRALIBS)
--endif
-+$(LIB): $(OBJS) $(AMRLIBS) $(EXTRADEPS)
-+	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $(OBJS) $(AMREXTRALIBS) $(RPATH) $(EXTRALIBS) -version-number `echo $(LIBVERSION) | tr . :`
- 
---- ffmpeg-export-2006-12-04/common.mak~	2006-12-05 09:20:25.403675337 +0200
-+++ ffmpeg-export-2006-12-04/common.mak	2006-12-05 09:21:34.105215448 +0200
-@@ -8,7 +8,7 @@
- CFLAGS += -DHAVE_AV_CONFIG_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE \
-           -D_ISOC9X_SOURCE -I$(BUILD_ROOT) -I$(SRC_PATH) \
-           -I$(SRC_PATH)/libavutil $(OPTFLAGS)
--SRCS := $(OBJS:.o=.c) $(ASM_OBJS:.o=.S) $(CPPOBJS:.o=.cpp)
-+SRCS := $(OBJS:.lo=.c) $(ASM_OBJS:.lo=.S) $(CPPOBJS:.lo=.cpp)
- OBJS := $(OBJS) $(ASM_OBJS) $(CPPOBJS)
- STATIC_OBJS := $(OBJS) $(STATIC_OBJS)
- SHARED_OBJS := $(OBJS) $(SHARED_OBJS)
-6. libtool in makefile
-TODO: lacks (working) rule for shared lib
---- ffmpeg-export-2006-12-04/common.mak~	2006-12-05 08:58:29.784194185 +0200
-+++ ffmpeg-export-2006-12-04/common.mak	2006-12-05 09:05:01.772978082 +0200
-@@ -23,22 +23,22 @@
- #$(SLIBNAME): $(SLIBNAME_WITH_MAJOR)
- #	ln -sf $^ $@
- 
--$(SLIBNAME_WITH_MAJOR): $(SHARED_OBJS)
--	$(CC) $(SHFLAGS) $(LDFLAGS) -o $@ $^ $(EXTRALIBS) $(EXTRAOBJS)
--	$(SLIB_EXTRA_CMD)
-+#$(SLIBNAME_WITH_MAJOR): $(SHARED_OBJS)
-+#	$(CC) $(SHFLAGS) $(LDFLAGS) -o $@ $^ $(EXTRALIBS) $(EXTRAOBJS)
-+#	$(SLIB_EXTRA_CMD)
- 
--%.o: %.c
--	$(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
-+%.lo: %.c
-+	libtool --mode=compile --tag=CC $(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
- 
--%.o: %.S
--	$(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
-+%.lo: %.S
-+	libtool --mode=compile --tag=CC $(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
- 
- # BeOS: remove -Wall to get rid of all the "multibyte constant" warnings
- %.o: %.cpp
--	g++ $(subst -Wall,,$(CFLAGS)) -c -o $@ $<
-+	libtool --mode=compile --tag=CXX $(CC) $(subst -Wall,,$(CFLAGS)) $(LIBOBJFLAGS) -c -o $@ $<
- 
- %: %.o $(LIB)
--	$(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS)
-+	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS)
- 
- depend dep: $(SRCS)
- 	$(CC) -MM $(CFLAGS) $^ 1>.depend
-@@ -62,13 +62,8 @@
- install-libs: $(INSTLIBTARGETS)
- 
- install-lib-shared: $(SLIBNAME)
--	install -d "$(shlibdir)"
--	install $(INSTALLSTRIP) -m 755 $(SLIBNAME) \
--		"$(shlibdir)/$(SLIBNAME_WITH_VERSION)"
--	cd "$(shlibdir)" && \
--		ln -sf $(SLIBNAME_WITH_VERSION) $(SLIBNAME_WITH_MAJOR)
--	cd "$(shlibdir)" && \
--		ln -sf $(SLIBNAME_WITH_VERSION) $(SLIBNAME)
-+	install -d $(DESTDIR)$(libdir)
-+	libtool --mode=install install $(INSTALLSTRIP) $(LIB) $(DESTDIR)$(libdir)
- 
- install-lib-static: $(LIB)
- 	install -d "$(libdir)"
-@@ -76,10 +71,10 @@
- 	$(LIB_INSTALL_EXTRA_CMD)
- 
- install-headers:
--	install -d "$(incdir)"
--	install -d "$(libdir)/pkgconfig"
--	install -m 644 $(addprefix $(SRC_DIR)/,$(HEADERS)) "$(incdir)"
--	install -m 644 $(BUILD_ROOT)/lib$(NAME).pc "$(libdir)/pkgconfig"
-+	install -d "$(DESTDIR)$(incdir)"
-+	install -d "$(DESTDIR)$(libdir)/pkgconfig"
-+	install -m 644 $(addprefix $(SRC_DIR)/,$(HEADERS)) "$(DESTDIR)$(incdir)"
-+	install -m 644 $(BUILD_ROOT)/lib$(NAME).pc "$(DESTDIR)$(libdir)/pkgconfig"
- 
- uninstall: uninstall-libs uninstall-headers
- 
---- ffmpeg-export-2006-12-04/common.mak~	2006-12-05 09:29:27.105826682 +0200
-+++ ffmpeg-export-2006-12-04/common.mak	2006-12-05 09:30:05.996699325 +0200
-@@ -25,10 +25,10 @@
- 	libtool --mode=compile --tag=CC $(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
- 
- # BeOS: remove -Wall to get rid of all the "multibyte constant" warnings
--%.o: %.cpp
-+%.lo: %.cpp
- 	libtool --mode=compile --tag=CXX $(CC) $(subst -Wall,,$(CFLAGS)) $(LIBOBJFLAGS) -c -o $@ $<
- 
--%: %.o $(LIB)
-+%: %.lo $(LIB)
- 	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS)
- 
- depend dep: $(SRCS)
---- ffmpeg-export-2006-12-04/libavformat/Makefile~	2006-11-21 15:18:21.000000000 +0200
-+++ ffmpeg-export-2006-12-04/libavformat/Makefile	2006-12-05 01:55:37.983302154 +0200
-@@ -6,184 +6,184 @@
+--- ffmpeg-export-2006-12-04/libavformat/Makefile	2006-11-21 15:18:21.000000000 +0200
++++ ffmpeg-export-2006-12-04.libtool2/libavformat/Makefile	2006-12-05 13:08:44.131688378 +0200
+@@ -6,187 +6,186 @@
  
  CFLAGS+=-I$(SRC_PATH)/libavcodec
  
@@ -1254,8 +1306,9 @@ TODO: lacks (working) rule for shared lib
 +OBJS-$(CONFIG_AUDIO_MUXER)               += audio.lo
  endif
  
- EXTRALIBS := -L$(BUILD_ROOT)/libavutil -lavutil$(BUILDSUF) \
-              -lavcodec$(BUILDSUF) -L$(BUILD_ROOT)/libavcodec $(EXTRALIBS)
+-EXTRALIBS := -L$(BUILD_ROOT)/libavutil -lavutil$(BUILDSUF) \
+-             -lavcodec$(BUILDSUF) -L$(BUILD_ROOT)/libavcodec $(EXTRALIBS)
++EXTRALIBS += ../libavcodec/libavcodec.la ../libavutil/libavutil.la
  
  ifeq ($(CONFIG_AUDIO_BEOS),yes)
 -CPPOBJS+= beosaudio.o
@@ -1297,122 +1350,13 @@ TODO: lacks (working) rule for shared lib
 +OBJS-$(CONFIG_GXF_MUXER)                 += gxfenc.lo
  endif
  
- OBJS += $(OBJS-yes)
---- ffmpeg-export-2006-12-04/libavformat/Makefile~	2006-12-05 01:55:37.983302154 +0200
-+++ ffmpeg-export-2006-12-04/libavformat/Makefile	2006-12-05 01:57:47.226205755 +0200
-@@ -153,8 +153,7 @@
- OBJS-$(CONFIG_AUDIO_MUXER)               += audio.lo
- endif
- 
--EXTRALIBS := -L$(BUILD_ROOT)/libavutil -lavutil$(BUILDSUF) \
--             -lavcodec$(BUILDSUF) -L$(BUILD_ROOT)/libavcodec $(EXTRALIBS)
-+EXTRALIBS += ../libavcodec/libavcodec.la ../libavutil/libavutil.la
- 
- ifeq ($(CONFIG_AUDIO_BEOS),yes)
- CPPOBJS+= beosaudio.lo
---- ffmpeg-export-2006-12-04/libavformat/Makefile~	2006-12-05 09:31:57.669205153 +0200
-+++ ffmpeg-export-2006-12-04/libavformat/Makefile	2006-12-05 09:52:17.886601884 +0200
-@@ -185,7 +185,7 @@
- OBJS-$(CONFIG_GXF_MUXER)                 += gxfenc.lo
- endif
- 
 -OBJS += $(OBJS-yes)
 +OBJS += $(shell echo $(OBJS-yes) | tr ' ' '\n' | sort -u)
  
  NAME=avformat
  ifeq ($(BUILD_SHARED),yes)
-#--- ffmpeg/libavformat/Makefile.orig	2006-01-27 00:42:29.000000000 +0100
-#+++ ffmpeg/libavformat/Makefile	2006-01-29 13:58:17.064047000 +0100
-#@@ -90,68 +90,47 @@
-# endif
-# 
-# NAME=avformat
-#-ifeq ($(BUILD_SHARED),yes)
-# LIBVERSION=$(LAVFVERSION)
-# LIBMAJOR=$(LAVFMAJOR)
-#-AVCLIBS+=-lavcodec$(BUILDSUF) -L../libavcodec -lavutil$(BUILDSUF) -L../libavutil
-#+ifeq ($(BUILD_SHARED),yes)
-#+RPATH= -rpath $(libdir)
-#+else
-#+RPATH=
-# endif
-#+AVCLIBS+=../libavcodec/libavcodec.la ../libavutil/libavutil.la
-# 
-#-SRCS := $(OBJS:.o=.c) $(PPOBJS:.o=.cpp)
-#+SRCS := $(OBJS:.lo=.c) $(PPOBJS:.lo=.cpp)
-# 
-#-all: $(LIB) $(SLIBNAME)
-#+all: $(LIB)
-# 
-# $(LIB): $(OBJS) $(PPOBJS)
-#-	rm -f $@
-#-	$(AR) rc $@ $(OBJS) $(PPOBJS)
-#-	$(RANLIB) $@
-#-
-#-$(SLIBNAME): $(OBJS)
-#-ifeq ($(CONFIG_WIN32),yes)
-#-	$(CC) $(SHFLAGS) -Wl,--output-def,$(@:.dll=.def) -o $@ $(OBJS) $(PPOBJS) $(AVCLIBS) $(EXTRALIBS)
-#-	-lib /machine:i386 /def:$(@:.dll=.def)
-#-else
-#-	$(CC) $(SHFLAGS) $(LDFLAGS) -o $@ $(OBJS) $(PPOBJS) $(AVCLIBS) $(EXTRALIBS)
-#+	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $(OBJS) $(PPOBJS) $(AVCLIBS) $(EXTRALIBS) $(RPATH) -version-number `echo $(LIBVERSION) | tr . :`
-#-endif
-# 
-# depend: $(SRCS)
-# 	$(CC) -MM $(CFLAGS) $^ 1>.depend
-# 
-#-ifeq ($(BUILD_SHARED),yes)
-# install: all install-headers
-#-ifeq ($(CONFIG_WIN32),yes)
-#-	install $(INSTALLSTRIP) -m 755 $(SLIBNAME) "$(prefix)"
-#-else
-#-	install -d $(libdir)
-#-	install $(INSTALLSTRIP) -m 755 $(SLIBNAME) \
-#-		$(libdir)/$(SLIBNAME_WITH_VERSION)
-#-	ln -sf $(SLIBNAME_WITH_VERSION) \
-#-		$(libdir)/$(SLIBNAME_WITH_MAJOR)
-#-	ln -sf $(SLIBNAME_WITH_VERSION) \
-#-		$(libdir)/$(SLIBNAME)
-#-	$(LDCONFIG) || true
-#-endif
-#-else
-#-install:
-#-endif
-#+	install -d $(DESTDIR)$(libdir)
-#+	libtool --mode=install install $(INSTALLSTRIP) $(LIB) $(DESTDIR)$(libdir)
-# 
-# installlib: all install-headers
-#-	install -m 644 $(LIB) "$(libdir)"
-#+	libtool --mode=install install $(LIB) "$(DESTDIR)$(libdir)"
-# 
-# install-headers:
-#-	mkdir -p "$(prefix)/include/ffmpeg"
-#+	install -d "$(DESTDIR)$(prefix)/include/ffmpeg"
-# 	install -m 644 $(SRC_PATH)/libavformat/avformat.h $(SRC_PATH)/libavformat/avio.h \
-#                 $(SRC_PATH)/libavformat/rtp.h $(SRC_PATH)/libavformat/rtsp.h \
-#                 $(SRC_PATH)/libavformat/rtspcodes.h \
-#-                "$(prefix)/include/ffmpeg"
-#-	install -d "$(libdir)/pkgconfig"
-#-	install -m 644 ../libavformat.pc "$(libdir)/pkgconfig"
-#+                "$(DESTDIR)$(prefix)/include/ffmpeg"
-#+	install -d "$(DESTDIR)$(libdir)/pkgconfig"
-#+	install -m 644 ../libavformat.pc "$(DESTDIR)$(libdir)/pkgconfig"
-# 
-#-%.o: %.c
-#-	$(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
-#+%.lo: %.c
-#+	libtool --mode=compile --tag=CC $(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
-# 
-# # BeOS: remove -Wall to get rid of all the "multibyte constant" warnings
-#-%.o: %.cpp
-#-	g++ $(subst -Wall,,$(CFLAGS)) -c -o $@ $<
-#+%.lo: %.cpp
-#+	libtool --mode=compile --tag=CXX g++ $(subst -Wall,,$(CFLAGS)) -c -o $@ $<
-# 
-# clean:
-# 	rm -f *.o *.d *~ *.a *.lib *.so *.dylib *.dll
---- ffmpeg-export-2006-12-04/libavutil/Makefile~	2006-11-14 03:02:30.000000000 +0200
-+++ ffmpeg-export-2006-12-04/libavutil/Makefile	2006-12-05 01:58:32.907232224 +0200
+--- ffmpeg-export-2006-12-04/libavutil/Makefile	2006-11-14 03:02:30.000000000 +0200
++++ ffmpeg-export-2006-12-04.libtool2/libavutil/Makefile	2006-12-05 13:08:44.141688603 +0200
 @@ -5,17 +5,17 @@
  
  CFLAGS+=-DBUILD_AVUTIL
@@ -1442,92 +1386,30 @@ TODO: lacks (working) rule for shared lib
  
  HEADERS = avutil.h common.h mathematics.h integer.h rational.h \
            intfloat_readwrite.h md5.h adler32.h log.h fifo.h
-#--- ffmpeg/libavutil/Makefile.orig	2006-01-27 00:42:29.000000000 +0100
-#+++ ffmpeg/libavutil/Makefile	2006-01-29 14:10:15.400940250 +0100
-#@@ -8,41 +8,34 @@
-# 
-# NAME=avutil
-#-ifeq ($(BUILD_SHARED),yes)
-# LIBVERSION=$(LAVUVERSION)
-# LIBMAJOR=$(LAVUMAJOR)
-#+ifeq ($(BUILD_SHARED),yes)
-#+RPATH=-rpath $(libdir)
-#+else
-#+RPATH=
-# endif
-# 
-#-all: $(LIB) $(SLIBNAME)
-#+all: $(LIB)
-# 
-# $(LIB): $(OBJS)
-#-	rm -f $@
-#-	$(AR) rc $@ $(OBJS)
-#-	$(RANLIB) $@
-#-
-#-$(SLIBNAME): $(OBJS)
-#-ifeq ($(CONFIG_WIN32),yes)
-#-	$(CC) $(SHFLAGS) -Wl,--output-def,$(@:.dll=.def) -o $@ $(OBJS) $(EXTRALIBS) $(AMREXTRALIBS)
-#-	-lib /machine:i386 /def:$(@:.dll=.def)
-#-else
-#-	$(CC) $(SHFLAGS) $(LDFLAGS) -o $@ $(OBJS) $(EXTRALIBS) $(AMREXTRALIBS)
-#-endif
-#+	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $(OBJS) $(EXTRALIBS) $(AMREXTRALIBS) $(LDFLAGS) $(RPATH) -version-number `echo $(LIBVERSION) | tr . :`
-# 
-#-%.o: %.c
-#-	$(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
-#+%.lo: %.c
-#+	libtool --mode=compile --tag=CC $(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
-# 
-# depend: $(SRCS)
-# 	$(CC) -MM $(CFLAGS) $^ 1>.depend
-#@@ -56,38 +49,24 @@
-# 	rm -f .depend
-# 
-# 
-#-ifeq ($(BUILD_SHARED),yes)
-# install: all install-headers
-#-ifeq ($(CONFIG_WIN32),yes)
-#-	install $(INSTALLSTRIP) -m 755 $(SLIBNAME) "$(prefix)"
-#-else
-#-	install -d $(libdir)
-#-	install $(INSTALLSTRIP) -m 755 $(SLIBNAME) \
-#-		$(libdir)/$(SLIBNAME_WITH_VERSION)
-#-	ln -sf $(SLIBNAME_WITH_VERSION) \
-#-		$(libdir)/$(SLIBNAME_WITH_MAJOR)
-#-	ln -sf $(SLIBNAME_WITH_VERSION) \
-#-		$(libdir)/$(SLIBNAME)
-#-	$(LDCONFIG) || true
-#-endif
-#-else
-#-install:
-#-endif
-#+	install -d $(DESTDIR)$(libdir)
-#+	libtool --mode=install install $(INSTALLSTRIP) $(LIB) $(DESTDIR)$(libdir)
-# 
-# installlib: all install-headers
-#-	install -m 644 $(LIB) "$(libdir)"
-#+	libtool --mode=install install $(LIB) "$(DESTDIR)$(libdir)"
-# 
-# install-headers:
-#-	mkdir -p "$(prefix)/include/ffmpeg"
-#+	install -d "$(DESTDIR)$(prefix)/include/ffmpeg"
-# 	install -m 644 $(SRC_PATH)/libavutil/avutil.h \
-# 	               $(SRC_PATH)/libavutil/common.h \
-# 	               $(SRC_PATH)/libavutil/mathematics.h \
-# 	               $(SRC_PATH)/libavutil/integer.h \
-# 	               $(SRC_PATH)/libavutil/rational.h \
-# 	               $(SRC_PATH)/libavutil/intfloat_readwrite.h \
-#-                "$(prefix)/include/ffmpeg"
-#-	install -d "$(libdir)/pkgconfig"
-#-	install -m 644 ../libavutil.pc "$(libdir)/pkgconfig"
-#+                "$(DESTDIR)$(prefix)/include/ffmpeg"
-#+	install -d "$(DESTDIR)$(libdir)/pkgconfig"
-#+	install -m 644 ../libavutil.pc "$(DESTDIR)$(libdir)/pkgconfig"
-# 
-# #
-# # include dependency files if they exist
---- ffmpeg-export-2006-12-04/vhook/Makefile~	2006-11-08 02:02:15.000000000 +0200
-+++ ffmpeg-export-2006-12-04/vhook/Makefile	2006-12-05 01:59:58.219149492 +0200
+--- ffmpeg-export-2006-12-04/libpostproc/Makefile	2006-11-08 02:02:15.000000000 +0200
++++ ffmpeg-export-2006-12-04.libtool2/libpostproc/Makefile	2006-12-05 13:08:44.131688378 +0200
+@@ -12,8 +12,8 @@
+ LIBMAJOR=$(SPPMAJOR)
+ endif
+ 
+-STATIC_OBJS=postprocess.o
+-SHARED_OBJS=postprocess_pic.o
++STATIC_OBJS=postprocess.lo
++SHARED_OBJS=postprocess_pic.lo
+ 
+ HEADERS = postprocess.h
+ 
+@@ -21,6 +21,5 @@
+ 
+ depend dep: postprocess.c
+ 
+-postprocess_pic.o: postprocess.c
+-	$(CC) -c $(CFLAGS) -fomit-frame-pointer -fPIC -DPIC -o $@ $<
+-
++postprocess_pic.lo: postprocess.c
++	libtool --mode=compile --tag=CC $(CC) -c $(CFLAGS) -fomit-frame-pointer -fPIC -DPIC -o $@ $<
+--- ffmpeg-export-2006-12-04/vhook/Makefile	2006-11-08 02:02:15.000000000 +0200
++++ ffmpeg-export-2006-12-04.libtool2/vhook/Makefile	2006-12-05 13:08:44.141688603 +0200
 @@ -28,8 +28,8 @@
  	$(CC) -MM $(CFLAGS) $^ 1>.depend
  
@@ -1539,454 +1421,3 @@ TODO: lacks (working) rule for shared lib
  
  uninstall:
  	rm -f $(addprefix $(shlibdir)/vhook/,$(ALLHOOKS))
-#--- ffmpeg/vhook/Makefile.orig	2006-01-27 00:42:30.000000000 +0100
-#+++ ffmpeg/vhook/Makefile	2006-01-29 14:11:18.492883250 +0100
-# 
-# imlib2$(SLIBSUF): imlib2.o
-#-	$(CC) $(LDFLAGS) -g -o $@ $(SHFLAGS) $< -lImlib2
-#+	$(CC) $(LDFLAGS) -o $@ $(SHFLAGS) $< -lImlib2
-# 
-# drawtext$(SLIBSUF): drawtext.o
-#-	$(CC) $(LDFLAGS) -g -o $@ $(SHFLAGS) $< `freetype-config --libs`
-#+	$(CC) $(LDFLAGS) -o $@ $(SHFLAGS) $< `freetype-config --libs`
-# 
-# %$(SLIBSUF): %.o
-#-	$(CC) $(LDFLAGS) -g -o $@ $(SHFLAGS) $<
-#+	$(CC) $(LDFLAGS) -o $@ $(SHFLAGS) $<
-# 
-# clean:
-# 	rm -f *.o *.d *~ *.a *.lib *.so *.dylib *.dll
-#--- ffmpeg/Makefile.orig	2006-01-27 00:42:27.000000000 +0100
-#+++ ffmpeg/Makefile	2006-01-29 14:14:13.291807500 +0100
-#@@ -7,7 +7,6 @@
-# VPATH=$(SRC_PATH)
-# 
-# CFLAGS=$(OPTFLAGS) -I. -I$(SRC_PATH) -I$(SRC_PATH)/libavutil -I$(SRC_PATH)/libavcodec -I$(SRC_PATH)/libavformat -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_GNU_SOURCE
-#-LDFLAGS+= -g
-# 
-# ifeq ($(TARGET_GPROF),yes)
-# CFLAGS+=-p
-#@@ -36,11 +35,7 @@
-# EXTRALIBS+=-lmedia -lbe
-# endif
-# 
-#-ifeq ($(BUILD_SHARED),yes)
-#-DEP_LIBS=libavcodec/$(SLIBPREF)avcodec$(SLIBSUF) libavformat/$(SLIBPREF)avformat$(SLIBSUF)
-#-else
-#-DEP_LIBS=libavcodec/$(LIBPREF)avcodec$(LIBSUF) libavformat/$(LIBPREF)avformat$(LIBSUF)
-#-endif
-#+DEP_LIBS=libavcodec/libavcodec.la libavformat/libavformat.la
-# 
-# ifeq ($(BUILD_VHOOK),yes)
-# VHOOK=videohook
-#@@ -59,7 +54,7 @@
-# 
-# OBJS = ffmpeg.o ffserver.o cmdutils.o $(FFPLAY_O)
-# SRCS = $(OBJS:.o=.c) $(ASM_OBJS:.o=.s)
-#-FFLIBS = -L./libavformat -lavformat$(BUILDSUF) -L./libavcodec -lavcodec$(BUILDSUF) -L./libavutil -lavutil$(BUILDSUF)
-#+FFLIBS = libavformat/libavformat.la libavcodec/libavcodec.la libavutil/libavutil.la
-# 
-#-all: lib $(PROG_G) $(PROG) $(PROGTEST) $(VHOOK) $(QTFASTSTART) $(DOC)
-#+all: lib $(PROG) $(PROGTEST) $(VHOOK) $(QTFASTSTART) $(DOC)
-# 
-#@@ -68,25 +63,17 @@
-# 	$(MAKE) -C libavcodec all
-# 	$(MAKE) -C libavformat all
-# 
-#-ffmpeg_g$(EXESUF): ffmpeg.o cmdutils.o .libs
-#-	$(CC) $(LDFLAGS) -o $@ ffmpeg.o cmdutils.o $(FFLIBS) $(EXTRALIBS)
-#-
-#-ffmpeg$(EXESUF): ffmpeg_g$(EXESUF)
-#-	cp -p $< $@
-#-	$(STRIP) $@
-#+ffmpeg$(EXESUF): ffmpeg.o cmdutils.o
-#+	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ ffmpeg.o cmdutils.o $(FFLIBS) $(EXTRALIBS)
-# 
-#-ffserver$(EXESUF): ffserver.o .libs
-#-	$(CC) $(LDFLAGS) $(FFSLDFLAGS) -o $@ ffserver.o $(FFLIBS) $(EXTRALIBS)
-#+ffserver$(EXESUF): ffserver.o
-#+	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) $(FFSLDFLAGS) -o $@ ffserver.o $(FFLIBS) $(EXTRALIBS)
-# 
-#-ffplay_g$(EXESUF): ffplay.o cmdutils.o .libs
-#-	$(CC) $(LDFLAGS) -o $@ ffplay.o cmdutils.o $(FFLIBS) $(EXTRALIBS) $(SDL_LIBS)
-#+ffplay$(EXESUF): ffplay.o cmdutils.o
-#+	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ ffplay.o cmdutils.o -lX11 $(FFLIBS) $(EXTRALIBS) $(SDL_LIBS)
-# 
-#-ffplay$(EXESUF): ffplay_g$(EXESUF)
-#-	cp -p $< $@
-#-	$(STRIP) $@
-#-
-#-output_example$(EXESUF): output_example.o .libs
-#-	$(CC) $(LDFLAGS) -o $@ output_example.o $(FFLIBS) $(EXTRALIBS)
-#+output_example$(EXESUF): output_example.o
-#+	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ output_example.o $(FFLIBS) $(EXTRALIBS)
-# 
-# qt-faststart$(EXESUF): qt-faststart.c
-# 	$(CC) $(SRC_PATH)/qt-faststart.c -o qt-faststart$(EXESUF)
-#@@ -100,7 +87,7 @@
-# %.o: %.c
-# 	$(CC) $(CFLAGS) -c -o $@ $<
-# 
-#-videohook: .libs
-#+videohook:
-# 	$(MAKE) -C vhook all
-# 
-# documentation:
-#@@ -112,8 +99,8 @@
-# 	$(MAKE) -C libavutil install
-# 	$(MAKE) -C libavcodec install
-# 	$(MAKE) -C libavformat install
-#-	install -d "$(bindir)"
-#-	install -c $(INSTALLSTRIP) -m 755 $(PROG) "$(bindir)"
-#+	install -d "$(DESTDIR)$(bindir)"
-#+	libtool --mode=install install -c $(INSTALLSTRIP) $(PROG) "$(DESTDIR)$(bindir)"
-# 
-# # create the window installer
-# wininstaller: all install
-#@@ -123,8 +110,8 @@
-# install-man:
-# ifneq ($(CONFIG_WIN32),yes)
-# 	if [ -f doc/ffmpeg.1 ] ; then \
-#-	    install -d "$(mandir)/man1" ; \
-#-	    install -m 644 $(MANPAGE) "$(mandir)/man1" ; \
-#+	    install -d "$(DESTDIR)$(mandir)/man1" ; \
-#+	    install -m 644 $(MANPAGE) "$(DESTDIR)$(mandir)/man1" ; \
-# 	fi
-# endif
-# 
-#@@ -148,17 +135,13 @@
-# .depend: $(SRCS)
-# 	$(CC) -MM $(CFLAGS) $(SDL_CFLAGS) $^ 1>.depend
-# 
-#-.libs: lib
-#-	@test -f .libs || touch .libs
-#-	@for i in $(DEP_LIBS) ; do if $(TEST) $$i -nt .libs ; then touch .libs; fi ; done
-#-
-# clean:
-# 	$(MAKE) -C libavutil clean
-# 	$(MAKE) -C libavcodec clean
-# 	$(MAKE) -C libavformat clean
-# 	$(MAKE) -C tests clean
-# 	$(MAKE) -C vhook clean
-#-	rm -f *.o *.d *~ .libs gmon.out TAGS \
-#+	rm -f *.o *.d *~ gmon.out TAGS \
-# 	   $(PROG) $(PROG_G) $(PROGTEST) $(QTFASTSTART)
-# 
-# # Note well: config.log is NOT removed.
---- ffmpeg-export-2006-12-04/configure~	2006-12-05 02:01:21.711025875 +0200
-+++ ffmpeg-export-2006-12-04/configure	2006-12-05 08:50:18.923199109 +0200
-@@ -608,10 +608,10 @@
- LDCONFIG="ldconfig"
- LIBPREF="lib"
- LIBSUF=".a"
--LIB='$(LIBPREF)$(NAME)$(LIBSUF)'
-+LIB='$(LIBPREF)$(NAME).la'
- SLIBPREF="lib"
- SLIBSUF=".so"
--SLIBNAME='$(SLIBPREF)$(NAME)$(SLIBSUF)'
-+SLIBNAME='$(SLIBPREF)$(NAME).la'
- SLIBNAME_WITH_VERSION='$(SLIBNAME).$(LIBVERSION)'
- SLIBNAME_WITH_MAJOR='$(SLIBNAME).$(LIBMAJOR)'
- EXESUF=""
-#--- ffmpeg-export-2006-12-04/common.mak~	2006-11-25 17:44:55.000000000 +0200
-#+++ ffmpeg-export-2006-12-04/common.mak	2006-12-05 08:58:29.784194185 +0200
-#@@ -20,8 +20,8 @@
-# 	$(AR) rc $@ $^ $(EXTRAOBJS)
-# 	$(RANLIB) $@
-# 
-#-$(SLIBNAME): $(SLIBNAME_WITH_MAJOR)
-#-	ln -sf $^ $@
-#+#$(SLIBNAME): $(SLIBNAME_WITH_MAJOR)
-#+#	ln -sf $^ $@
-# 
-# $(SLIBNAME_WITH_MAJOR): $(SHARED_OBJS)
-# 	$(CC) $(SHFLAGS) $(LDFLAGS) -o $@ $^ $(EXTRALIBS) $(EXTRAOBJS)
---- ffmpeg-export-2006-12-04/common.mak~	2006-12-05 09:05:01.772978082 +0200
-+++ ffmpeg-export-2006-12-04/common.mak	2006-12-05 09:20:25.403675337 +0200
-@@ -15,17 +15,8 @@
- 
- all: $(EXTRADEPS) $(LIB) $(SLIBNAME)
- 
--$(LIB): $(STATIC_OBJS)
--	rm -f $@
--	$(AR) rc $@ $^ $(EXTRAOBJS)
--	$(RANLIB) $@
--
--$(SLIBNAME): $(SLIBNAME_WITH_MAJOR)
--	ln -sf $^ $@
--
--#$(SLIBNAME_WITH_MAJOR): $(SHARED_OBJS)
--#	$(CC) $(SHFLAGS) $(LDFLAGS) -o $@ $^ $(EXTRALIBS) $(EXTRAOBJS)
--#	$(SLIB_EXTRA_CMD)
-+$(SLIBNAME): $(SHARED_OBJS)
-+	libtool --mode=link --tag=CC $(CC) -o $(LIB) $(OBJS) -rpath $(libdir) -version-number `echo $(LIBVERSION) | tr . :`
- 
- %.lo: %.c
- 	libtool --mode=compile --tag=CC $(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
---- ffmpeg-export-2006-12-04/libavcodec/Makefile~	2006-12-05 10:02:12.439956921 +0200
-+++ ffmpeg-export-2006-12-04/libavcodec/Makefile	2006-12-05 10:02:17.910079801 +0200
-@@ -399,9 +399,8 @@
- 
- OBJS-$(TARGET_ARCH_BFIN)               += bfin/dsputil_bfin.lo \
- 
--CFLAGS += $(CFLAGS-yes)
--OBJS += $(OBJS-yes)
--ASM_OBJS += $(ASM_OBJS-yes)
-+OBJS += $(shell echo $(OBJS-yes) | tr ' ' '\n' | sort -u)
-+ASM_OBJS += $(shell echo $(ASM_OBJS-yes) | tr ' ' '\n' | sort -u)
- 
- EXTRALIBS += $(SRC_PATH)/libavutil/libavutil.la
- 
---- ffmpeg-export-2006-12-04/Makefile~	2006-11-20 23:46:43.000000000 +0200
-+++ ffmpeg-export-2006-12-04/Makefile	2006-12-05 11:25:08.441949912 +0200
-@@ -49,8 +49,8 @@
- INSTALLMAN=install-man
- endif
- 
--OBJS = ffmpeg.o ffserver.o cmdutils.o ffplay.o
--SRCS = $(OBJS:.o=.c) $(ASM_OBJS:.o=.s)
-+OBJS = ffmpeg.lo ffserver.lo cmdutils.lo ffplay.lo
-+SRCS = $(OBJS:.lo=.c) $(ASM_OBJS:.lo=.s)
- LDFLAGS := -L$(BUILD_ROOT)/libavformat -L$(BUILD_ROOT)/libavcodec -L$(BUILD_ROOT)/libavutil $(LDFLAGS)
- EXTRALIBS := -lavformat$(BUILDSUF) -lavcodec$(BUILDSUF) -lavutil$(BUILDSUF) $(EXTRALIBS)
- 
-@@ -72,14 +72,14 @@
- 	$(MAKE) -C libswscale  all
- endif
- 
--ffmpeg_g$(EXESUF): ffmpeg.o cmdutils.o .libs
--	$(CC) $(LDFLAGS) -o $@ ffmpeg.o cmdutils.o $(EXTRALIBS)
-+ffmpeg_g$(EXESUF): ffmpeg.lo cmdutils.lo .libs
-+	$(CC) $(LDFLAGS) -o $@ ffmpeg.lo cmdutils.lo $(EXTRALIBS)
- 
--ffserver$(EXESUF): ffserver.o .libs
--	$(CC) $(LDFLAGS) $(FFSERVERLDFLAGS) -o $@ ffserver.o $(EXTRALIBS)
-+ffserver$(EXESUF): ffserver.lo .libs
-+	$(CC) $(LDFLAGS) $(FFSERVERLDFLAGS) -o $@ ffserver.lo $(EXTRALIBS)
- 
--ffplay_g$(EXESUF): ffplay.o cmdutils.o .libs
--	$(CC) $(LDFLAGS) -o $@ ffplay.o cmdutils.o $(EXTRALIBS) $(SDL_LIBS)
-+ffplay_g$(EXESUF): ffplay.lo cmdutils.lo .libs
-+	$(CC) $(LDFLAGS) -o $@ ffplay.lo cmdutils.lo $(EXTRALIBS) $(SDL_LIBS)
- 
- %$(EXESUF): %_g$(EXESUF)
- 	cp -p $< $@
-@@ -88,8 +88,8 @@
- version.h:
- 	$(SRC_PATH)/version.sh $(SRC_PATH)
- 
--output_example$(EXESUF): output_example.o .libs
--	$(CC) $(LDFLAGS) -o $@ output_example.o $(EXTRALIBS)
-+output_example$(EXESUF): output_example.lo .libs
-+	$(CC) $(LDFLAGS) -o $@ output_example.lo $(EXTRALIBS)
- 
- qt-faststart$(EXESUF): qt-faststart.c
- 	$(CC) $(CFLAGS) $< -o $@
-@@ -97,12 +97,12 @@
- cws2fws$(EXESUF): cws2fws.c
- 	$(CC) $< -o $@ -lz
- 
--ffplay.o: ffplay.c
-+ffplay.lo: ffplay.c
- 	$(CC) $(CFLAGS) $(SDL_CFLAGS) -c -o $@ $<
- 
--ffmpeg.o ffplay.o ffserver.o: version.h
-+ffmpeg.lo ffplay.lo ffserver.lo: version.h
- 
--%.o: %.c
-+%.lo: %.c
- 	$(CC) $(CFLAGS) -c -o $@ $<
- 
- videohook: .libs
-@@ -211,7 +211,7 @@
- 	$(MAKE) -C tests       clean
- 	$(MAKE) -C vhook       clean
- 	$(MAKE) -C doc         clean
--	rm -f *.o *.d *~ .libs gmon.out TAGS $(ALLPROGS) $(ALLPROGS_G) \
-+	rm -f *.lo *.d *~ .libs gmon.lout TAGS $(ALLPROGS) $(ALLPROGS_G) \
- 	   output_example$(EXESUF) qt-faststart$(EXESUF) cws2fws$(EXESUF)
- 
- distclean: clean
---- ffmpeg-export-2006-12-04/Makefile~	2006-12-05 11:25:08.441949912 +0200
-+++ ffmpeg-export-2006-12-04/Makefile	2006-12-05 11:29:53.948378928 +0200
-@@ -72,40 +72,39 @@
- 	$(MAKE) -C libswscale  all
- endif
- 
--ffmpeg_g$(EXESUF): ffmpeg.lo cmdutils.lo .libs
--	$(CC) $(LDFLAGS) -o $@ ffmpeg.lo cmdutils.lo $(EXTRALIBS)
-+ffmpeg_g$(EXESUF): ffmpeg.lo cmdutils.lo
-+	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS)
- 
--ffserver$(EXESUF): ffserver.lo .libs
--	$(CC) $(LDFLAGS) $(FFSERVERLDFLAGS) -o $@ ffserver.lo $(EXTRALIBS)
-+ffserver$(EXESUF): ffserver.lo
-+	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) $(FFSERVERLDFLAGS) -o $@ $^ $(EXTRALIBS)
- 
--ffplay_g$(EXESUF): ffplay.lo cmdutils.lo .libs
--	$(CC) $(LDFLAGS) -o $@ ffplay.lo cmdutils.lo $(EXTRALIBS) $(SDL_LIBS)
-+ffplay_g$(EXESUF): ffplay.lo cmdutils.lo
-+	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS) $(SDL_LIBS)
- 
--%$(EXESUF): %_g$(EXESUF)
--	cp -p $< $@
--	$(STRIP) $@
-+ffmpeg$(EXESUF): ffmpeg.lo cmdutils.lo
-+	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS)
- 
- version.h:
- 	$(SRC_PATH)/version.sh $(SRC_PATH)
- 
--output_example$(EXESUF): output_example.lo .libs
--	$(CC) $(LDFLAGS) -o $@ output_example.lo $(EXTRALIBS)
-+output_example$(EXESUF): output_example.lo
-+	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS)
- 
- qt-faststart$(EXESUF): qt-faststart.c
--	$(CC) $(CFLAGS) $< -o $@
-+	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $<
- 
- cws2fws$(EXESUF): cws2fws.c
--	$(CC) $< -o $@ -lz
-+	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $< -lz
- 
- ffplay.lo: ffplay.c
--	$(CC) $(CFLAGS) $(SDL_CFLAGS) -c -o $@ $<
-+	libtool --mode=compile --tag=CC $(CC) $(CFLAGS) $(SDL_CFLAGS) -c -o $@ $<
- 
- ffmpeg.lo ffplay.lo ffserver.lo: version.h
- 
- %.lo: %.c
--	$(CC) $(CFLAGS) -c -o $@ $<
-+	libtool --mode=compile --tag=CC $(CC) $(CFLAGS) -c -o $@ $<
- 
--videohook: .libs
-+videohook:
- 	$(MAKE) -C vhook all
- 
- documentation:
-@@ -198,10 +197,6 @@
- .depend: $(SRCS) version.h
- 	$(CC) -MM $(CFLAGS) $(SDL_CFLAGS) $(filter-out %.h,$^) 1>.depend
- 
--.libs: lib
--	@test -f .libs || touch .libs
--	@for i in $(DEP_LIBS) ; do if test $$i -nt .libs ; then touch .libs; fi ; done
--
- clean:
- 	$(MAKE) -C libavutil   clean
- 	$(MAKE) -C libavcodec  clean
-@@ -211,7 +206,7 @@
- 	$(MAKE) -C tests       clean
- 	$(MAKE) -C vhook       clean
- 	$(MAKE) -C doc         clean
--	rm -f *.lo *.d *~ .libs gmon.lout TAGS $(ALLPROGS) $(ALLPROGS_G) \
-+	rm -f *.lo *.d *~ gmon.lout TAGS $(ALLPROGS) $(ALLPROGS_G) \
- 	   output_example$(EXESUF) qt-faststart$(EXESUF) cws2fws$(EXESUF)
- 
- distclean: clean
---- ffmpeg-export-2006-12-04/Makefile~	2006-12-05 11:30:20.258971357 +0200
-+++ ffmpeg-export-2006-12-04/Makefile	2006-12-05 11:34:30.974616397 +0200
-@@ -51,12 +51,10 @@
- 
- OBJS = ffmpeg.lo ffserver.lo cmdutils.lo ffplay.lo
- SRCS = $(OBJS:.lo=.c) $(ASM_OBJS:.lo=.s)
--LDFLAGS := -L$(BUILD_ROOT)/libavformat -L$(BUILD_ROOT)/libavcodec -L$(BUILD_ROOT)/libavutil $(LDFLAGS)
--EXTRALIBS := -lavformat$(BUILDSUF) -lavcodec$(BUILDSUF) -lavutil$(BUILDSUF) $(EXTRALIBS)
-+EXTRALIBS := $(BUILD_ROOT)/libavformat/libavformat.la $(BUILD_ROOT)/libavcoded/libavcodec.la $(BUILD_ROOT)/libavutil/libavutil.la $(EXTRALIBS)
- 
- ifeq ($(CONFIG_SWSCALER),yes)
--LDFLAGS+=-L./libswscale
--EXTRALIBS+=-lswscale$(BUILDSUF)
-+EXTRALIBS+= $(BUILD_ROOT)/libswscale/libswscale.la
- endif
- 
- all: lib $(PROGS_G) $(PROGS) $(VHOOK) $(DOC)
---- ffmpeg-export-2006-12-04/common.mak~	2006-12-05 11:52:06.638341724 +0200
-+++ ffmpeg-export-2006-12-04/common.mak	2006-12-05 11:52:08.608385978 +0200
-@@ -12,11 +12,13 @@
- OBJS := $(OBJS) $(ASM_OBJS) $(CPPOBJS)
- STATIC_OBJS := $(OBJS) $(STATIC_OBJS)
- SHARED_OBJS := $(OBJS) $(SHARED_OBJS)
-+STATIC_OBJS_ = $(shell echo $(OBJS) $(STATIC_OBJS) | tr ' ' '\n' | sort -u)
-+SHARED_OBJS_ = $(shell echo $(OBJS) $(SHARED_OBJS) | tr ' ' '\n' | sort -u)
- 
- all: $(EXTRADEPS) $(LIB) $(SLIBNAME)
- 
--$(SLIBNAME): $(SHARED_OBJS)
--	libtool --mode=link --tag=CC $(CC) -o $(LIB) $(OBJS) -rpath $(libdir) -version-number `echo $(LIBVERSION) | tr . :`
-+$(SLIBNAME): $(SHARED_OBJS_)
-+	libtool --mode=link --tag=CC $(CC) -o $(LIB) $(SHARED_OBJS_) -rpath $(libdir) -version-number `echo $(LIBVERSION) | tr . :`
- 
- %.lo: %.c
- 	libtool --mode=compile --tag=CC $(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
---- ffmpeg-export-2006-12-04/Makefile~	2006-12-05 11:43:30.426746570 +0200
-+++ ffmpeg-export-2006-12-04/Makefile	2006-12-05 12:10:01.682508527 +0200
-@@ -13,7 +13,6 @@
- 
- ifeq ($(CONFIG_FFMPEG),yes)
- MANPAGES=doc/ffmpeg.1
--PROGS_G+=ffmpeg_g$(EXESUF)
- PROGS+=ffmpeg$(EXESUF)
- endif
- 
-@@ -24,13 +23,11 @@
- 
- ifeq ($(CONFIG_FFPLAY),yes)
- MANPAGES+=doc/ffplay.1
--PROGS_G+=ffplay_g$(EXESUF)
- PROGS+=ffplay$(EXESUF)
- endif
- 
- BASENAMES=ffmpeg ffplay ffserver
- ALLPROGS=$(addsuffix $(EXESUF), $(BASENAMES))
--ALLPROGS_G=$(addsuffix _g$(EXESUF), $(BASENAMES))
- ALLMANPAGES=$(addsuffix .1, $(BASENAMES))
- 
- ifeq ($(BUILD_SHARED),yes)
-@@ -57,7 +54,7 @@
- EXTRALIBS+= $(BUILD_ROOT)/libswscale/libswscale.la
- endif
- 
--all: lib $(PROGS_G) $(PROGS) $(VHOOK) $(DOC)
-+all: lib $(PROGS) $(VHOOK) $(DOC)
- 
- lib:
- 	$(MAKE) -C libavutil   all
-@@ -70,13 +67,13 @@
- 	$(MAKE) -C libswscale  all
- endif
- 
--ffmpeg_g$(EXESUF): ffmpeg.lo cmdutils.lo
-+ffmpeg$(EXESUF): ffmpeg.lo cmdutils.lo
- 	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS)
- 
- ffserver$(EXESUF): ffserver.lo
- 	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) $(FFSERVERLDFLAGS) -o $@ $^ $(EXTRALIBS)
- 
--ffplay_g$(EXESUF): ffplay.lo cmdutils.lo
-+ffplay$(EXESUF): ffplay.lo cmdutils.lo
- 	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS) $(SDL_LIBS)
- 
- ffmpeg$(EXESUF): ffmpeg.lo cmdutils.lo
-@@ -204,7 +201,7 @@
- 	$(MAKE) -C tests       clean
- 	$(MAKE) -C vhook       clean
- 	$(MAKE) -C doc         clean
--	rm -f *.lo *.d *~ gmon.lout TAGS $(ALLPROGS) $(ALLPROGS_G) \
-+	rm -f *.lo *.d *~ gmon.lout TAGS $(ALLPROGS) \
- 	   output_example$(EXESUF) qt-faststart$(EXESUF) cws2fws$(EXESUF)
- 
- distclean: clean
---- ffmpeg-export-2006-12-04/Makefile~	2006-12-05 12:10:01.682508527 +0200
-+++ ffmpeg-export-2006-12-04/Makefile	2006-12-05 12:11:45.214836385 +0200
-@@ -76,9 +76,6 @@
- ffplay$(EXESUF): ffplay.lo cmdutils.lo
- 	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS) $(SDL_LIBS)
- 
--ffmpeg$(EXESUF): ffmpeg.lo cmdutils.lo
--	libtool --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS)
--
- version.h:
- 	$(SRC_PATH)/version.sh $(SRC_PATH)
- 
