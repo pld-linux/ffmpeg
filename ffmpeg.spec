@@ -34,6 +34,7 @@ Patch2:		%{name}-gcc4.patch
 Patch3:		%{name}-system-amr.patch
 Patch4:		%{name}-x264-symbol.patch
 Patch5:		%{name}-kill-mabi_altivec.patch
+Patch6:		%{name}-altivec_fix.patch
 URL:		http://ffmpeg.mplayerhq.hu/
 BuildRequires:	SDL-devel
 %if %{with amr}
@@ -213,6 +214,7 @@ du¿ej przestrzeni na dane skonfigurowanej w ffserver.conf).
 #%patch3 -p1 NEEDS UPDATE
 %patch4 -p1
 %patch5 -p1
+%patch6 -p1
 
 %build
 # notes:
