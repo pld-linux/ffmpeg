@@ -1,4 +1,5 @@
 # TODO
+# - libtool patch breaks linked libs (-Wl,as-needed inside configure and Makefiles broken)
 # - libnut enabled   no
 # - Software Scaler enabled no
 # - AVISynth enabled no
@@ -10,7 +11,7 @@
 #
 %define		_snap	2006-12-04
 %define		snap	%(echo %{_snap} | tr -d -)
-%define		_rel 0.5
+%define		_rel 0.7
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
