@@ -11,7 +11,7 @@
 #
 %define		_snap	2006-12-04
 %define		snap	%(echo %{_snap} | tr -d -)
-%define		_rel 0.7
+%define		_rel 1
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
@@ -29,7 +29,7 @@ Source0:	http://ffmpeg.mplayerhq.hu/%{name}-export-snapshot.tar.bz2
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
-Patch0:		%{name}-libtool.patch
+#Patch0:		%{name}-libtool.patch
 Patch1:		%{name}-libdir.patch
 Patch2:		%{name}-gcc4.patch
 Patch3:		%{name}-system-amr.patch
@@ -209,7 +209,7 @@ du¿ej przestrzeni na dane skonfigurowanej w ffserver.conf).
 
 %prep
 %setup -q -n %{name}-export-%{_snap}
-%patch0 -p1
+#%patch0 -p1
 %patch1 -p1
 %patch2 -p1
 #%patch3 -p1 NEEDS UPDATE
@@ -331,7 +331,7 @@ fi
 %attr(755,root,root) %{_libdir}/libavformat.so
 %attr(755,root,root) %{_libdir}/libavutil.so
 %attr(755,root,root) %{_libdir}/libpostproc.so
-%{_libdir}/lib*.la
+#%{_libdir}/lib*.la
 %{_includedir}/ffmpeg
 %{_includedir}/postproc
 %{_pkgconfigdir}/*.pc
