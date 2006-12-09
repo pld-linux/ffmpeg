@@ -9,7 +9,7 @@
 #
 %define		_snap	2006-12-04
 %define		snap	%(echo %{_snap} | tr -d -)
-%define		_rel 1.3
+%define		_rel 2
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
@@ -27,7 +27,7 @@ Source0:	http://ffmpeg.mplayerhq.hu/%{name}-export-snapshot.tar.bz2
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
-#Patch0:		%{name}-libtool.patch
+#PatchX:		%{name}-libtool.patch
 Patch0:		%{name}-link.patch
 Patch1:		%{name}-libdir.patch
 Patch2:		%{name}-gcc4.patch
