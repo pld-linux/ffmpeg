@@ -1,7 +1,6 @@
 # TODO
 # - libtool patch breaks linked libs (-Wl,as-needed inside configure and Makefiles broken)
 # - libnut enabled   no
-# - Software Scaler enabled no
 #
 # Conditional build:
 %bcond_with	amr		# build 3GPP Adaptive Multi Rate (AMR) speech codec
@@ -29,6 +28,7 @@ Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
 #Patch0:		%{name}-libtool.patch
+Patch0:		%{name}-link.patch
 Patch1:		%{name}-libdir.patch
 Patch2:		%{name}-gcc4.patch
 Patch3:		%{name}-system-amr.patch
@@ -208,7 +208,7 @@ du¿ej przestrzeni na dane skonfigurowanej w ffserver.conf).
 
 %prep
 %setup -q -n %{name}-export-%{_snap}
-#%patch0 -p1
+%patch0 -p1
 %patch1 -p1
 %patch2 -p1
 #%patch3 -p1 NEEDS UPDATE
@@ -239,6 +239,7 @@ du¿ej przestrzeni na dane skonfigurowanej w ffserver.conf).
 	--enable-pp \
 	--enable-pthreads \
 	--enable-shared \
+	--enable-swscaler \
 	--enable-vorbis \
 	--enable-x264 \
 	--enable-xvid \
@@ -318,6 +319,7 @@ fi
 %attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
 %attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
 %attr(755,root,root) %{_libdir}/libpostproc.so.*.*.*
+%attr(755,root,root) %{_libdir}/libswscale.so.*.*.*
 %dir %{_libdir}/vhook
 %attr(755,root,root) %{_libdir}/vhook/drawtext.so
 %attr(755,root,root) %{_libdir}/vhook/fish.so
@@ -332,6 +334,7 @@ fi
 %attr(755,root,root) %{_libdir}/libavformat.so
 %attr(755,root,root) %{_libdir}/libavutil.so
 %attr(755,root,root) %{_libdir}/libpostproc.so
+%attr(755,root,root) %{_libdir}/libswscale.so
 #%{_libdir}/lib*.la
 %{_includedir}/ffmpeg
 %{_includedir}/postproc
