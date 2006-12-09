@@ -1,5 +1,4 @@
 # TODO
-# - libtool patch breaks linked libs (-Wl,as-needed inside configure and Makefiles broken)
 # - libnut enabled   no
 #
 # Conditional build:
@@ -20,14 +19,11 @@ Release:	3.%{snap}.%{_rel}
 License:	GPL with LGPL parts
 Group:		Applications/Multimedia
 #Source0:	http://dl.sourceforge.net/ffmpeg/%{name}-%{version}-pre1.tar.gz
-#Source0:	ftp://ftp2.mplayerhq.hu/MPlayer/cvs/FFMpeg-%{snap}.tar.bz2
-#Source0:	%{name}-%{snap}.tar.bz2
 Source0:	http://ffmpeg.mplayerhq.hu/%{name}-export-snapshot.tar.bz2
 # Source0-md5:	5be2e4d1e326bb7809205a3401204621
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
-#PatchX:		%{name}-libtool.patch
 Patch0:		%{name}-link.patch
 Patch1:		%{name}-libdir.patch
 Patch2:		%{name}-gcc4.patch
@@ -211,7 +207,7 @@ du¿ej przestrzeni na dane skonfigurowanej w ffserver.conf).
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
-#%patch3 -p1 NEEDS UPDATE
+%patch3 -p1
 %patch4 -p1
 %patch5 -p1
 %patch6 -p1
@@ -259,10 +255,8 @@ du¿ej przestrzeni na dane skonfigurowanej w ffserver.conf).
 	--disable-debug \
 	--disable-opts \
 
-# GONE?
-#	--enable-theora \
-
 # one jobserver as it otherwise manages to create truncated .lo files ... :/
+# XXX: recheck, libtool is not used now so there are no *.lo
 %{__make} -j1
 
 %install
@@ -335,7 +329,6 @@ fi
 %attr(755,root,root) %{_libdir}/libavutil.so
 %attr(755,root,root) %{_libdir}/libpostproc.so
 %attr(755,root,root) %{_libdir}/libswscale.so
-#%{_libdir}/lib*.la
 %{_includedir}/ffmpeg
 %{_includedir}/postproc
 %{_pkgconfigdir}/*.pc
