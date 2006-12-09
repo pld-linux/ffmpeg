@@ -255,9 +255,7 @@ du¿ej przestrzeni na dane skonfigurowanej w ffserver.conf).
 	--disable-debug \
 	--disable-opts \
 
-# one jobserver as it otherwise manages to create truncated .lo files ... :/
-# XXX: recheck, libtool is not used now so there are no *.lo
-%{__make} -j1
+%{__make}
 
 %install
 rm -rf $RPM_BUILD_ROOT
