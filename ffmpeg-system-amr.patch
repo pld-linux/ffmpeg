@@ -1,139 +1,70 @@
---- ffmpeg/configure.orig	2006-07-02 00:58:55.381979000 +0200
-+++ ffmpeg/configure	2006-07-02 12:45:52.840905000 +0200
-@@ -1500,6 +1500,25 @@
-   echo "#define HAVE_VHOOK 1" >> $TMPH
- fi
+--- ffmpeg-export-2006-12-04/configure.orig	2006-12-09 16:02:48.392192000 +0100
++++ ffmpeg-export-2006-12-04/configure	2006-12-09 17:22:37.765123062 +0100
+@@ -1891,6 +1891,25 @@
+ lavu_version=`grep '#define LIBAVUTIL_VERSION ' "$source_path/libavutil/avutil.h" | sed 's/[^0-9\.]//g'`
  
+ 
++if test "$amr_wb" = "yes" -o "$amr_nb" = "yes" ; then
++  echo "CONFIG_AMR=yes" >> config.mak
++fi
++
 +if test "$amr_wb" = "yes" ; then
 +  echo "#define AMR_WB 1" >> $TMPH
-+  echo "AMR_WB=yes" >> config.mak
++  echo "CONFIG_AMR_WB=yes" >> config.mak
 +  extralibs="$extralibs -lamrwb"
 +fi
 +
 +if test "$amr_nb" = "yes" ; then
 +  echo "#define AMR_NB 1" >> $TMPH
-+  echo "AMR_NB=yes" >> config.mak
++  echo "CONFIG_AMR_NB=yes" >> config.mak
 +if test "$amr_nb_fixed" = "yes" ; then
 +  extralibs="$extralibs -lamrnbfixed"
 +else
 +  extralibs="$extralibs -lamrnb"
 +fi
-+if test "$amr_if2" = "yes" ; then
-+  echo "AMR_CFLAGS=-DIF2=1" >> config.mak
 +fi
-+fi
-+
- pp_version=`grep '#define LIBPOSTPROC_VERSION ' "$source_path/libavcodec/libpostproc/postprocess.h" | sed 's/[^0-9\.]//g'`
- lavc_version=`grep '#define LIBAVCODEC_VERSION ' "$source_path/libavcodec/avcodec.h" | sed 's/[^0-9\.]//g'`
- lavf_version=`grep '#define LIBAVFORMAT_VERSION ' "$source_path/libavformat/avformat.h" | sed 's/[^0-9\.]//g'`
-@@ -1817,46 +1836,6 @@
-     echo "SRC_PATH='$source_path'" >> config.mak
- fi
  
--if test "$amr_wb" = "yes" ; then
--  echo "#define AMR_WB 1" >> $TMPH
--  echo "AMR_WB=yes" >> config.mak
--  echo
--  echo "AMR WB FLOAT NOTICE ! Make sure you have downloaded TS26.204"
--  echo "V5.1.0 from "
--  echo "http://www.3gpp.org/ftp/Specs/archive/26_series/26.204/26204-510.zip"
--  echo "and extracted the source to libavcodec/amrwb_float"
--  echo
--fi
--
--if test "$amr_nb" = "yes" ; then
--  echo "#define AMR_NB 1" >> $TMPH
--  echo "AMR_NB=yes" >> config.mak
--  echo
--if test "$amr_nb_fixed" = "yes" ; then
--  echo "AMR_NB_FIXED=yes" >> config.mak
--  echo "#define AMR_NB_FIXED 1" >> $TMPH
--  echo "AMR NB FIXED POINT NOTICE! Make sure you have downloaded TS26.073 "
--  echo "REL-5 version 5.1.0 from "
--  echo "http://www.3gpp.org/ftp/Specs/latest/Rel-5/26_series/26073-5??.zip"
--  echo "and extracted src to libavcodec/amr"
--  echo "You must also add -DMMS_IO and remove -pedantic-errors to/from CFLAGS in libavcodec/amr/makefile."
--  echo "i.e. CFLAGS = -Wall -I. \$(CFLAGS_\$(MODE)) -D\$(VAD) -DMMS_IO"
--  echo
--else
--  echo "AMR NB FLOAT NOTICE ! Make sure you have downloaded TS26.104"
--  echo "REL-5 V5.1.0 from "
--  echo "http://www.3gpp.org/ftp/Specs/latest/Rel-5/26_series/26104-5??.zip"
--  echo "and extracted the source to libavcodec/amr_float"
--  echo "and if u try this on an alpha, u may need to change Word32 to int in amr/typedef.h"
--  echo
--fi
--
--if test "$amr_if2" = "yes" ; then
--  echo "AMR_CFLAGS=-DIF2=1" >> config.mak
--fi
--
--fi
--
- for codec in $CODEC_LIST ; do
-     echo "#define CONFIG_`echo $codec | tr a-z A-Z` 1" >> $TMPH
-     echo "CONFIG_`echo $codec | tr a-z A-Z`=yes" >> config.mak
---- ffmpeg/libavcodec/Makefile.orig	2006-07-02 00:58:55.361978000 +0200
-+++ ffmpeg/libavcodec/Makefile	2006-07-02 12:36:11.820593500 +0200
-@@ -215,13 +215,8 @@
- ifeq ($(AMR_NB),yes)
- ifeq ($(AMR_NB_FIXED),yes)
- AMROBJS= amr.lo
--AMREXTRALIBS+= amr/*.lo
--AMRLIBS=amrlibs
--CLEANAMR=cleanamr
- else
- AMROBJS= amr.lo
--OBJS+= amr_float/sp_dec.lo amr_float/sp_enc.lo amr_float/interf_dec.lo amr_float/interf_enc.lo
--CLEANAMR=cleanamrfloat
- endif
- endif
+ if test "$lshared" = "yes" ; then
+   echo "#define BUILD_SHARED_AV 1" >> $TMPH
+--- ffmpeg-export-2006-12-04/libavcodec/Makefile.orig	2006-11-22 10:20:16.000000000 +0100
++++ ffmpeg-export-2006-12-04/libavcodec/Makefile	2006-12-09 17:23:09.810949249 +0100
+@@ -264,33 +264,6 @@
+ OBJS-$(CONFIG_DTS)                     += dtsdec.o
  
-@@ -239,15 +234,8 @@
- 
- ifeq ($(AMR_WB),yes)
- AMROBJS= amr.lo
--OBJS+= amrwb_float/dec_acelp.lo amrwb_float/dec_dtx.lo amrwb_float/dec_gain.lo \
--		amrwb_float/dec_if.lo amrwb_float/dec_lpc.lo amrwb_float/dec_main.lo \
--		amrwb_float/dec_rom.lo amrwb_float/dec_util.lo amrwb_float/enc_acelp.lo \
--		amrwb_float/enc_dtx.lo amrwb_float/enc_gain.lo amrwb_float/enc_if.lo \
--		amrwb_float/enc_lpc.lo amrwb_float/enc_main.lo amrwb_float/enc_rom.lo \
--		amrwb_float/enc_util.lo amrwb_float/if_rom.lo
- endif
- OBJS+= $(AMROBJS)
--CLEANAMRWB=cleanamrwbfloat
- ASM_OBJS=
- 
- ifeq ($(HAVE_XVMC_ACCEL),yes)
-@@ -411,9 +399,6 @@
- 
- all: $(LIB)
- 
--amrlibs:
--	$(MAKE) -C amr spclib fipoplib
+ OBJS-$(CONFIG_AMR)                     += amr.o
+-OBJS-$(CONFIG_AMR_NB)                  += amr_float/sp_dec.o     \
+-                                          amr_float/sp_enc.o     \
+-                                          amr_float/interf_dec.o \
+-                                          amr_float/interf_enc.o
 -
- tests: apiexample cpuid_test $(TESTS)
+-ifeq ($(CONFIG_AMR_NB_FIXED),yes)
+-EXTRAOBJS += amr/*.o
+-EXTRADEPS=amrlibs
+-endif
+-
+-OBJS-$(CONFIG_AMR_WB)                  += amrwb_float/dec_acelp.o \
+-                                          amrwb_float/dec_dtx.o   \
+-                                          amrwb_float/dec_gain.o  \
+-                                          amrwb_float/dec_if.o    \
+-                                          amrwb_float/dec_lpc.o   \
+-                                          amrwb_float/dec_main.o  \
+-                                          amrwb_float/dec_rom.o   \
+-                                          amrwb_float/dec_util.o  \
+-                                          amrwb_float/enc_acelp.o \
+-                                          amrwb_float/enc_dtx.o   \
+-                                          amrwb_float/enc_gain.o  \
+-                                          amrwb_float/enc_if.o    \
+-                                          amrwb_float/enc_lpc.o   \
+-                                          amrwb_float/enc_main.o  \
+-                                          amrwb_float/enc_rom.o   \
+-                                          amrwb_float/enc_util.o  \
+-                                          amrwb_float/if_rom.o
  
- $(LIB): $(OBJS) $(AMRLIBS) $(EXTRADEPS)
-@@ -453,15 +438,6 @@
- 	rm -f .depend
- 	$(MAKE) -C libpostproc distclean
- 
--cleanamr:
--	$(MAKE) -C amr clean
--
--cleanamrfloat:
--	rm -f amr_float/*.o
--
--cleanamrwbfloat:
--	$(MAKE) -C amrwb_float -f makefile.gcc clean
--
- # api example program
- apiexample: apiexample.c $(LIB)
- 	libtool --mode=link --tag=CC $(CC) $(CFLAGS) -o $@ $< $(LIB) $(LIBAVUTIL) $(EXTRALIBS) -lm
---- ffmpeg/libavcodec/amr.c.orig	2006-01-12 23:43:14.000000000 +0100
-+++ ffmpeg/libavcodec/amr.c	2006-07-02 12:34:29.710212000 +0200
-@@ -59,16 +59,16 @@
+ OBJS-$(CONFIG_AAC_PARSER)              += parser.o
+ OBJS-$(CONFIG_AC3_PARSER)              += parser.o
+--- ffmpeg-export-2006-12-04/libavcodec/amr.c.orig	2006-11-20 21:41:31.000000000 +0100
++++ ffmpeg-export-2006-12-04/libavcodec/amr.c	2006-12-09 17:24:13.690589543 +0100
+@@ -61,16 +61,16 @@
  
  #define MMS_IO
  
@@ -158,7 +89,7 @@
  #endif
  
  /* Common code for fixed and float version*/
-@@ -493,8 +493,8 @@
+@@ -532,8 +532,8 @@
  #define typedef_h
  #endif
  
