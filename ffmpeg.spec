@@ -10,7 +10,7 @@
 %define		snap	%(echo %{_snap} | tr -d -)
 %define		_rel 0.1
 Summary:	Realtime audio/video encoder and streaming server
-Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
+Summary(pl.UTF-8):   Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.9
 Release:	3.%{snap}.%{_rel}
@@ -88,28 +88,28 @@ convert it into several file formats based on DCT/motion compensation
 encoding. Sound is compressed in MPEG audio layer 2 or using an AC3
 compatible stream.
 
-%description -l pl
+%description -l pl.UTF-8
 ffmpeg jest bardzo szybkim koderem audio/wideo w czasie rzeczywistym
-oraz serwerem strumieni multimedialnych. ffmpeg potrafi zrzucaÊ dane
-ze standardowego urz±dzenia Video4Linux i przekonwertowaÊ je w kilka
-formatÛw plikÛw bazuj±cych na kodowaniu DCT/kompensacji ruchu. DºwiÍk
-jest kompresowany do strumienia MPEG audio layer 2 lub uøywaj±c
+oraz serwerem strumieni multimedialnych. ffmpeg potrafi zrzucaƒá dane
+ze standardowego urzƒÖdzenia Video4Linux i przekonwertowaƒá je w kilka
+format√≥w plik√≥w bazujƒÖcych na kodowaniu DCT/kompensacji ruchu. D≈∫wiƒôk
+jest kompresowany do strumienia MPEG audio layer 2 lub u≈ºywajƒÖc
 strumienia kompatybilnego z AC3.
 
 %package libs
 Summary:	ffmpeg libraries
-Summary(pl):	Biblioteki ffmpeg
+Summary(pl.UTF-8):   Biblioteki ffmpeg
 Group:		Libraries
 
 %description libs
 This package contains ffmpeg shared libraries.
 
-%description libs -l pl
-Ten pakiet zawiera biblioteki wspÛ≥dzielone ffmpeg.
+%description libs -l pl.UTF-8
+Ten pakiet zawiera biblioteki wsp√≥≈Çdzielone ffmpeg.
 
 %package devel
 Summary:	ffmpeg header files
-Summary(pl):	Pliki nag≥Ûwkowe ffmpeg
+Summary(pl.UTF-8):   Pliki nag≈Ç√≥wkowe ffmpeg
 Group:		Development/Libraries
 Requires:	%{name}-libs = %{version}-%{release}
 # for libavcodec:
@@ -132,24 +132,24 @@ Obsoletes:	libpostproc-devel
 %description devel
 ffmpeg header files.
 
-%description devel -l pl
-Pliki nag≥Ûwkowe ffmpeg.
+%description devel -l pl.UTF-8
+Pliki nag≈Ç√≥wkowe ffmpeg.
 
 %package static
 Summary:	ffmpeg static libraries
-Summary(pl):	Statyczne biblioteki ffmpeg
+Summary(pl.UTF-8):   Statyczne biblioteki ffmpeg
 Group:		Development/Libraries
 Requires:	%{name}-devel = %{version}-%{release}
 
 %description static
 ffmpeg static libraries (libavcodec and libavformat).
 
-%description static -l pl
+%description static -l pl.UTF-8
 Statyczne biblioteki ffmpeg (libavcodec i libavformat).
 
 %package ffplay
 Summary:	FFplay - SDL-based media player
-Summary(pl):	FFplay - odtwarzacz mediÛw oparty na SDL
+Summary(pl.UTF-8):   FFplay - odtwarzacz medi√≥w oparty na SDL
 Group:		Applications/Multimedia
 Requires:	%{name}-libs = %{version}-%{release}
 
@@ -158,14 +158,14 @@ FFplay is a very simple and portable media player using the FFmpeg
 libraries and the SDL library. It is mostly used as a test bench for
 the various APIs of FFmpeg.
 
-%description ffplay -l pl
-FFplay to bardzo prosty i przeno∂ny odtwarzacz mediÛw uøywaj±cy
-bibliotek FFmpeg oraz biblioteki SDL. Jest uøywany g≥Ûwnie do
-testowania rÛønych API FFmpeg.
+%description ffplay -l pl.UTF-8
+FFplay to bardzo prosty i przeno≈õny odtwarzacz medi√≥w u≈ºywajƒÖcy
+bibliotek FFmpeg oraz biblioteki SDL. Jest u≈ºywany g≈Ç√≥wnie do
+testowania r√≥≈ºnych API FFmpeg.
 
 %package vhook-imlib2
 Summary:	imlib2 based hook
-Summary(pl):	Modu≥ przej∂ciowy oparty o imlib2
+Summary(pl.UTF-8):   Modu≈Ç przej≈õciowy oparty o imlib2
 Group:		Libraries
 Requires:	%{name}-libs = %{version}-%{release}
 
@@ -175,15 +175,15 @@ supports a fixed overlay or reading the text from a file. The string
 is passed through strftime so that it is easy to imprint the date and
 time onto the image.
 
-%description vhook-imlib2 -l pl
-Ten modu≥ implementuje tekstow± nak≥adkÍ dla obrazu. Aktualnie
-obs≥uguje sta≥± nak≥adkÍ lub wczytywanie tekstu z pliku. £aÒcuch jest
-przepuszczany przez strftime, wiÍc ≥atwo umie∂ciÊ datÍ i czas na
+%description vhook-imlib2 -l pl.UTF-8
+Ten modu≈Ç implementuje tekstowƒÖ nak≈Çadkƒô dla obrazu. Aktualnie
+obs≈Çuguje sta≈ÇƒÖ nak≈Çadkƒô lub wczytywanie tekstu z pliku. ≈Åa≈Ñcuch jest
+przepuszczany przez strftime, wiƒôc ≈Çatwo umie≈õciƒá datƒô i czas na
 obrazie.
 
 %package ffserver
 Summary:	FFserver video server
-Summary(pl):	FFserver - serwer strumieni obrazu
+Summary(pl.UTF-8):   FFserver - serwer strumieni obrazu
 Group:		Daemons
 Requires(post,preun):	/sbin/chkconfig
 Requires:	%{name}-libs = %{version}-%{release}
@@ -195,12 +195,12 @@ several live feeds, streaming from files and time shifting on live
 feeds (you can seek to positions in the past on each live feed,
 provided you specify a big enough feed storage in ffserver.conf).
 
-%description ffserver -l pl
-FFserver to serwer strumieni dla dºwiÍku i obrazu. Obs≥uguje kilka
-ºrÛde≥ na øywo, przekazywanie strumieni z plikÛw i przesuwanie w
-czasie dla ºrÛde≥ na øywo (moøna przeskakiwaÊ na po≥oøenia w
-przesz≥o∂ci dla kaødego ºrÛd≥a na øywo, pod warunkiem odpowiednio
-duøej przestrzeni na dane skonfigurowanej w ffserver.conf).
+%description ffserver -l pl.UTF-8
+FFserver to serwer strumieni dla d≈∫wiƒôku i obrazu. Obs≈Çuguje kilka
+≈∫r√≥de≈Ç na ≈ºywo, przekazywanie strumieni z plik√≥w i przesuwanie w
+czasie dla ≈∫r√≥de≈Ç na ≈ºywo (mo≈ºna przeskakiwaƒá na po≈Ço≈ºenia w
+przesz≈Ço≈õci dla ka≈ºdego ≈∫r√≥d≈Ça na ≈ºywo, pod warunkiem odpowiednio
+du≈ºej przestrzeni na dane skonfigurowanej w ffserver.conf).
 
 %prep
 %setup -q -n %{name}-export-%{_snap}
