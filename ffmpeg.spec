@@ -10,7 +10,7 @@
 %define		snap	%(echo %{_snap} | tr -d -)
 %define		_rel 0.1
 Summary:	Realtime audio/video encoder and streaming server
-Summary(pl.UTF-8):   Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
+Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.9
 Release:	3.%{snap}.%{_rel}
@@ -98,7 +98,7 @@ strumienia kompatybilnego z AC3.
 
 %package libs
 Summary:	ffmpeg libraries
-Summary(pl.UTF-8):   Biblioteki ffmpeg
+Summary(pl.UTF-8):	Biblioteki ffmpeg
 Group:		Libraries
 
 %description libs
@@ -109,7 +109,7 @@ Ten pakiet zawiera biblioteki współdzielone ffmpeg.
 
 %package devel
 Summary:	ffmpeg header files
-Summary(pl.UTF-8):   Pliki nagłówkowe ffmpeg
+Summary(pl.UTF-8):	Pliki nagłówkowe ffmpeg
 Group:		Development/Libraries
 Requires:	%{name}-libs = %{version}-%{release}
 # for libavcodec:
@@ -137,7 +137,7 @@ Pliki nagłówkowe ffmpeg.
 
 %package static
 Summary:	ffmpeg static libraries
-Summary(pl.UTF-8):   Statyczne biblioteki ffmpeg
+Summary(pl.UTF-8):	Statyczne biblioteki ffmpeg
 Group:		Development/Libraries
 Requires:	%{name}-devel = %{version}-%{release}
 
@@ -149,7 +149,7 @@ Statyczne biblioteki ffmpeg (libavcodec i libavformat).
 
 %package ffplay
 Summary:	FFplay - SDL-based media player
-Summary(pl.UTF-8):   FFplay - odtwarzacz mediów oparty na SDL
+Summary(pl.UTF-8):	FFplay - odtwarzacz mediów oparty na SDL
 Group:		Applications/Multimedia
 Requires:	%{name}-libs = %{version}-%{release}
 
@@ -165,7 +165,7 @@ testowania różnych API FFmpeg.
 
 %package vhook-imlib2
 Summary:	imlib2 based hook
-Summary(pl.UTF-8):   Moduł przejściowy oparty o imlib2
+Summary(pl.UTF-8):	Moduł przejściowy oparty o imlib2
 Group:		Libraries
 Requires:	%{name}-libs = %{version}-%{release}
 
@@ -183,7 +183,7 @@ obrazie.
 
 %package ffserver
 Summary:	FFserver video server
-Summary(pl.UTF-8):   FFserver - serwer strumieni obrazu
+Summary(pl.UTF-8):	FFserver - serwer strumieni obrazu
 Group:		Daemons
 Requires(post,preun):	/sbin/chkconfig
 Requires:	%{name}-libs = %{version}-%{release}
