@@ -1,0 +1,6 @@
+- updated to 2007-03-12:
+  - BMP encoder
+  - WMA encoder
+  - GSM-MS encoder and decoder
+  - DCA decoder
+- imlib2 dep increased (has fixed badness with X_DISPLAY_MISSING define)
