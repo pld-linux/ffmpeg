@@ -9,7 +9,7 @@
 #
 %define		_snap	2006-12-04
 %define		snap	%(echo %{_snap} | tr -d -)
-%define		_rel 2
+%define		_rel 3
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
@@ -35,6 +35,7 @@ Patch3:		%{name}-system-amr.patch
 Patch4:		%{name}-x264-symbol.patch
 Patch5:		%{name}-kill-mabi_altivec.patch
 Patch6:		%{name}-altivec_fix.patch
+Patch7:		%{name}-img_convert_symbol.patch
 URL:		http://ffmpeg.mplayerhq.hu/
 BuildRequires:	SDL-devel
 %if %{with amr}
@@ -215,6 +216,7 @@ du¿ej przestrzeni na dane skonfigurowanej w ffserver.conf).
 %patch4 -p1
 %patch5 -p1
 %patch6 -p1
+%patch7 -p1
 
 %build
 # notes:
