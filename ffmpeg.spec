@@ -1,7 +1,6 @@
 # TODO
 # - libtool patch breaks linked libs (-Wl,as-needed inside configure and Makefiles broken)
 # - libnut enabled   no
-# - Software Scaler enabled no
 #
 # Conditional build:
 %bcond_with	amr		# build 3GPP Adaptive Multi Rate (AMR) speech codec
@@ -10,7 +9,7 @@
 #
 %define		_snap	2006-12-04
 %define		snap	%(echo %{_snap} | tr -d -)
-%define		_rel 1.3
+%define		_rel 3
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
@@ -28,13 +27,15 @@ Source0:	http://ffmpeg.mplayerhq.hu/%{name}-export-snapshot.tar.bz2
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
-#Patch0:		%{name}-libtool.patch
+#PatchX:		%{name}-libtool.patch
+Patch0:		%{name}-link.patch
 Patch1:		%{name}-libdir.patch
 Patch2:		%{name}-gcc4.patch
 Patch3:		%{name}-system-amr.patch
 Patch4:		%{name}-x264-symbol.patch
 Patch5:		%{name}-kill-mabi_altivec.patch
 Patch6:		%{name}-altivec_fix.patch
+Patch7:		%{name}-img_convert_symbol.patch
 URL:		http://ffmpeg.mplayerhq.hu/
 BuildRequires:	SDL-devel
 %if %{with amr}
@@ -208,13 +209,14 @@ du¿ej przestrzeni na dane skonfigurowanej w ffserver.conf).
 
 %prep
 %setup -q -n %{name}-export-%{_snap}
-#%patch0 -p1
+%patch0 -p1
 %patch1 -p1
 %patch2 -p1
 #%patch3 -p1 NEEDS UPDATE
 %patch4 -p1
 %patch5 -p1
 %patch6 -p1
+%patch7 -p1
 
 %build
 # notes:
@@ -239,6 +241,7 @@ du¿ej przestrzeni na dane skonfigurowanej w ffserver.conf).
 	--enable-pp \
 	--enable-pthreads \
 	--enable-shared \
+	--enable-swscaler \
 	--enable-vorbis \
 	--enable-x264 \
 	--enable-xvid \
@@ -318,6 +321,7 @@ fi
 %attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
 %attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
 %attr(755,root,root) %{_libdir}/libpostproc.so.*.*.*
+%attr(755,root,root) %{_libdir}/libswscale.so.*.*.*
 %dir %{_libdir}/vhook
 %attr(755,root,root) %{_libdir}/vhook/drawtext.so
 %attr(755,root,root) %{_libdir}/vhook/fish.so
@@ -332,6 +336,7 @@ fi
 %attr(755,root,root) %{_libdir}/libavformat.so
 %attr(755,root,root) %{_libdir}/libavutil.so
 %attr(755,root,root) %{_libdir}/libpostproc.so
+%attr(755,root,root) %{_libdir}/libswscale.so
 #%{_libdir}/lib*.la
 %{_includedir}/ffmpeg
 %{_includedir}/postproc
