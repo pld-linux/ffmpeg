@@ -8,7 +8,7 @@
 #
 %define		_snap	2007-03-12
 %define		snap	%(echo %{_snap} | tr -d -)
-%define		_rel 1
+%define		_rel 2
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
@@ -32,6 +32,7 @@ Patch5:		%{name}-kill-mabi_altivec.patch
 Patch6:		%{name}-img_convert_symbol.patch
 URL:		http://ffmpeg.mplayerhq.hu/
 BuildRequires:	SDL-devel
+BuildRequires:  a52dec-libs-devel
 %if %{with amr}
 BuildRequires:	amrnb-devel
 BuildRequires:	amrwb-devel >= 5.3.0
@@ -49,7 +50,7 @@ BuildRequires:	libdts-devel
 BuildRequires:	libgsm-devel
 BuildRequires:	libogg-devel
 BuildRequires:	libraw1394-devel
-BuildRequires:	libtheora >= 1.0-0.alpha7
+BuildRequires:	libtheora-devel >= 1.0-0.alpha7
 BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	libvorbis-devel
 BuildRequires:	libx264-devel >= 0.1.2-1.20061024_2245.1
