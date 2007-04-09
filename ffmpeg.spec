@@ -32,7 +32,7 @@ Patch5:		%{name}-kill-mabi_altivec.patch
 Patch6:		%{name}-img_convert_symbol.patch
 URL:		http://ffmpeg.mplayerhq.hu/
 BuildRequires:	SDL-devel
-BuildRequires:  a52dec-libs-devel
+BuildRequires:	a52dec-libs-devel
 %if %{with amr}
 BuildRequires:	amrnb-devel
 BuildRequires:	amrwb-devel >= 5.3.0
