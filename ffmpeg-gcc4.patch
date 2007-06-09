@@ -5,9 +5,9 @@
   */
  
 +#include <mmintrin.h>
- #include "../dsputil.h"
- #include "../simple_idct.h"
- #include "../mpegvideo.h"
+ #include "dsputil.h"
+ #include "simple_idct.h"
+ #include "mpegvideo.h"
 @@ -617,6 +618,22 @@
      );
  }
