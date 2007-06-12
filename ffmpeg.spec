@@ -32,8 +32,8 @@ URL:		http://ffmpeg.mplayerhq.hu/
 BuildRequires:	SDL-devel
 BuildRequires:	a52dec-libs-devel
 %if %{with amr}
-BuildRequires:	amrnb-devel
-BuildRequires:	amrwb-devel >= 5.3.0
+BuildRequires:	amrnb-devel >= 6.1.0.4
+BuildRequires:	amrwb-devel >= 7.0.0.1
 %endif
 BuildRequires:	faac-devel
 BuildRequires:	faad2-devel
