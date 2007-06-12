@@ -118,7 +118,6 @@ Requires:	amrwb-devel >= 5.3.0
 Requires:	faac-devel
 Requires:	faad2-devel
 Requires:	lame-libs-devel
-Requires:	libdts-devel
 Requires:	libgsm-devel
 Requires:	libtheora-devel >= 1.0-0.alpha7
 Requires:	libvorbis-devel
@@ -241,8 +240,8 @@ dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
 	--disable-mmx \
 %endif
 %if %{with amr}
-	--enable-amr_nb \
-	--enable-amr_wb \
+	--enable-libamr-nb \
+	--enable-libamr-wb \
 %endif
 	--cc="%{__cc}" \
 	--extra-cflags="%{rpmcflags}" \
