@@ -1,5 +1,5 @@
 # TODO
-# - libnut enabled   no
+# - libnut enabled   no (http://www.nut-container.org/)
 #
 # Conditional build:
 %bcond_with	amr		# build 3GPP Adaptive Multi Rate (AMR) speech codec
