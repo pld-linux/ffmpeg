@@ -1,0 +1,5 @@
+- up to snap 2007-06-09:
+  - Atrac3 decoder
+  - V.Flash PTX decoder
+  - RoQ muxer, audio encoder
+  - Renderware TXD demuxer and decoder
