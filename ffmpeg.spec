@@ -8,7 +8,7 @@
 #
 %define		_snap	2007-06-26
 %define		snap	%(echo %{_snap} | tr -d -)
-%define		_rel 2
+%define		_rel 3
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
@@ -209,6 +209,7 @@ dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
 # - it's not autoconf configure
 # - --disable-debug, --disable-opts, tune=generic causes not to override our optflags
 ./configure \
+	--arch=%{_target_base_arch} \
 	--prefix=%{_prefix} \
 	--libdir=%{_libdir} \
 	--shlibdir=%{_libdir} \
