@@ -1,3 +1,15 @@
+--- ffmpeg-export-2006-12-04/libavcodec/Makefile.org	2007-07-15 13:53:40.858275149 +0200
++++ ffmpeg-export-2006-12-04/libavcodec/Makefile	2007-07-15 13:53:45.208487348 +0200
+@@ -321,9 +321,7 @@
+ 
+ OBJS-$(HAVE_XVMC_ACCEL)                += xvmcvideo.o
+ 
+-ifneq ($(CONFIG_SWSCALER),yes)
+ OBJS += imgresample.o
+-endif
+ 
+ # processor-specific code
+ ifeq ($(HAVE_MMX),yes)
 --- ffmpeg-export-2006-12-04/libavcodec/imgconvert.c.orig	2006-12-21 17:28:49.000000000 +0000
 +++ ffmpeg-export-2006-12-04/libavcodec/imgconvert.c	2006-12-21 17:30:07.000000000 +0000
 @@ -2299,7 +2299,6 @@
