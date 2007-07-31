@@ -1,4 +1,5 @@
 # TODO
+# - kill -la52 from extralibs when liba52bin is used
 # - libnut enabled   no (http://www.nut-container.org/)
 #
 # Conditional build:
