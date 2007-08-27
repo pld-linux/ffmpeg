@@ -1,0 +1,7 @@
+- updated to 2007-08-27 snap
+  - QTRLE encoder
+  - OS/2 support removed
+  - AC-3 decoder
+  - NUT muxer (since r10052)
+- added a52bin patch to drop liba52-devel dependency
+- removed outdated fork patch
