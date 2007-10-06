@@ -259,7 +259,6 @@ install -d $RPM_BUILD_ROOT{%{_sysconfdir},%{_sbindir},/etc/{sysconfig,rc.d/init.
 	DESTDIR=$RPM_BUILD_ROOT
 
 install config.h $RPM_BUILD_ROOT%{_includedir}/ffmpeg
-install libavformat/allformats.h $RPM_BUILD_ROOT%{_includedir}/ffmpeg
 install libavutil/intreadwrite.h $RPM_BUILD_ROOT%{_includedir}/ffmpeg
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/ffserver
 install %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/ffserver
