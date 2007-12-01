@@ -16,7 +16,7 @@ Version:	0.4.9
 Release:	4.%{snap}.%{_rel}
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, a52, xvid, x264, faad)
-License:	GPL with LGPL parts
+License:	GPL v2+ with LGPL v2.1+ parts
 Group:		Applications/Multimedia
 #Source0:	http://dl.sourceforge.net/ffmpeg/%{name}-%{version}-pre1.tar.gz
 Source0:	http://ffmpeg.mplayerhq.hu/%{name}-export-snapshot.tar.bz2
