@@ -8,7 +8,7 @@
 #
 %define		_snap	2008-01-31
 %define		snap	%(echo %{_snap} | tr -d -)
-%define		_rel 1
+%define		_rel 2
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
@@ -204,6 +204,59 @@ dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
 %patch2 -p0
 %endif
 
+# package the grep result for mplayer, the result formatted as mplayer/configure
+cat <<EOF > ffmpeg-config
+#! /bin/sh
+_libavdecoders_all="`sed -n 's/^[^#]*DEC.*(.*, *\(.*\)).*/\1_decoder/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`"
+_libavencoders_all="`sed -n 's/^[^#]*ENC.*(.*, *\(.*\)).*/\1_encoder/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`"
+_libavparsers_all="`sed -n 's/^[^#]*PARSER.*(.*, *\(.*\)).*/\1_parser/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`"
+_libavbsfs_all="`sed -n 's/^[^#]*BSF.*(.*, *\(.*\)).*/\1_bsf/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`"
+_libavdemuxers_all="`sed -n 's/^[^#]*DEMUX.*(.*, *\(.*\)).*/\1_demuxer/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]'`"
+_libavmuxers_all="`sed -n 's/^[^#]*_MUX.*(.*, *\(.*\)).*/\1_muxer/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]'`"
+_libavprotocols_all="`sed -n 's/^[^#]*PROTOCOL.*(.*, *\(.*\)).*/\1_protocol/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]'`"
+EOF
+cat <<'EOF' >> ffmpeg-config
+
+case "$1" in
+--decoders)
+	echo $_libavdecoders_all
+	;;
+--encoders)
+	echo $_libavencoders_all
+	;;
+--parsers)
+	echo $_libavparsers_all
+	;;
+--bsfs)
+	echo $_libavbsfs_all
+	;;
+--demuxers)
+	echo $_libavdemuxers_all
+	;;
+--muxers)
+	echo $_libavmuxers_all
+	;;
+--protocols)
+	echo $_libavprotocols_all
+	;;
+*)
+	cat <<USAGE
+Usage: $0 [OPTION]
+Options:
+  --decoders
+  --encoders
+  --parsers
+  --bsfs
+  --demuxers
+  --muxers
+  --protocols
+USAGE
+	exit 1;;
+esac
+
+exit 0
+EOF
+
 %build
 # notes:
 # - it's not autoconf configure
@@ -262,6 +315,11 @@ install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/ffserver
 install %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/ffserver
 install %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/ffserver.conf
 mv -f $RPM_BUILD_ROOT{%{_bindir},%{_sbindir}}/ffserver
+
+# install as ffmpeg-avconfig to avoid with possible programs looking for
+# ffmpeg-config and expecting --libs output from it which is not implemented
+# simple to do (by querying pkgconfig), but why?
+install ffmpeg-config $RPM_BUILD_ROOT%{_bindir}/ffmpeg-avconfig
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -325,6 +383,7 @@ fi
 %attr(755,root,root) %{_libdir}/libavutil.so
 %attr(755,root,root) %{_libdir}/libpostproc.so
 %attr(755,root,root) %{_libdir}/libswscale.so
+%attr(755,root,root) %{_bindir}/ffmpeg-avconfig
 %{_includedir}/ffmpeg
 %{_includedir}/postproc
 %{_pkgconfigdir}/*.pc
