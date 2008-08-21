@@ -8,7 +8,7 @@
 #
 %define		_snap	2008-01-31
 %define		snap	%(echo %{_snap} | tr -d -)
-%define		_rel 2
+%define		_rel 3
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
