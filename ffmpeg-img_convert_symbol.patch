@@ -10,17 +10,18 @@
  
  # processor-specific code
  ifeq ($(HAVE_MMX),yes)
---- ffmpeg-export-2006-12-04/libavcodec/imgconvert.c.orig	2006-12-21 17:28:49.000000000 +0000
-+++ ffmpeg-export-2006-12-04/libavcodec/imgconvert.c	2006-12-21 17:30:07.000000000 +0000
-@@ -2299,7 +2299,6 @@
-     return 0;
+
+--- ffmpeg/libavcodec/imgconvert.c~	2008-08-03 02:41:31.000000000 +0200
++++ ffmpeg/libavcodec/imgconvert.c	2008-08-23 00:06:15.552030129 +0200
+@@ -2108,7 +2108,6 @@
  }
+ #endif
  
--#ifndef CONFIG_SWSCALER
- /* XXX: always use linesize. Return -1 if not supported */
- int img_convert(AVPicture *dst, int dst_pix_fmt,
-                 const AVPicture *src, int src_pix_fmt,
-@@ -2541,7 +2540,6 @@
+-#ifndef CONFIG_SWSCALE
+ static uint8_t y_ccir_to_jpeg[256];
+ static uint8_t y_jpeg_to_ccir[256];
+ static uint8_t c_ccir_to_jpeg[256];
+@@ -2628,7 +2627,6 @@
      avpicture_free(tmp);
      return ret;
  }
