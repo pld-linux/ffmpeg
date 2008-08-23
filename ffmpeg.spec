@@ -8,12 +8,12 @@
 #
 %define		_snap	2008-08-22
 %define		snap	%(echo %{_snap} | tr -d -)
-%define		_rel 4
+%define		rel 4
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.9
-Release:	4.%{snap}.%{_rel}
+Release:	4.%{snap}.%{rel}
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, ac3, xvid, x264, faad)
 License:	GPL v2+ with LGPL v2.1+ parts
@@ -305,7 +305,7 @@ EOF
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{%{_sysconfdir},%{_sbindir},/etc/{sysconfig,rc.d/init.d}} \
-	$RPM_BUILD_ROOT/%{_includedir}/ffmpeg \
+	$RPM_BUILD_ROOT%{_includedir}/ffmpeg \
 	$RPM_BUILD_ROOT/var/{cache,log}/ffserver
 
 %{__make} install \
