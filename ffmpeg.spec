@@ -8,7 +8,7 @@
 #
 %define		_snap	2008-08-22
 %define		snap	%(echo %{_snap} | tr -d -)
-%define		_rel 3
+%define		_rel 4
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
@@ -24,6 +24,7 @@ Source0:	http://ffmpeg.mplayerhq.hu/%{name}-export-snapshot.tar.bz2
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
+Patch0:		%{name}-img_convert_symbol.patch
 URL:		http://ffmpeg.mplayerhq.hu/
 BuildRequires:	SDL-devel
 %if %{with amr}
@@ -38,11 +39,11 @@ BuildRequires:	freetype-devel
 # require version with altivec support fixed
 BuildRequires:	gcc >= 5:3.3.2-3
 %endif
+BuildRequires:	a52dec-libs-devel
 %{?with_imlib2:BuildRequires:	imlib2-devel >= 1.3.0}
 BuildRequires:	lame-libs-devel
-BuildRequires:	a52dec-libs-devel
-BuildRequires:	libgsm-devel
 BuildRequires:	libdc1394-devel
+BuildRequires:	libgsm-devel
 BuildRequires:	libraw1394-devel
 BuildRequires:	libtheora-devel >= 1.0-0.alpha7
 BuildRequires:	libtool >= 2:1.4d-3
@@ -198,6 +199,7 @@ dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
 
 %prep
 %setup -q -n %{name}-export-%{_snap}
+%patch0 -p1
 
 # package the grep result for mplayer, the result formatted as mplayer/configure
 cat <<EOF > ffmpeg-config
