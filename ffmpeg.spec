@@ -55,7 +55,7 @@ BuildRequires:	nasm
 %endif
 %endif
 BuildRequires:	perl-tools-pod
-BuildRequires:	rpmbuild(macros) >= 1.268
+BuildRequires:	rpmbuild(macros) >= 1.470
 BuildRequires:	tetex
 BuildRequires:	texinfo
 %{?with_amr:BuildRequires:	unzip}
