@@ -56,6 +56,7 @@ BuildRequires:	nasm
 %endif
 BuildRequires:	perl-tools-pod
 BuildRequires:	rpmbuild(macros) >= 1.470
+BuildRequires:	schroedinger-devel
 BuildRequires:	tetex
 BuildRequires:	texinfo
 %{?with_amr:BuildRequires:	unzip}
@@ -264,7 +265,13 @@ EOF
 	--libdir=%{_libdir} \
 	--shlibdir=%{_libdir} \
 	--mandir=%{_mandir} \
+	--cc="%{__cc}" \
+	--extra-cflags="-D_GNU_SOURCE=1 %{rpmcppflags} %{rpmcflags}" \
+	--extra-ldflags="%{rpmldflags}" \
+	--disable-debug \
+	--disable-optimizations \
 	--disable-stripping \
+	--enable-gpl \
 	--enable-liba52 \
 	--enable-liba52bin \
 	--enable-libfaac \
@@ -272,17 +279,17 @@ EOF
 	--enable-libfaadbin \
 	--enable-libdc1394 \
 	--enable-libdirac \
-	--enable-gpl \
 	--enable-libgsm \
-	--enable-libtheora \
 	--enable-libmp3lame \
+	--enable-libschroedinger \
+	--enable-libtheora \
+	--enable-libvorbis \
+	--enable-libx264 \
+	--enable-libxvid \
 	--enable-postproc \
 	--enable-pthreads \
 	--enable-shared \
 	--enable-swscale \
-	--enable-libvorbis \
-	--enable-libx264 \
-	--enable-libxvid \
 %ifnarch %{ix86} %{x8664}
 	--disable-mmx \
 %endif
@@ -292,13 +299,8 @@ EOF
 %if %{with amr}
 	--enable-nonfree \
 	--enable-libamr-nb \
-	--enable-libamr-wb \
+	--enable-libamr-wb
 %endif
-	--cc="%{__cc}" \
-	--extra-cflags="-D_GNU_SOURCE=1 %{rpmcppflags} %{rpmcflags}" \
-	--extra-ldflags="%{rpmldflags}" \
-	--disable-debug \
-	--disable-optimizations \
 
 %{__make}
 
