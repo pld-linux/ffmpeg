@@ -8,7 +8,7 @@
 #
 %define		_snap	2008-08-22
 %define		snap	%(echo %{_snap} | tr -d -)
-%define		rel 5
+%define		rel 6
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
@@ -115,6 +115,7 @@ Requires:	%{name}-libs = %{version}-%{release}
 Requires:	amrnb-devel
 Requires:	amrwb-devel >= 5.3.0
 %endif
+Requires:	dirac-devel
 Requires:	faac-devel
 Requires:	faad2-devel
 Requires:	lame-libs-devel
