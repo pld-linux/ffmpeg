@@ -121,6 +121,7 @@ Requires:	faac-devel
 Requires:	faad2-devel
 Requires:	lame-libs-devel
 Requires:	libgsm-devel
+Requires:	libraw1394-devel
 Requires:	libtheora-devel >= 1.0-0.alpha7
 Requires:	libvorbis-devel
 Requires:	libx264-devel >= 0.1.2-1.20060828_2245.1
