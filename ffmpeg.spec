@@ -32,7 +32,7 @@ BuildRequires:	SDL-devel
 BuildRequires:	amrnb-devel >= 6.1.0.4
 BuildRequires:	amrwb-devel >= 7.0.0.1
 %endif
-BuildRequires:	dirac-devel
+BuildRequires:	dirac-devel >= 1.0.0
 BuildRequires:	faac-devel
 BuildRequires:	faad2-devel
 BuildRequires:	freetype-devel
