@@ -48,7 +48,7 @@ BuildRequires:	libraw1394-devel
 BuildRequires:	libtheora-devel >= 1.0-0.beta3
 BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	libvorbis-devel
-BuildRequires:	libx264-devel >= 0.1.2-1.20080801
+BuildRequires:	libx264-devel >= 0.1.2-1.20081023
 %ifarch %{ix86}
 %ifnarch i386 i486
 BuildRequires:	nasm
