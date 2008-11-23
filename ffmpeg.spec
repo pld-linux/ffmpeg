@@ -8,7 +8,7 @@
 #
 %define		_snap	2008-10-24
 %define		snap	%(echo %{_snap} | tr -d -)
-%define		rel 1
+%define		rel 2
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
@@ -315,8 +315,15 @@ install -d $RPM_BUILD_ROOT{%{_sysconfdir},%{_sbindir},/etc/{sysconfig,rc.d/init.
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-install config.h $RPM_BUILD_ROOT%{_includedir}/ffmpeg
-install libavutil/intreadwrite.h $RPM_BUILD_ROOT%{_includedir}/libavutil
+cp -a config.h $RPM_BUILD_ROOT%{_includedir}/ffmpeg
+cp -a libavutil/intreadwrite.h $RPM_BUILD_ROOT%{_includedir}/libavutil
+cp -a libavutil/bswap.h $RPM_BUILD_ROOT%{_includedir}/libavutil
+cp -a libavutil/common.h $RPM_BUILD_ROOT%{_includedir}/libavutil
+cp -a libavutil/mem.h $RPM_BUILD_ROOT%{_includedir}/libavutil
+for a in libavutil/*/bswap.h; do
+	install -D $a $RPM_BUILD_ROOT%{_includedir}/$a
+done
+
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/ffserver
 install %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/ffserver
 install %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/ffserver.conf
