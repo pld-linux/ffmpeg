@@ -8,7 +8,7 @@
 #
 %define		_snap	2008-10-24
 %define		snap	%(echo %{_snap} | tr -d -)
-%define		rel 2
+%define		rel 3
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
@@ -206,8 +206,8 @@ dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
 %patch0 -p1
 %patch1 -p1
 
-# package the grep result for mplayer, the result formatted as mplayer/configure
-cat <<EOF > ffmpeg-config
+# package the grep result for mplayer, the result formatted as ./mplayer/configure
+cat <<EOF > ffmpeg-avconfig
 #! /bin/sh
 _libavdecoders_all="`sed -n 's/^[^#]*DEC.*(.*, *\(.*\)).*/\1_decoder/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`"
 _libavencoders_all="`sed -n 's/^[^#]*ENC.*(.*, *\(.*\)).*/\1_encoder/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`"
@@ -217,7 +217,7 @@ _libavdemuxers_all="`sed -n 's/^[^#]*DEMUX.*(.*, *\(.*\)).*/\1_demuxer/p' libavf
 _libavmuxers_all="`sed -n 's/^[^#]*_MUX.*(.*, *\(.*\)).*/\1_muxer/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]'`"
 _libavprotocols_all="`sed -n 's/^[^#]*PROTOCOL.*(.*, *\(.*\)).*/\1_protocol/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]'`"
 EOF
-cat <<'EOF' >> ffmpeg-config
+cat <<'EOF' >> ffmpeg-avconfig
 
 case "$1" in
 --decoders)
@@ -323,6 +323,8 @@ cp -a libavutil/mem.h $RPM_BUILD_ROOT%{_includedir}/libavutil
 for a in libavutil/*/bswap.h; do
 	install -D $a $RPM_BUILD_ROOT%{_includedir}/$a
 done
+cp -a libavformat/riff.h $RPM_BUILD_ROOT%{_includedir}/libavformat
+cp -a libavformat/avio.h $RPM_BUILD_ROOT%{_includedir}/libavformat
 
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/ffserver
 install %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/ffserver
@@ -332,7 +334,7 @@ mv -f $RPM_BUILD_ROOT{%{_bindir},%{_sbindir}}/ffserver
 # install as ffmpeg-avconfig to avoid with possible programs looking for
 # ffmpeg-config and expecting --libs output from it which is not implemented
 # simple to do (by querying pkgconfig), but why?
-install ffmpeg-config $RPM_BUILD_ROOT%{_bindir}/ffmpeg-avconfig
+install ffmpeg-avconfig $RPM_BUILD_ROOT%{_bindir}/ffmpeg-avconfig
 
 %clean
 rm -rf $RPM_BUILD_ROOT
