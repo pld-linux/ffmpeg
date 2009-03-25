@@ -55,6 +55,7 @@ BuildRequires:	pkgconfig
 BuildRequires:	rpmbuild(macros) >= 1.470
 BuildRequires:	schroedinger-devel
 BuildRequires:	tetex
+BuildRequires:	texi2html
 BuildRequires:	texinfo
 %{?with_amr:BuildRequires:	unzip}
 BuildRequires:	xvid-devel >= 1:1.1.0
