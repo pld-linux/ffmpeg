@@ -10,7 +10,7 @@ Summary:	Realtime audio/video encoder and streaming server
 Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.5
-Release:	1
+Release:	2
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, ac3, xvid, x264, faad)
 License:	GPL v2+ with LGPL v2.1+ parts
@@ -75,6 +75,7 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 # -mmmx is needed to enable <mmintrin.h> code.
 %define		specflags_i586	-mmmx
 %define		specflags_i686	-mmmx
+%define		specflags_ppc	-fPIC
 
 %description
 ffmpeg is a hyper fast realtime audio/video encoder and streaming
@@ -267,7 +268,7 @@ EOF
 	--mandir=%{_mandir} \
 	--cc="%{__cc}" \
 	--extra-cflags="-D_GNU_SOURCE=1 %{rpmcppflags} %{rpmcflags} -I/usr/include/libavcodec -I/usr/include/libswscale" \
-	--extra-ldflags="%{rpmldflags}" \
+	--extra-ldflags="%{rpmcflags} %{rpmldflags}" \
 	--disable-debug \
 	--disable-optimizations \
 	--disable-stripping \
