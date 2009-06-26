@@ -1,0 +1,19 @@
+--- ffmpeg-export-2007-10-09/libavcodec/dsputil.c~	2007-09-30 01:31:18.000000000 +0300
++++ ffmpeg-export-2007-10-09/libavcodec/dsputil.c	2009-06-26 03:35:01.209250659 +0300
+@@ -3827,6 +3827,8 @@
+ }
+ 
+ int ff_check_alignment(void){
++#if __GNUC__ == 3 && __GNUC_MINOR__ == 3
++#else
+     static int did_fail=0;
+     DECLARE_ALIGNED_16(int, aligned);
+ 
+@@ -3843,6 +3845,7 @@
+         }
+         return -1;
+     }
++#endif
+     return 0;
+ }
+ 
