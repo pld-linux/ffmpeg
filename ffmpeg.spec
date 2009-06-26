@@ -8,12 +8,12 @@
 #
 %define		_snap	2007-10-09
 %define		snap	%(echo %{_snap} | tr -d -)
-%define		_rel 1
+%define		rel 2
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.9
-Release:	4.%{snap}.%{_rel}
+Release:	4.%{snap}.%{_el}
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, a52, xvid, x264, faad)
 License:	GPL with LGPL parts
@@ -28,6 +28,7 @@ Patch0:		%{name}-gcc4.patch
 Patch1:		%{name}-img_convert_symbol.patch
 Patch2:		%{name}-a52bin.patch
 Patch3:		%{name}-pkgconfig-lib64.patch
+Patch4:		%{name}-gcc3.patch
 URL:		http://ffmpeg.mplayerhq.hu/
 BuildRequires:	SDL-devel
 BuildRequires:	a52dec-libs-devel
@@ -207,6 +208,7 @@ dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
 %ifarch %{x8664}
 %patch3 -p0
 %endif
+%patch4 -p1
 
 %build
 # notes:
