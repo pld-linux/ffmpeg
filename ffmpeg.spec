@@ -8,12 +8,12 @@
 #
 %define		_snap	2007-10-09
 %define		snap	%(echo %{_snap} | tr -d -)
-%define		rel 4
+%define		rel 5
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.9
-Release:	4.%{snap}.%{rel}
+Release:	%{rel}.%{snap}
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, a52, xvid, x264, faad)
 License:	GPL with LGPL parts
