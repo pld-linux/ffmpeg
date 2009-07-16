@@ -8,7 +8,7 @@
 #
 %define		_snap	2007-10-09
 %define		snap	%(echo %{_snap} | tr -d -)
-%define		rel 3
+%define		rel 4
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
@@ -30,6 +30,7 @@ Patch2:		%{name}-a52bin.patch
 Patch3:		%{name}-pkgconfig-lib64.patch
 Patch4:		%{name}-gcc3.patch
 Patch5:		qt-faststart-off_t.patch
+Patch6:		imagewidth.patch
 URL:		http://ffmpeg.mplayerhq.hu/
 BuildRequires:	SDL-devel
 BuildRequires:	a52dec-libs-devel
@@ -211,6 +212,7 @@ dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
 %endif
 %patch4 -p1
 %patch5 -p1
+%patch6 -p0
 
 %build
 # notes:
