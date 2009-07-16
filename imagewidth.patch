@@ -1,0 +1,113 @@
+http://lists.mplayerhq.hu/pipermail/ffmpeg-devel/2009-July/072472.html
+
+--- vhook/imlib2.orig.c	2007-08-07 05:43:50.000000000 +0300
++++ vhook/imlib2.c	2009-07-07 08:20:59.935830867 +0300
+@@ -84,12 +84,12 @@
+     AVEvalExpr *eval_r, *eval_g, *eval_b, *eval_a;
+     char *expr_R, *expr_G, *expr_B, *expr_A;
+     int eval_colors;
+-    double x, y;
++    double x, y, X, Y;
+     char *fileImage;
+     struct _CachedImage *cache;
+     Imlib_Image imageOverlaid;
+-    AVEvalExpr *eval_x, *eval_y;
+-    char *expr_x, *expr_y;
++    AVEvalExpr *eval_x, *eval_y, *eval_X, *eval_Y;
++    char *expr_x, *expr_y, *expr_X, *expr_Y;
+     int frame_number;
+     int imageOverlaid_width, imageOverlaid_height;
+ 
+@@ -123,6 +123,8 @@
+         }
+         ff_eval_free(ci->eval_x);
+         ff_eval_free(ci->eval_y);
++        ff_eval_free(ci->eval_X);
++        ff_eval_free(ci->eval_Y);
+         ff_eval_free(ci->eval_r);
+         ff_eval_free(ci->eval_g);
+         ff_eval_free(ci->eval_b);
+@@ -130,6 +132,8 @@
+ 
+         av_free(ci->expr_x);
+         av_free(ci->expr_y);
++        av_free(ci->expr_X);
++        av_free(ci->expr_Y);
+         av_free(ci->expr_R);
+         av_free(ci->expr_G);
+         av_free(ci->expr_B);
+@@ -157,8 +161,12 @@
+ 
+     ci->x = 0.0;
+     ci->y = 0.0;
++    ci->X = 0.0;
++    ci->Y = 0.0;
+     ci->expr_x = "0.0";
+     ci->expr_y = "0.0";
++    ci->expr_X = "0.0";
++    ci->expr_Y = "0.0";
+ 
+     optind = 0;
+ 
+@@ -173,7 +181,7 @@
+         imlib_add_path_to_font_path(fp);
+ 
+ 
+-    while ((c = getopt(argc, argv, "R:G:B:A:C:c:f:F:t:x:y:i:")) > 0) {
++    while ((c = getopt(argc, argv, "R:G:B:A:C:c:f:F:t:x:y:i:X:Y:")) > 0) {
+         switch (c) {
+             case 'R':
+                 ci->expr_R = av_strdup(optarg);
+@@ -211,6 +219,12 @@
+             case 'y':
+                 ci->expr_y = av_strdup(optarg);
+                 break;
++            case 'X':
++                ci->expr_X = av_strdup(optarg);
++                break;
++            case 'Y':
++                ci->expr_Y = av_strdup(optarg);
++                break;
+             case 'i':
+                 ci->fileImage = av_strdup(optarg);
+                 break;
+@@ -316,6 +330,16 @@
+         ci->imageOverlaid_height = imlib_image_get_height();
+     }
+ 
++    if (!(ci->eval_X = ff_parse(ci->expr_X, const_names, NULL, NULL, NULL, NULL, &error))){
++        av_log(NULL, AV_LOG_ERROR, "Couldn't parse X expression '%s': %s\n", ci->expr_X, error);
++        return -1;
++    }
++
++    if (!(ci->eval_Y = ff_parse(ci->expr_Y, const_names, NULL, NULL, NULL, NULL, &error))){
++        av_log(NULL, AV_LOG_ERROR, "Couldn't parse Y expression '%s': %s\n", ci->expr_Y, error);
++        return -1;
++    }
++
+     if (!(ci->eval_x = ff_parse(ci->expr_x, const_names, NULL, NULL, NULL, NULL, &error))){
+         av_log(NULL, AV_LOG_ERROR, "Couldn't parse x expression '%s': %s\n", ci->expr_x, error);
+         return -1;
+@@ -438,6 +462,8 @@
+         ci->x = ff_parse_eval(ci->eval_x, const_values, ci);
+         ci->y = ff_parse_eval(ci->eval_y, const_values, ci);
+         y = ci->y;
++        ci->X = ff_parse_eval(ci->eval_X, const_values, ci);
++        ci->Y = ff_parse_eval(ci->eval_Y, const_values, ci);
+ 
+         if (ci->eval_a) {
+             ci->a = ff_parse_eval(ci->eval_a, const_values, ci);
+@@ -464,10 +490,12 @@
+         }
+ 
+         if (ci->imageOverlaid) {
++			if (ci->X == 0) ci->X = ci->imageOverlaid_width;
++			if (ci->Y == 0) ci->Y = ci->imageOverlaid_height;
+             imlib_context_set_image(image);
+             imlib_blend_image_onto_image(ci->imageOverlaid, 0,
+                 0, 0, ci->imageOverlaid_width, ci->imageOverlaid_height,
+-                ci->x, ci->y, ci->imageOverlaid_width, ci->imageOverlaid_height);
++                ci->x, ci->y, ci->X, ci->Y);
+         }
+ 
+     }
