@@ -8,12 +8,12 @@
 #
 %define		_snap	2007-10-09
 %define		snap	%(echo %{_snap} | tr -d -)
-%define		_rel 0.3
+%define		rel 4
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.4.9
-Release:	4.%{snap}.%{_rel}
+Release:	4.%{snap}.%{rel}
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, a52, xvid, x264, faad)
 License:	GPL with LGPL parts
@@ -28,6 +28,9 @@ Patch0:		%{name}-gcc4.patch
 Patch1:		%{name}-img_convert_symbol.patch
 Patch2:		%{name}-a52bin.patch
 Patch3:		%{name}-pkgconfig-lib64.patch
+Patch4:		%{name}-gcc3.patch
+Patch5:		qt-faststart-off_t.patch
+Patch6:		imagewidth.patch
 URL:		http://ffmpeg.mplayerhq.hu/
 BuildRequires:	SDL-devel
 BuildRequires:	a52dec-libs-devel
@@ -207,6 +210,9 @@ dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
 %ifarch %{x8664}
 %patch3 -p0
 %endif
+%patch4 -p1
+%patch5 -p1
+%patch6 -p0
 
 %build
 # notes:
@@ -254,6 +260,8 @@ dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
 
 %{__make}
 
+%{__cc} %{rpmcflags} tools/qt-faststart.c -o qt-faststart
+
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{%{_sysconfdir},%{_sbindir},/etc/{sysconfig,rc.d/init.d}} \
@@ -267,6 +275,7 @@ install libavutil/intreadwrite.h $RPM_BUILD_ROOT%{_includedir}/ffmpeg
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/ffserver
 install %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/ffserver
 install %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/ffserver.conf
+install qt-faststart $RPM_BUILD_ROOT%{_bindir}
 mv -f $RPM_BUILD_ROOT{%{_bindir},%{_sbindir}}/ffserver
 
 %clean
@@ -299,15 +308,22 @@ fi
 %defattr(644,root,root,755)
 %doc Changelog README doc/*.html doc/TODO
 %attr(755,root,root) %{_bindir}/ffmpeg
+%attr(755,root,root) %{_bindir}/qt-faststart
 %{_mandir}/man1/ffmpeg.1*
 
 %files libs
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libavcodec.so.*.*.*
+%attr(755,root,root) %ghost %{_libdir}/libavcodec.so.51
 %attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
+%attr(755,root,root) %ghost %{_libdir}/libavformat.so.51
 %attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
+%attr(755,root,root) %ghost %{_libdir}/libavutil.so.49
 %attr(755,root,root) %{_libdir}/libpostproc.so.*.*.*
+%attr(755,root,root) %ghost %{_libdir}/libpostproc.so.51
 %attr(755,root,root) %{_libdir}/libswscale.so.*.*.*
+%attr(755,root,root) %ghost %{_libdir}/libswscale.so.0
+
 %dir %{_libdir}/vhook
 %attr(755,root,root) %{_libdir}/vhook/drawtext.so
 %attr(755,root,root) %{_libdir}/vhook/fish.so
