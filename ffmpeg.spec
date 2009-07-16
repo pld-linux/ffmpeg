@@ -277,11 +277,11 @@ EOF
 	--disable-optimizations \
 	--disable-stripping \
 	--enable-gpl \
+	--enable-libdc1394 \
+	--enable-libdirac \
 	--enable-libfaac \
 	--enable-libfaad \
 	--enable-libfaadbin \
-	--enable-libdc1394 \
-	--enable-libdirac \
 	--enable-libgsm \
 	--enable-libmp3lame \
 	--enable-libschroedinger \
