@@ -22,6 +22,7 @@ Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
 Patch0:		%{name}-x264.patch
 Patch1:		%{name}-bug-803.patch
+Patch2:		imagewidth.patch
 URL:		http://ffmpeg.mplayerhq.hu/
 BuildRequires:	SDL-devel
 %if %{with amr}
@@ -204,6 +205,7 @@ dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
 %setup -q
 %patch0 -p1
 %patch1 -p1
+%patch2 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
