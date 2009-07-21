@@ -272,7 +272,7 @@ install libavutil/intreadwrite.h $RPM_BUILD_ROOT%{_includedir}/ffmpeg
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/ffserver
 install %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/ffserver
 install %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/ffserver.conf
-install qt-faststart $RPM_BUILD_ROOT%{_bindir}
+install tools/qt-faststart $RPM_BUILD_ROOT%{_bindir}
 mv -f $RPM_BUILD_ROOT{%{_bindir},%{_sbindir}}/ffserver
 
 %clean
