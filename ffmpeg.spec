@@ -46,16 +46,17 @@ BuildRequires:	libtheora-devel >= 1.0-0.beta3
 BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	libvorbis-devel
 BuildRequires:	libx264-devel >= 0.1.2-1.20081023
-BuildRequires:	speex-devel
 %ifarch %{ix86}
 %ifnarch i386 i486
 BuildRequires:	nasm
 %endif
 %endif
+BuildRequires:	perl-Encode
 BuildRequires:	perl-tools-pod
 BuildRequires:	pkgconfig
 BuildRequires:	rpmbuild(macros) >= 1.470
 BuildRequires:	schroedinger-devel
+BuildRequires:	speex-devel
 BuildRequires:	tetex
 BuildRequires:	texi2html
 BuildRequires:	texinfo
