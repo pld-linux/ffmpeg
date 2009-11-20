@@ -10,7 +10,7 @@ Summary:	FFmpeg is a very fast video and audio converter
 Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.5
-Release:	5
+Release:	6
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, ac3, xvid, x264, faad)
 License:	GPL v2+ with LGPL v2.1+ parts
@@ -45,7 +45,8 @@ BuildRequires:	libraw1394-devel
 BuildRequires:	libtheora-devel >= 1.0-0.beta3
 BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	libvorbis-devel
-BuildRequires:	libx264-devel >= 0.1.2-1.20081023
+BuildRequires:	libx264-devel >= 0.1.3
+BuildRequires:	speex-devel
 %ifarch %{ix86}
 %ifnarch i386 i486
 BuildRequires:	nasm
