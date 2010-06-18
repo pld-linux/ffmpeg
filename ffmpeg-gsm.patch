@@ -1,0 +1,22 @@
+--- configure~	2010-06-15 21:44:30.000000000 +0200
++++ configure	2010-06-18 07:51:49.083904825 +0200
+@@ -2611,7 +2611,7 @@
+                       require  libdirac libdirac_encoder/dirac_encoder.h dirac_encoder_init $(pkg-config --libs dirac)
+ enabled libfaac    && require2 libfaac "stdint.h faac.h" faacEncGetVersion -lfaac
+ enabled libfaad    && require2 libfaad faad.h faacDecOpen -lfaad
+-enabled libgsm     && require  libgsm gsm/gsm.h gsm_create -lgsm
++enabled libgsm     && require  libgsm gsm.h gsm_create -lgsm
+ enabled libmp3lame && require  libmp3lame lame/lame.h lame_init -lmp3lame -lm
+ enabled libnut     && require  libnut libnut.h nut_demuxer_init -lnut
+ enabled libopencore_amrnb  && require libopencore_amrnb opencore-amrnb/interf_dec.h Decoder_Interface_init -lopencore-amrnb -lm
+--- libavcodec/libgsm.c~	2010-04-20 16:45:34.000000000 +0200
++++ libavcodec/libgsm.c	2010-06-18 08:05:19.692574999 +0200
+@@ -28,7 +28,7 @@
+ // The idiosyncrasies of GSM-in-WAV are explained at http://kbs.cs.tu-berlin.de/~jutta/toast.html
+ 
+ #include "avcodec.h"
+-#include <gsm/gsm.h>
++#include <gsm.h>
+ 
+ // gsm.h misses some essential constants
+ #define GSM_BLOCK_SIZE 33

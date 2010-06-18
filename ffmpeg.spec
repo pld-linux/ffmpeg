@@ -9,19 +9,19 @@
 Summary:	FFmpeg is a very fast video and audio converter
 Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
-Version:	0.5.2
+Version:	0.6
 Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, ac3, xvid, x264, faad)
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.mplayerhq.hu/releases/%{name}-%{version}.tar.bz2
-# Source0-md5:	451eb428ca97a72c00555d50944cdb24
+# Source0-md5:	d6142a9a5821d6a6262a6edb903faa24
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
 Patch0:		%{name}-bug-803.patch
-Patch1:		imagewidth.patch
+Patch1:		%{name}-gsm.patch
 URL:		http://www.ffmpeg.org/
 BuildRequires:	SDL-devel
 BuildRequires:	dirac-devel >= 1.0.0
@@ -39,8 +39,10 @@ BuildRequires:	libgsm-devel
 BuildRequires:	libraw1394-devel
 BuildRequires:	libtheora-devel >= 1.0-0.beta3
 BuildRequires:	libtool >= 2:1.4d-3
+BuildRequires:	libva-devel >= 1.0.3
 BuildRequires:	libvdpau-devel
 BuildRequires:	libvorbis-devel
+BuildRequires:	libvpx-devel
 BuildRequires:	libx264-devel >= 0.1.3
 BuildRequires:	opencore-amr-devel
 BuildRequires:	openjpeg-devel >= 1.3-2
@@ -161,24 +163,6 @@ FFplay to bardzo prosty i przenośny odtwarzacz mediów używający
 bibliotek FFmpeg oraz biblioteki SDL. Jest używany głównie do
 testowania różnych API FFmpeg.
 
-%package vhook-imlib2
-Summary:	imlib2 based hook
-Summary(pl.UTF-8):	Moduł przejściowy oparty o imlib2
-Group:		Libraries
-Requires:	%{name}-libs = %{version}-%{release}
-
-%description vhook-imlib2
-This module implements a text overlay for a video image. Currently it
-supports a fixed overlay or reading the text from a file. The string
-is passed through strftime so that it is easy to imprint the date and
-time onto the image.
-
-%description vhook-imlib2 -l pl.UTF-8
-Ten moduł implementuje tekstową nakładkę dla obrazu. Aktualnie
-obsługuje stałą nakładkę lub wczytywanie tekstu z pliku. Łańcuch jest
-przepuszczany przez strftime, więc łatwo umieścić datę i czas na
-obrazie.
-
 %package ffserver
 Summary:	FFserver video server
 Summary(pl.UTF-8):	FFserver - serwer strumieni obrazu
@@ -203,7 +187,7 @@ dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
 %prep
 %setup -q
 %patch0 -p1
-%patch1 -p1
+%patch1 -p0
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
@@ -287,6 +271,7 @@ EOF
 	--enable-libspeex \
 	--enable-libtheora \
 	--enable-libvorbis \
+	--enable-libvpx \
 	--enable-libx264 \
 	--enable-libxvid \
 	--enable-libopencore-amrnb \
@@ -374,9 +359,11 @@ fi
 %defattr(644,root,root,755)
 %doc Changelog README doc/*.html doc/TODO
 %attr(755,root,root) %{_bindir}/ffmpeg
+%attr(755,root,root) %{_bindir}/ffprobe
 %dir %{_datadir}/ffmpeg
 %{_datadir}/ffmpeg/*.ffpreset
 %{_mandir}/man1/ffmpeg.1*
+%{_mandir}/man1/ffprobe.1*
 
 %files libs
 %defattr(644,root,root,755)
@@ -385,22 +372,15 @@ fi
 %attr(755,root,root) %{_libdir}/libavdevice.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libavdevice.so.52
 %attr(755,root,root) %{_libdir}/libavfilter.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavfilter.so.0
+%attr(755,root,root) %ghost %{_libdir}/libavfilter.so.1
 %attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libavformat.so.52
 %attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavutil.so.49
+%attr(755,root,root) %ghost %{_libdir}/libavutil.so.50
 %attr(755,root,root) %{_libdir}/libpostproc.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libpostproc.so.51
 %attr(755,root,root) %{_libdir}/libswscale.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libswscale.so.0
-
-%dir %{_libdir}/vhook
-%attr(755,root,root) %{_libdir}/vhook/drawtext.so
-%attr(755,root,root) %{_libdir}/vhook/fish.so
-%attr(755,root,root) %{_libdir}/vhook/null.so
-%attr(755,root,root) %{_libdir}/vhook/ppm.so
-%attr(755,root,root) %{_libdir}/vhook/watermark.so
 
 %files devel
 %defattr(644,root,root,755)
@@ -431,12 +411,6 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/ffplay
 %{_mandir}/man1/ffplay.1*
-
-%if %{with imlib2}
-%files vhook-imlib2
-%defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/vhook/imlib2.so
-%endif
 
 %files ffserver
 %defattr(644,root,root,755)
