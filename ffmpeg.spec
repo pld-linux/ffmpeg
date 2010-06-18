@@ -42,7 +42,7 @@ BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	libva-devel >= 1.0.3
 BuildRequires:	libvdpau-devel
 BuildRequires:	libvorbis-devel
-BuildRequires:	libvpx-devel
+BuildRequires:	libvpx-devel >= 0.9.1
 BuildRequires:	libx264-devel >= 0.1.3
 BuildRequires:	opencore-amr-devel
 BuildRequires:	openjpeg-devel >= 1.3-2
