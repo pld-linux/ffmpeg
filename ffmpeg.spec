@@ -44,7 +44,7 @@ BuildRequires:	libvdpau-devel
 BuildRequires:	libvorbis-devel
 BuildRequires:	libvpx-devel >= 0.9.1
 # X264_BUILD >= 83
-BuildRequires:	libx264-devel >= 0.1.3-1_20100424_2245_1
+BuildRequires:	libx264-devel >= 0.1.3-1.20100424_2245.1
 BuildRequires:	opencore-amr-devel
 BuildRequires:	openjpeg-devel >= 1.3-2
 BuildRequires:	speex-devel
