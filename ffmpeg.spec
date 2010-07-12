@@ -22,6 +22,8 @@ Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
 Patch0:		%{name}-bug-803.patch
 Patch1:		%{name}-gsm.patch
+# vhook is gone. this patch needs different approach
+#PatchX:		imagewidth.patch
 URL:		http://www.ffmpeg.org/
 BuildRequires:	SDL-devel
 BuildRequires:	dirac-devel >= 1.0.0
