@@ -44,7 +44,7 @@ BuildRequires:	libvorbis-devel
 BuildRequires:	libx264-devel >= 0.1.3
 BuildRequires:	opencore-amr-devel
 BuildRequires:	openjpeg-devel >= 1.3-2
-BuildRequires:	speex-devel
+BuildRequires:	speex-devel >= 1:1.2-rc1
 %ifarch %{ix86}
 %ifnarch i386 i486
 BuildRequires:	nasm
@@ -55,9 +55,7 @@ BuildRequires:	perl-tools-pod
 BuildRequires:	pkgconfig
 BuildRequires:	rpmbuild(macros) >= 1.470
 BuildRequires:	schroedinger-devel
-BuildRequires:	speex-devel
 BuildRequires:	tetex
-BuildRequires:	texi2html
 BuildRequires:	texinfo
 BuildRequires:	xvid-devel >= 1:1.1.0
 BuildRequires:	zlib-devel
