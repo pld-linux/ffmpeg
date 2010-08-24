@@ -49,7 +49,7 @@ BuildRequires:	libvpx-devel >= 0.9.1
 BuildRequires:	libx264-devel >= 0.1.3-1.20100424_2245.1
 BuildRequires:	opencore-amr-devel
 BuildRequires:	openjpeg-devel >= 1.3-2
-BuildRequires:	speex-devel
+BuildRequires:	speex-devel >= 1:1.2-rc1
 %ifarch %{ix86}
 %ifnarch i386 i486
 BuildRequires:	nasm
@@ -60,7 +60,6 @@ BuildRequires:	perl-tools-pod
 BuildRequires:	pkgconfig
 BuildRequires:	rpmbuild(macros) >= 1.470
 BuildRequires:	schroedinger-devel
-BuildRequires:	speex-devel
 BuildRequires:	tetex
 BuildRequires:	texi2html
 BuildRequires:	texinfo
