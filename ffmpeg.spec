@@ -8,7 +8,7 @@
 #
 %define		_snap	2007-10-09
 %define		snap	%(echo %{_snap} | tr -d -)
-%define		rel 6
+%define		rel 7
 Summary:	Realtime audio/video encoder and streaming server
 Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
@@ -100,6 +100,7 @@ strumienia kompatybilnego z AC3.
 Summary:	ffmpeg libraries
 Summary(pl.UTF-8):	Biblioteki ffmpeg
 Group:		Libraries
+Requires:	faad2-libs >= 2.6
 
 %description libs
 This package contains ffmpeg shared libraries.
