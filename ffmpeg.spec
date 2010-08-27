@@ -10,7 +10,7 @@ Summary:	FFmpeg is a very fast video and audio converter
 Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.5.2
-Release:	2
+Release:	3
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, ac3, xvid, x264, faad)
 License:	GPL v3+ with LGPL v3+ parts
@@ -313,6 +313,7 @@ EOF
 sed -i -e 's|#define.*CONFIG_OLDSCALER.*0|#define CONFIG_OLDSCALER 1|g' config.h
 
 %{__make}
+%{__make} tools/qt-faststart
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -334,15 +335,16 @@ done
 cp -a libavformat/riff.h $RPM_BUILD_ROOT%{_includedir}/libavformat
 cp -a libavformat/avio.h $RPM_BUILD_ROOT%{_includedir}/libavformat
 
-install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/ffserver
-install %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/ffserver
-install %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/ffserver.conf
+install -p %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/ffserver
+cp -a %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/ffserver
+cp -a %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/ffserver.conf
 mv -f $RPM_BUILD_ROOT{%{_bindir},%{_sbindir}}/ffserver
+install -p tools/qt-faststart $RPM_BUILD_ROOT%{_bindir}
 
 # install as ffmpeg-avconfig to avoid with possible programs looking for
 # ffmpeg-config and expecting --libs output from it which is not implemented
 # simple to do (by querying pkgconfig), but why?
-install ffmpeg-avconfig $RPM_BUILD_ROOT%{_bindir}/ffmpeg-avconfig
+install -p ffmpeg-avconfig $RPM_BUILD_ROOT%{_bindir}/ffmpeg-avconfig
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -374,6 +376,7 @@ fi
 %defattr(644,root,root,755)
 %doc Changelog README doc/*.html doc/TODO
 %attr(755,root,root) %{_bindir}/ffmpeg
+%attr(755,root,root) %{_bindir}/qt-faststart
 %dir %{_datadir}/ffmpeg
 %{_datadir}/ffmpeg/*.ffpreset
 %{_mandir}/man1/ffmpeg.1*
