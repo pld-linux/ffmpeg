@@ -10,7 +10,7 @@ Summary:	FFmpeg is a very fast video and audio converter
 Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.6
-Release:	1
+Release:	2
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, ac3, xvid, x264, faad)
 License:	GPL v3+ with LGPL v3+ parts
@@ -23,7 +23,7 @@ Source3:	ffserver.conf
 Patch0:		%{name}-bug-803.patch
 Patch1:		%{name}-gsm.patch
 # vhook is gone. this patch needs different approach
-#PatchX:		imagewidth.patch
+#PatchX: imagewidth.patch
 URL:		http://www.ffmpeg.org/
 BuildRequires:	SDL-devel
 BuildRequires:	dirac-devel >= 1.0.0
@@ -284,6 +284,7 @@ EOF
 	--enable-shared \
 	--enable-swscale \
 	--enable-vdpau \
+	--enable-x11grab \
 %ifnarch %{ix86} %{x8664}
 	--disable-mmx \
 %endif
@@ -294,7 +295,7 @@ EOF
 	--enable-nonfree \
 	--enable-libfaac \
 %endif
-	--enable-runtime-cpudetect 
+	--enable-runtime-cpudetect
 
 # force oldscaler build
 sed -i -e 's|#define.*CONFIG_OLDSCALER.*0|#define CONFIG_OLDSCALER 1|g' config.h
