@@ -10,7 +10,7 @@ Summary:	FFmpeg is a very fast video and audio converter
 Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.5.2
-Release:	3
+Release:	4
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, ac3, xvid, x264, faad)
 License:	GPL v3+ with LGPL v3+ parts
@@ -24,6 +24,7 @@ Patch0:		%{name}-bug-803.patch
 Patch1:		imagewidth.patch
 URL:		http://www.ffmpeg.org/
 BuildRequires:	SDL-devel
+BuildRequires:	alsa-lib-devel >= 1.0.16
 BuildRequires:	dirac-devel >= 1.0.0
 BuildRequires:	faac-devel
 BuildRequires:	faad2-devel
@@ -96,6 +97,7 @@ strumienia kompatybilnego z AC3.
 Summary:	ffmpeg libraries
 Summary(pl.UTF-8):	Biblioteki ffmpeg
 Group:		Libraries
+Requires:	alsa-lib >= 1.0.16
 
 %description libs
 This package contains:
