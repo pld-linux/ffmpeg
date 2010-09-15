@@ -10,7 +10,7 @@ Summary:	FFmpeg is a very fast video and audio converter
 Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.6
-Release:	5
+Release:	6
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, ac3, xvid, x264, faad)
 License:	GPL v3+ with LGPL v3+ parts
@@ -103,6 +103,7 @@ strumienia kompatybilnego z AC3.
 Summary:	ffmpeg libraries
 Summary(pl.UTF-8):	Biblioteki ffmpeg
 Group:		Libraries
+Suggests:	faad2-libs
 
 %description libs
 This package contains:
@@ -271,6 +272,7 @@ EOF
 	--enable-libdc1394 \
 	--enable-libdirac \
 	--enable-libfaad \
+	--enable-libfaadbin \
 	--enable-libgsm \
 	--enable-libmp3lame \
 	--enable-libschroedinger \
