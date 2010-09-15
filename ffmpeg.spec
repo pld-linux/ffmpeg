@@ -10,7 +10,7 @@ Summary:	FFmpeg is a very fast video and audio converter
 Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
 Version:	0.6
-Release:	4
+Release:	5
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, ac3, xvid, x264, faad)
 License:	GPL v3+ with LGPL v3+ parts
@@ -25,6 +25,8 @@ Patch1:		%{name}-gsm.patch
 Patch2:		faadbin-libfaadname.patch
 # vhook is gone. this patch needs different approach
 #PatchX: imagewidth.patch
+# http://webm.googlecode.com/files/ffmpeg-0.6_libvpx-0.9.1.diff.gz
+Patch3:		ffmpeg-0.6_libvpx-0.9.1.diff
 URL:		http://www.ffmpeg.org/
 BuildRequires:	SDL-devel
 BuildRequires:	dirac-devel >= 1.0.0
@@ -192,6 +194,7 @@ dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
 %patch0 -p1
 %patch1 -p0
 %patch2 -p1
+%patch3 -p0
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
