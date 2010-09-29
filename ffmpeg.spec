@@ -99,6 +99,9 @@ Summary:	ffmpeg libraries
 Summary(pl.UTF-8):	Biblioteki ffmpeg
 Group:		Libraries
 Requires:	alsa-lib >= 1.0.16
+%if %{with nonfree}
+Provides:	%{name}-libs(faac)
+%endif
 
 %description libs
 This package contains:
