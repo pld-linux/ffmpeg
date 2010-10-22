@@ -1,0 +1,32 @@
+From: alexc <alexc@9553f0bf-9b14-0410-a0b8-cfaf0461ba5b>
+Date: Tue, 3 Mar 2009 18:19:44 +0000 (+0000)
+Subject: MOV: fix crash when 'meta' occurs before first 'trak'
+X-Git-Url: http://git.ffmpeg.org/?p=ffmpeg;a=commitdiff_plain;h=b3f3355dc645ecea3326b67940925876075337a7
+
+MOV: fix crash when 'meta' occurs before first 'trak'
+
+
+git-svn-id: file:///var/local/repositories/ffmpeg/trunk@17781 9553f0bf-9b14-0410-a0b8-cfaf0461ba5b
+---
+
+diff --git a/libavformat/mov.c b/libavformat/mov.c
+index b34326c..88f8003 100644
+--- a/libavformat/mov.c
++++ b/libavformat/mov.c
+@@ -308,10 +308,15 @@ static int mov_read_dref(MOVContext *c, ByteIOContext *pb, MOVAtom atom)
+ 
+ static int mov_read_hdlr(MOVContext *c, ByteIOContext *pb, MOVAtom atom)
+ {
+-    AVStream *st = c->fc->streams[c->fc->nb_streams-1];
++    AVStream *st;
+     uint32_t type;
+     uint32_t ctype;
+ 
++    if (c->fc->nb_streams < 1) // meta before first trak
++        return 0;
++
++    st = c->fc->streams[c->fc->nb_streams-1];
++
+     get_byte(pb); /* version */
+     get_be24(pb); /* flags */
+ 
