@@ -25,6 +25,8 @@ Source3:	ffserver.conf
 Patch0:		%{name}-bug-803.patch
 Patch1:		%{name}-gsm.patch
 Patch2:		faadbin-libfaadname.patch
+# vhook is gone. this patch needs different approach
+#PatchX: imagewidth.patch
 # http://webm.googlecode.com/files/ffmpeg-0.6_libvpx-0.9.1.diff.gz
 Patch3:		ffmpeg-0.6_libvpx-0.9.1.diff
 URL:		http://www.ffmpeg.org/
