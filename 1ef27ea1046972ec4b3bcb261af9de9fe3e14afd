@@ -1,0 +1,4 @@
+- updated Source URL
+- verbose make
+- package LICENSE (notes on specific parts of ffmpeg and its dependencies)
+- [dropped imlib2 bcond, cleanup deps]
