@@ -11,14 +11,14 @@
 Summary:	FFmpeg is a very fast video and audio converter
 Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
-Version:	0.6.1
+Version:	0.6.2
 Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, ac3, xvid, x264, faad)
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.bz2
-# Source0-md5:	4f5d732d25eedfb072251b5314ba2093
+# Source0-md5:	f7819307dad55aa0d6b40ac0e862884d
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
@@ -305,10 +305,13 @@ EOF
 	--enable-runtime-cpudetect
 
 # force oldscaler build
-sed -i -e 's|#define.*CONFIG_OLDSCALER.*0|#define CONFIG_OLDSCALER 1|g' config.h
+%{__sed} -i -e 's|#define.*CONFIG_OLDSCALER.*0|#define CONFIG_OLDSCALER 1|g' config.h
 
 %{__make} \
 	V=1
+
+# CC_O to add -c to commandline. makefile should be patched
+%{__make} tools/qt-faststart V=1 CC_O='-c -o $@'
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -331,15 +334,16 @@ done
 cp -a libavformat/riff.h $RPM_BUILD_ROOT%{_includedir}/libavformat
 cp -a libavformat/avio.h $RPM_BUILD_ROOT%{_includedir}/libavformat
 
-install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/ffserver
-install %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/ffserver
-install %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/ffserver.conf
+install -p %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/ffserver
+cp -a %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/ffserver
+cp -a %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/ffserver.conf
 mv -f $RPM_BUILD_ROOT{%{_bindir},%{_sbindir}}/ffserver
+install -p tools/qt-faststart $RPM_BUILD_ROOT%{_bindir}
 
 # install as ffmpeg-avconfig to avoid with possible programs looking for
 # ffmpeg-config and expecting --libs output from it which is not implemented
 # simple to do (by querying pkgconfig), but why?
-install ffmpeg-avconfig $RPM_BUILD_ROOT%{_bindir}/ffmpeg-avconfig
+install -p ffmpeg-avconfig $RPM_BUILD_ROOT%{_bindir}/ffmpeg-avconfig
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -371,6 +375,7 @@ fi
 %defattr(644,root,root,755)
 %doc Changelog LICENSE README %{?with_doc:doc/*.html} doc/TODO
 %attr(755,root,root) %{_bindir}/ffmpeg
+%attr(755,root,root) %{_bindir}/qt-faststart
 %attr(755,root,root) %{_bindir}/ffprobe
 %dir %{_datadir}/ffmpeg
 %{_datadir}/ffmpeg/*.ffpreset
