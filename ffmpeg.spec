@@ -375,8 +375,8 @@ fi
 %defattr(644,root,root,755)
 %doc Changelog LICENSE README %{?with_doc:doc/*.html} doc/TODO
 %attr(755,root,root) %{_bindir}/ffmpeg
-%attr(755,root,root) %{_bindir}/qt-faststart
 %attr(755,root,root) %{_bindir}/ffprobe
+%attr(755,root,root) %{_bindir}/qt-faststart
 %dir %{_datadir}/ffmpeg
 %{_datadir}/ffmpeg/*.ffpreset
 %{?with_doc:%{_mandir}/man1/ffmpeg.1*}
