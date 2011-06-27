@@ -1,29 +1,43 @@
---- ffmpeg-20080908/libavcodec/libmp3lame.c.orig	2008-08-09 21:37:36.000000000 +0400
-+++ ffmpeg-20080908/libavcodec/libmp3lame.c	2009-02-03 11:22:37.000000000 +0300
-@@ -34,6 +34,7 @@
+--- ffmpeg-0.8/libavcodec/libmp3lame.c.orig	2011-06-21 21:29:25.000000000 +0200
++++ ffmpeg-0.8/libavcodec/libmp3lame.c	2011-06-26 17:35:11.772209142 +0200
+@@ -35,6 +35,7 @@
      int stereo;
      uint8_t buffer[BUFFER_SIZE];
      int buffer_index;
 +    int flushed;
- } Mp3AudioContext;
+     struct {
+         int *left;
+         int *right;
+@@ -169,11 +170,16 @@
+     /* lame 3.91 dies on '1-channel interleaved' data */
  
- static av_cold int MP3lame_encode_init(AVCodecContext *avctx)
-@@ -166,12 +167,18 @@
-                 BUFFER_SIZE - s->buffer_index
-                 );
-         }
-+        s->flushed = 0;
-     }else{
-+        if (s->flushed)
-+            lame_result = 0;
-+        else {
-+            s->flushed = 1;
+     if(!data){
++	if(s->flushed)
++	    lame_result = 0;
++	else {
++	    s->flushed = 1;
          lame_result= lame_encode_flush(
                  s->gfp,
                  s->buffer + s->buffer_index,
                  BUFFER_SIZE - s->buffer_index
                  );
-+        }
++	}
+ #if 2147483647 == INT_MAX
+     }else if(AV_SAMPLE_FMT_S32 == avctx->sample_fmt){
+         if (s->stereo) {
+@@ -205,6 +211,7 @@
+                 BUFFER_SIZE - s->buffer_index
+                 );
+         }
++	s->flushed = 0;
+ #endif
+     }else{
+         if (s->stereo) {
+@@ -225,6 +232,7 @@
+                 BUFFER_SIZE - s->buffer_index
+                 );
+         }
++	s->flushed = 0;
      }
  
-     if(lame_result==-1) {
+     if(lame_result < 0){

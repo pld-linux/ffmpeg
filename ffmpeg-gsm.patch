@@ -1,14 +1,14 @@
---- configure~	2010-06-15 21:44:30.000000000 +0200
-+++ configure	2010-06-18 07:51:49.083904825 +0200
-@@ -2611,7 +2611,7 @@
-                       require  libdirac libdirac_encoder/dirac_encoder.h dirac_encoder_init $(pkg-config --libs dirac)
+--- configure.orig	2011-06-21 21:29:25.000000000 +0200
++++ configure	2011-06-26 20:07:17.579181375 +0200
+@@ -2920,7 +2920,7 @@
+     "dirac_decoder_init dirac_encoder_init"
  enabled libfaac    && require2 libfaac "stdint.h faac.h" faacEncGetVersion -lfaac
- enabled libfaad    && require2 libfaad faad.h faacDecOpen -lfaad
+ enabled libfreetype && require_pkg_config freetype2 "ft2build.h freetype/freetype.h" FT_Init_FreeType
 -enabled libgsm     && require  libgsm gsm/gsm.h gsm_create -lgsm
 +enabled libgsm     && require  libgsm gsm.h gsm_create -lgsm
- enabled libmp3lame && require  libmp3lame lame/lame.h lame_init -lmp3lame -lm
+ enabled libmp3lame && require  "libmp3lame >= 3.98.3" lame/lame.h lame_set_VBR_quality -lmp3lame
  enabled libnut     && require  libnut libnut.h nut_demuxer_init -lnut
- enabled libopencore_amrnb  && require libopencore_amrnb opencore-amrnb/interf_dec.h Decoder_Interface_init -lopencore-amrnb -lm
+ enabled libopencore_amrnb  && require libopencore_amrnb opencore-amrnb/interf_dec.h Decoder_Interface_init -lopencore-amrnb
 --- libavcodec/libgsm.c~	2010-04-20 16:45:34.000000000 +0200
 +++ libavcodec/libgsm.c	2010-06-18 08:05:19.692574999 +0200
 @@ -28,7 +28,7 @@

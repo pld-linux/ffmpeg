@@ -1,5 +1,9 @@
 # TODO
+# - is bug803 patch still needed? the code changed somehow
 # - libnut enabled   no (http://www.nut-container.org/)
+# - frei0r (frei0r.h)?
+# - libvo_aacenc, libvo_amrwbenc?
+# - libxavs?
 #
 # Conditional build:
 %bcond_with	nonfree		# non free options of package
@@ -8,41 +12,39 @@
 %bcond_without	vpx		# VP8, a high-quality video codec
 %bcond_without	doc		# don't build docs
 
-Summary:	FFmpeg is a very fast video and audio converter
-Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
+Summary:	FFmpeg - a very fast video and audio converter
+Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	0.6.3
+Version:	0.8
 Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
-# (postprocessing, ac3, xvid, x264, faad)
+# (postprocessing, ac3, xvid, x264)
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.bz2
-# Source0-md5:	cdf4ad9b2a4d195b5ca874494bc7b0b0
+# Source0-md5:	7e9b8c8a6952de0c477027e48249f3ed
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
 Patch0:		%{name}-bug-803.patch
 Patch1:		%{name}-gsm.patch
-Patch2:		faadbin-libfaadname.patch
-# vhook is gone. this patch needs different approach
-#PatchX: imagewidth.patch
-# http://webm.googlecode.com/files/ffmpeg-0.6_libvpx-0.9.1.diff.gz
-Patch3:		ffmpeg-0.6_libvpx-0.9.1.diff
 URL:		http://www.ffmpeg.org/
 BuildRequires:	SDL-devel
+BuildRequires:	alsa-lib-devel
+BuildRequires:	celt-devel
 BuildRequires:	dirac-devel >= 1.0.0
 BuildRequires:	faac-devel
-BuildRequires:	faad2-devel
 BuildRequires:	freetype-devel
 %ifarch ppc
 # require version with altivec support fixed
 BuildRequires:	gcc >= 5:3.3.2-3
 %endif
-BuildRequires:	lame-libs-devel
+BuildRequires:	jack-audio-connection-kit-devel
+BuildRequires:	lame-libs-devel >= 3.98.3
 BuildRequires:	libdc1394-devel
 BuildRequires:	libgsm-devel
 BuildRequires:	libraw1394-devel
+BuildRequires:	librtmp-devel
 BuildRequires:	libtheora-devel >= 1.0-0.beta3
 BuildRequires:	libtool >= 2:1.4d-3
 %{?with_va:BuildRequires:	libva-devel >= 1.0.3}
@@ -50,7 +52,7 @@ BuildRequires:	libvdpau-devel
 BuildRequires:	libvorbis-devel
 %{?with_vpx:BuildRequires:	libvpx-devel >= 0.9.1}
 # X264_BUILD >= 83
-BuildRequires:	libx264-devel >= 0.1.3-1.20100424_2245.1
+BuildRequires:	libx264-devel >= 0.1.3-1.20110625_2245
 BuildRequires:	opencore-amr-devel
 BuildRequires:	openjpeg-devel >= 1.3-2
 BuildRequires:	speex-devel >= 1:1.2-rc1
@@ -67,6 +69,8 @@ BuildRequires:	schroedinger-devel
 %{?with_doc:BuildRequires:	tetex}
 %{?with_doc:BuildRequires:	texi2html}
 %{?with_doc:BuildRequires:	texinfo}
+BuildRequires:	xorg-lib-libXext-devel
+BuildRequires:	xorg-lib-libXfixes-devel
 BuildRequires:	xvid-devel >= 1:1.1.0
 BuildRequires:	zlib-devel
 %{?with_autoreqdep:BuildConflicts:	libpostproc}
@@ -93,29 +97,32 @@ another. It also supports grabbing and encoding in real time from a TV
 card.
 
 %description -l pl.UTF-8
-ffmpeg jest bardzo szybkim koderem audio/wideo w czasie rzeczywistym
-oraz serwerem strumieni multimedialnych. ffmpeg potrafi zrzucać dane
-ze standardowego urządzenia Video4Linux i przekonwertować je w kilka
-formatów plików bazujących na kodowaniu DCT/kompensacji ruchu. Dźwięk
-jest kompresowany do strumienia MPEG audio layer 2 lub używając
-strumienia kompatybilnego z AC3.
+FFmpeg to kompletne rozwiązanie nagrywania, konwersji i transmisji
+strumieni dźwięku i obrazu. Jest to działające z linii poleceń
+narzędzie do konwersji obrazu z jednego formatu do innego. Obsługuje
+także przechwytywanie i kodowanie w czasie rzeczywistym z karty
+telewizyjnej.
 
 %package libs
 Summary:	ffmpeg libraries
 Summary(pl.UTF-8):	Biblioteki ffmpeg
 Group:		Libraries
-Suggests:	faad2-libs
 
 %description libs
-This package contains:
-- the codec library from the ffmpeg project. It supports most existing
-  encoding formats (MPEG, DivX, MPEG4, AC3, DV...),
-- demuxer library from the ffmpeg project. It supports most existing
-  file formats (AVI, MPEG, OGG, Matroska, ASF...),
-- video postprocessing library from the ffmpeg project.
+This package contains the ffmpeg shared libraries:
+- the codec library (libavcodec). It supports most existing encoding
+  formats (MPEG, DivX, MPEG4, AC3, DV...),
+- demuxer library (libavformat). It supports most existing file
+  formats (AVI, MPEG, OGG, Matroska, ASF...),
+- video postprocessing library (libpostproc).
 
 %description libs -l pl.UTF-8
-Ten pakiet zawiera biblioteki współdzielone ffmpeg.
+Ten pakiet zawiera biblioteki współdzielone ffmpeg:
+- bibliotekę kodeków (libavcodec); obsługuje większość istniejących
+  formatów kodowania (MPEG, DivX, MPEG4, AC3, DV...),
+- bibliotekę demuksera (libavformat); obsługuje większość istniejących
+  formatów plików (AVI, MPEG, OGG, Matroska, ASF...),
+- bibliotekę postprocessingu (libpostproc).
 
 %package devel
 Summary:	ffmpeg header files
@@ -125,7 +132,6 @@ Requires:	%{name}-libs = %{version}-%{release}
 # for libavcodec:
 Requires:	dirac-devel
 Requires:	faac-devel
-Requires:	faad2-devel
 Requires:	lame-libs-devel
 Requires:	libgsm-devel
 Requires:	libraw1394-devel
@@ -195,8 +201,6 @@ dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
 %setup -q
 %patch0 -p1
 %patch1 -p0
-%patch2 -p1
-%patch3 -p0
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
@@ -271,11 +275,14 @@ EOF
 	--enable-gpl \
 	--enable-version3 \
 	--enable-libdc1394 \
+	--enable-libcelt \
 	--enable-libdirac \
-	--enable-libfaad \
-	--enable-libfaadbin \
 	--enable-libgsm \
 	--enable-libmp3lame \
+	--enable-libopencore-amrnb \
+	--enable-libopencore-amrwb \
+	--enable-libopenjpeg \
+	--enable-librtmp \
 	--enable-libschroedinger \
 	--enable-libspeex \
 	--enable-libtheora \
@@ -283,9 +290,6 @@ EOF
 	%{?with_vpx:--enable-libvpx} \
 	--enable-libx264 \
 	--enable-libxvid \
-	--enable-libopencore-amrnb \
-	--enable-libopencore-amrwb \
-	--enable-libopenjpeg \
 	--enable-postproc \
 	--enable-pthreads \
 	--enable-shared \
@@ -303,6 +307,8 @@ EOF
 	--enable-libfaac \
 %endif
 	--enable-runtime-cpudetect
+
+#	--enable-libopencv would cause dependency loop
 
 # force oldscaler build
 %{__sed} -i -e 's|#define.*CONFIG_OLDSCALER.*0|#define CONFIG_OLDSCALER 1|g' config.h
@@ -373,7 +379,7 @@ fi
 
 %files
 %defattr(644,root,root,755)
-%doc Changelog LICENSE README %{?with_doc:doc/*.html} doc/TODO
+%doc CREDITS LICENSE MAINTAINERS README doc/{APIchanges,RELEASE_NOTES,TODO} %{?with_doc:doc/*.html}
 %attr(755,root,root) %{_bindir}/ffmpeg
 %attr(755,root,root) %{_bindir}/ffprobe
 %attr(755,root,root) %{_bindir}/qt-faststart
@@ -385,19 +391,19 @@ fi
 %files libs
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libavcodec.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavcodec.so.52
+%attr(755,root,root) %ghost %{_libdir}/libavcodec.so.53
 %attr(755,root,root) %{_libdir}/libavdevice.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavdevice.so.52
+%attr(755,root,root) %ghost %{_libdir}/libavdevice.so.53
 %attr(755,root,root) %{_libdir}/libavfilter.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavfilter.so.1
+%attr(755,root,root) %ghost %{_libdir}/libavfilter.so.2
 %attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavformat.so.52
+%attr(755,root,root) %ghost %{_libdir}/libavformat.so.53
 %attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavutil.so.50
+%attr(755,root,root) %ghost %{_libdir}/libavutil.so.51
 %attr(755,root,root) %{_libdir}/libpostproc.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libpostproc.so.51
 %attr(755,root,root) %{_libdir}/libswscale.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libswscale.so.0
+%attr(755,root,root) %ghost %{_libdir}/libswscale.so.2
 
 %files devel
 %defattr(644,root,root,755)
