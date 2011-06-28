@@ -15,14 +15,14 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	0.8
+Version:	0.7.1
 Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, ac3, xvid, x264)
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.bz2
-# Source0-md5:	7e9b8c8a6952de0c477027e48249f3ed
+# Source0-md5:	8615815985a17ef6498620c715e63f5e
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
@@ -391,19 +391,19 @@ fi
 %files libs
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libavcodec.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavcodec.so.53
+%attr(755,root,root) %ghost %{_libdir}/libavcodec.so.52
 %attr(755,root,root) %{_libdir}/libavdevice.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavdevice.so.53
+%attr(755,root,root) %ghost %{_libdir}/libavdevice.so.52
 %attr(755,root,root) %{_libdir}/libavfilter.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavfilter.so.2
+%attr(755,root,root) %ghost %{_libdir}/libavfilter.so.1
 %attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavformat.so.53
+%attr(755,root,root) %ghost %{_libdir}/libavformat.so.52
 %attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavutil.so.51
+%attr(755,root,root) %ghost %{_libdir}/libavutil.so.50
 %attr(755,root,root) %{_libdir}/libpostproc.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libpostproc.so.51
 %attr(755,root,root) %{_libdir}/libswscale.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libswscale.so.2
+%attr(755,root,root) %ghost %{_libdir}/libswscale.so.0
 
 %files devel
 %defattr(644,root,root,755)
