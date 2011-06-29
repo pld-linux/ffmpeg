@@ -50,7 +50,7 @@ BuildRequires:	libtool >= 2:1.4d-3
 %{?with_va:BuildRequires:	libva-devel >= 1.0.3}
 BuildRequires:	libvdpau-devel
 BuildRequires:	libvorbis-devel
-%{?with_vpx:BuildRequires:	libvpx-devel >= 0.9.1}
+%{?with_vpx:BuildRequires:	libvpx-devel >= 0.9.6}
 # X264_BUILD >= 83
 BuildRequires:	libx264-devel >= 0.1.3-1.20110625_2245
 BuildRequires:	opencore-amr-devel
