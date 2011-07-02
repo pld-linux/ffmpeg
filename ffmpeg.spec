@@ -1,6 +1,5 @@
 # TODO
 # - is bug803 patch still needed? the code changed somehow
-# - libnut enabled   no (http://www.nut-container.org/)
 #
 # Conditional build:
 %bcond_with	nonfree		# non free options of package (currently: faac)
@@ -13,7 +12,7 @@ Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
 Version:	0.8
-Release:	1
+Release:	2
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, xavs, xvid, x11grab)
 # using v3 allows Apache-licensed libs (opencore-amr, libvo-*enc)
@@ -43,6 +42,7 @@ BuildRequires:	jack-audio-connection-kit-devel
 BuildRequires:	lame-libs-devel >= 3.98.3
 BuildRequires:	libdc1394-devel
 BuildRequires:	libgsm-devel
+BuildRequires:	libnut-devel
 BuildRequires:	libraw1394-devel
 BuildRequires:	librtmp-devel
 BuildRequires:	libtheora-devel >= 1.0-0.beta3
@@ -143,6 +143,7 @@ Requires:	jack-audio-connection-kit-devel
 Requires:	lame-libs-devel >= 3.98.3
 Requires:	libdc1394-devel
 Requires:	libgsm-devel
+Requires:	libnut-devel
 Requires:	libraw1394-devel
 Requires:	librtmp-devel
 Requires:	libtheora-devel >= 1.0-0.beta3
@@ -301,6 +302,7 @@ EOF
 	--enable-libdirac \
 	--enable-libgsm \
 	--enable-libmp3lame \
+	--enable-libnut \
 	--enable-libopencore-amrnb \
 	--enable-libopencore-amrwb \
 	--enable-libopenjpeg \
