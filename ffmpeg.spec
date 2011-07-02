@@ -1,9 +1,6 @@
 # TODO
 # - is bug803 patch still needed? the code changed somehow
 # - libnut enabled   no (http://www.nut-container.org/)
-# - frei0r (frei0r.h)?
-# - libvo_aacenc, libvo_amrwbenc?
-# - libxavs?
 #
 # Conditional build:
 %bcond_with	nonfree		# non free options of package
@@ -35,6 +32,7 @@ BuildRequires:	celt-devel
 BuildRequires:	dirac-devel >= 1.0.0
 BuildRequires:	faac-devel
 BuildRequires:	freetype-devel
+BuildRequires:	frei0r-devel
 %ifarch ppc
 # require version with altivec support fixed
 BuildRequires:	gcc >= 5:3.3.2-3
@@ -69,6 +67,9 @@ BuildRequires:	schroedinger-devel
 %{?with_doc:BuildRequires:	tetex}
 %{?with_doc:BuildRequires:	texi2html}
 %{?with_doc:BuildRequires:	texinfo}
+BuildRequires:	vo-aacenc-devel
+BuildRequires:	vo-amrwbenc-devel
+BuildRequires:	xavs-devel
 BuildRequires:	xorg-lib-libXext-devel
 BuildRequires:	xorg-lib-libXfixes-devel
 BuildRequires:	xvid-devel >= 1:1.1.0
@@ -274,6 +275,7 @@ EOF
 	--enable-avfilter \
 	--enable-gpl \
 	--enable-version3 \
+	--enable-frei0r \
 	--enable-libdc1394 \
 	--enable-libcelt \
 	--enable-libdirac \
@@ -286,9 +288,12 @@ EOF
 	--enable-libschroedinger \
 	--enable-libspeex \
 	--enable-libtheora \
+	--enable-libvo-aacenc \
+	--enable-libvo-amrwbenc \
 	--enable-libvorbis \
 	%{?with_vpx:--enable-libvpx} \
 	--enable-libx264 \
+	--enable-libxavs \
 	--enable-libxvid \
 	--enable-postproc \
 	--enable-pthreads \
