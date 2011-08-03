@@ -11,21 +11,20 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	0.8
-Release:	5
+Version:	0.8.1
+Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, xavs, xvid, x11grab)
 # using v3 allows Apache-licensed libs (opencore-amr, libvo-*enc)
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.bz2
-# Source0-md5:	7e9b8c8a6952de0c477027e48249f3ed
+# Source0-md5:	e9c497e221b5594df477bcbf318f4bce
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
 Patch0:		%{name}-bug-803.patch
 Patch1:		%{name}-gsm.patch
-Patch2:		%{name}-AV_PICTURE_TYPE_NONE.patch
 URL:		http://www.ffmpeg.org/
 BuildRequires:	SDL-devel
 BuildRequires:	alsa-lib-devel
@@ -224,7 +223,6 @@ dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
 %setup -q
 %patch0 -p1
 %patch1 -p0
-%patch2 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
