@@ -31,7 +31,7 @@ URL:		http://www.ffmpeg.org/
 BuildRequires:	SDL-devel
 BuildRequires:	alsa-lib-devel
 BuildRequires:	bzip2-devel
-BuildRequires:	celt-devel
+BuildRequires:	celt-devel >= 0.11.0
 BuildRequires:	dirac-devel >= 1.0.0
 %{?with_nonfree:BuildRequires:	faac-devel}
 BuildRequires:	freetype-devel
