@@ -45,7 +45,7 @@ BuildRequires:	lame-libs-devel >= 3.98.3
 BuildRequires:	libdc1394-devel
 BuildRequires:	libgsm-devel
 BuildRequires:	libnut-devel
-BuildRequires:	libraw1394-devel
+BuildRequires:	libraw1394-devel >= 2
 BuildRequires:	librtmp-devel
 BuildRequires:	libtheora-devel >= 1.0-0.beta3
 BuildRequires:	libtool >= 2:1.4d-3
@@ -53,7 +53,7 @@ BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	libvdpau-devel
 BuildRequires:	libvorbis-devel
 %{?with_vpx:BuildRequires:	libvpx-devel >= 0.9.6}
-# X264_BUILD >= 83
+# X264_BUILD >= 115
 %{?with_x264:BuildRequires:	libx264-devel >= 0.1.3-1.20110625_2245}
 BuildRequires:	opencore-amr-devel
 BuildRequires:	openjpeg-devel >= 1.3-2
@@ -146,7 +146,7 @@ Requires:	lame-libs-devel >= 3.98.3
 Requires:	libdc1394-devel
 Requires:	libgsm-devel
 Requires:	libnut-devel
-Requires:	libraw1394-devel
+Requires:	libraw1394-devel >= 2
 Requires:	librtmp-devel
 Requires:	libtheora-devel >= 1.0-0.beta3
 %{?with_va:Requires:	libva-devel >= 1.0.3}
