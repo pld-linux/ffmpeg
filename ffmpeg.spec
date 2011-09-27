@@ -14,7 +14,7 @@ Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
 Version:	0.8.4
-Release:	1
+Release:	2
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, xavs, xvid, x11grab)
 # using v3 allows Apache-licensed libs (opencore-amr, libvo-*enc)
@@ -368,6 +368,8 @@ for a in libavutil/*/bswap.h; do
 done
 cp -a libavformat/riff.h $RPM_BUILD_ROOT%{_includedir}/libavformat
 cp -a libavformat/avio.h $RPM_BUILD_ROOT%{_includedir}/libavformat
+# for lim-omx ffmpeg components
+cp -a libavcodec/audioconvert.h $RPM_BUILD_ROOT%{_includedir}/libavcodec
 
 install -p %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/ffserver
 cp -a %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/ffserver
