@@ -1,14 +1,14 @@
 --- configure.orig	2011-06-21 21:29:25.000000000 +0200
 +++ configure	2011-06-26 20:07:17.579181375 +0200
-@@ -2920,7 +2920,7 @@
+@@ -3071,7 +3071,7 @@
      "dirac_decoder_init dirac_encoder_init"
  enabled libfaac    && require2 libfaac "stdint.h faac.h" faacEncGetVersion -lfaac
  enabled libfreetype && require_pkg_config freetype2 "ft2build.h freetype/freetype.h" FT_Init_FreeType
 -enabled libgsm     && require  libgsm gsm/gsm.h gsm_create -lgsm
 +enabled libgsm     && require  libgsm gsm.h gsm_create -lgsm
+ enabled libmodplug && require  libmodplug libmodplug/modplug.h ModPlug_Load -lmodplug
  enabled libmp3lame && require  "libmp3lame >= 3.98.3" lame/lame.h lame_set_VBR_quality -lmp3lame
  enabled libnut     && require  libnut libnut.h nut_demuxer_init -lnut
- enabled libopencore_amrnb  && require libopencore_amrnb opencore-amrnb/interf_dec.h Decoder_Interface_init -lopencore-amrnb
 --- libavcodec/libgsm.c~	2010-04-20 16:45:34.000000000 +0200
 +++ libavcodec/libgsm.c	2010-06-18 08:05:19.692574999 +0200
 @@ -28,7 +28,7 @@

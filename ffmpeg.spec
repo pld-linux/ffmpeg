@@ -14,7 +14,7 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	0.8.7
+Version:	0.9
 Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, xavs, xvid, x11grab)
@@ -22,7 +22,7 @@ Release:	1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.bz2
-# Source0-md5:	31da4d5610d7138761e23fab8fe3a84d
+# Source0-md5:	795058de6fc432aa11271408273a0535
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
@@ -55,8 +55,8 @@ BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	libvdpau-devel
 BuildRequires:	libvorbis-devel
 %{?with_vpx:BuildRequires:	libvpx-devel >= 0.9.6}
-# X264_BUILD >= 115
-%{?with_x264:BuildRequires:	libx264-devel >= 0.1.3-1.20110625_2245}
+# X264_BUILD >= 118
+%{?with_x264:BuildRequires:	libx264-devel >= 0.1.3-1.20111212_2245}
 BuildRequires:	opencore-amr-devel
 BuildRequires:	openjpeg-devel >= 1.3-2
 BuildRequires:	speex-devel >= 1:1.2-rc1
@@ -413,12 +413,14 @@ fi
 
 %files
 %defattr(644,root,root,755)
-%doc CREDITS LICENSE MAINTAINERS README doc/{APIchanges,RELEASE_NOTES,TODO} %{?with_doc:doc/*.html}
+%doc CREDITS LICENSE MAINTAINERS README doc/{APIchanges,RELEASE_NOTES} %{?with_doc:doc/*.html}
+%attr(755,root,root) %{_bindir}/avconv
 %attr(755,root,root) %{_bindir}/ffmpeg
 %attr(755,root,root) %{_bindir}/ffprobe
 %attr(755,root,root) %{_bindir}/qt-faststart
 %dir %{_datadir}/ffmpeg
 %{_datadir}/ffmpeg/*.ffpreset
+%{?with_doc:%{_mandir}/man1/avconv.1*}
 %{?with_doc:%{_mandir}/man1/ffmpeg.1*}
 %{?with_doc:%{_mandir}/man1/ffprobe.1*}
 
@@ -436,6 +438,8 @@ fi
 %attr(755,root,root) %ghost %{_libdir}/libavutil.so.51
 %attr(755,root,root) %{_libdir}/libpostproc.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libpostproc.so.51
+%attr(755,root,root) %{_libdir}/libswresample.so.*.*.*
+%attr(755,root,root) %ghost %{_libdir}/libswresample.so.0
 %attr(755,root,root) %{_libdir}/libswscale.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libswscale.so.2
 
@@ -449,6 +453,7 @@ fi
 %attr(755,root,root) %{_libdir}/libavformat.so
 %attr(755,root,root) %{_libdir}/libavutil.so
 %attr(755,root,root) %{_libdir}/libpostproc.so
+%attr(755,root,root) %{_libdir}/libswresample.so
 %attr(755,root,root) %{_libdir}/libswscale.so
 %{_includedir}/ffmpeg
 %{_includedir}/libavcodec
@@ -457,6 +462,7 @@ fi
 %{_includedir}/libavformat
 %{_includedir}/libavutil
 %{_includedir}/libpostproc
+%{_includedir}/libswresample
 %{_includedir}/libswscale
 %{_pkgconfigdir}/libavcodec.pc
 %{_pkgconfigdir}/libavdevice.pc
@@ -464,6 +470,7 @@ fi
 %{_pkgconfigdir}/libavformat.pc
 %{_pkgconfigdir}/libavutil.pc
 %{_pkgconfigdir}/libpostproc.pc
+%{_pkgconfigdir}/libswresample.pc
 %{_pkgconfigdir}/libswscale.pc
 
 %files static
@@ -474,6 +481,7 @@ fi
 %{_libdir}/libavformat.a
 %{_libdir}/libavutil.a
 %{_libdir}/libpostproc.a
+%{_libdir}/libswresample.a
 %{_libdir}/libswscale.a
 
 %files ffplay
