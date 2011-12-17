@@ -1,5 +1,5 @@
 # TODO
-# - consider: libstagefright-h264, libutvideo
+# - consider: libutvideo
 # - is bug803 patch still needed? the code changed somehow
 #
 # Workaround ffmpeg.spec & opencv.spec updating:
