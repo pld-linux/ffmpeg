@@ -1,5 +1,4 @@
 # TODO
-# - consider: libutvideo
 # - is bug803 patch still needed? the code changed somehow
 #
 # Workaround ffmpeg.spec & opencv.spec updating:
@@ -18,6 +17,7 @@
 %bcond_without	opencv		# build without opencv video filtering
 %bcond_without	pulseaudio	# build without PulseAudio input support
 %bcond_without	x264		# build without x264 encoder
+%bcond_without	utvideo		# build without Ut Video decoder
 %bcond_without	va		# VAAPI (Video Acceleration API)
 %bcond_without	vpx		# VP8, a high-quality video codec
 %bcond_without	doc		# don't build docs
@@ -67,7 +67,7 @@ BuildRequires:	libraw1394-devel >= 2
 BuildRequires:	librtmp-devel
 BuildRequires:	libtheora-devel >= 1.0-0.beta3
 BuildRequires:	libtool >= 2:1.4d-3
-BuildRequires:	libv4l2-devel
+BuildRequires:	libv4l-devel
 %{?with_va:BuildRequires:	libva-devel >= 1.0.3}
 BuildRequires:	libvdpau-devel
 BuildRequires:	libvorbis-devel
@@ -92,6 +92,7 @@ BuildRequires:	schroedinger-devel
 %{?with_doc:BuildRequires:	tetex}
 %{?with_doc:BuildRequires:	texi2html}
 %{?with_doc:BuildRequires:	texinfo}
+%{?with_utvideo:BuildRequires:	utvideo-devel}
 BuildRequires:	vo-aacenc-devel
 BuildRequires:	vo-amrwbenc-devel
 BuildRequires:	xavs-devel
@@ -340,6 +341,7 @@ EOF
 	--enable-libschroedinger \
 	--enable-libspeex \
 	--enable-libtheora \
+	%{?with_utvideo:--enable-libutvideo} \
 	--enable-libv4l2 \
 	--enable-libvo-aacenc \
 	--enable-libvo-amrwbenc \
