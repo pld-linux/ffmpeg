@@ -59,7 +59,7 @@ BuildRequires:	lame-libs-devel >= 3.98.3
 %{?with_aacplus:BuildRequires:	libaacplus-devel >= 2.0.0}
 BuildRequires:	libass-devel
 BuildRequires:	libcdio-devel
-BuildRequires:	libdc1394-devel
+BuildRequires:	libdc1394-devel >= 2
 BuildRequires:	libgsm-devel
 BuildRequires:	libmodplug-devel
 BuildRequires:	libnut-devel
@@ -69,7 +69,7 @@ BuildRequires:	libtheora-devel >= 1.0-0.beta3
 BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	libv4l-devel
 %{?with_va:BuildRequires:	libva-devel >= 1.0.3}
-BuildRequires:	libvdpau-devel
+BuildRequires:	libvdpau-devel >= 0.2
 BuildRequires:	libvorbis-devel
 %{?with_vpx:BuildRequires:	libvpx-devel >= 0.9.6}
 # X264_BUILD >= 118
@@ -101,6 +101,8 @@ BuildRequires:	xorg-lib-libXfixes-devel
 BuildRequires:	xvid-devel >= 1:1.1.0
 BuildRequires:	zlib-devel
 %{?with_autoreqdep:BuildConflicts:	libpostproc}
+# overflows maximum hash table size
+BuildConflicts:	pdksh < 5.2.14-57
 Requires:	%{name}-libs = %{version}-%{release}
 Requires:	xvid >= 1:1.1.0
 Obsoletes:	libpostproc
@@ -160,12 +162,12 @@ Requires:	%{name}-libs = %{version}-%{release}
 Requires:	SDL-devel
 Requires:	alsa-lib-devel
 Requires:	bzip2-devel
-Requires:	celt-devel
+Requires:	celt-devel >= 0.11.0
 Requires:	dirac-devel >= 1.0.0
 %{?with_nonfree:Requires:	faac-devel}
 Requires:	jack-audio-connection-kit-devel
 Requires:	lame-libs-devel >= 3.98.3
-Requires:	libdc1394-devel
+Requires:	libdc1394-devel >= 2
 Requires:	libgsm-devel
 Requires:	libnut-devel
 Requires:	libraw1394-devel >= 2
