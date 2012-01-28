@@ -25,7 +25,7 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	0.9.1
+Version:	0.10
 Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, xavs, xvid, x11grab)
@@ -33,7 +33,7 @@ Release:	1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.bz2
-# Source0-md5:	41ae6cfdef81a54835b914f523e575cf
+# Source0-md5:	dc665cc599a739e3c5262ccdac13d129
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
@@ -246,7 +246,7 @@ dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
 %prep
 %setup -q
 %patch0 -p1
-%patch1 -p0
+%patch1 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
@@ -317,7 +317,6 @@ EOF
 	--disable-debug \
 	--disable-optimizations \
 	--disable-stripping \
-	--enable-avconv \
 	--enable-avfilter \
 	--enable-gnutls \
 	--enable-gpl \
@@ -442,13 +441,12 @@ fi
 %files
 %defattr(644,root,root,755)
 %doc CREDITS LICENSE MAINTAINERS README doc/{APIchanges,RELEASE_NOTES} %{?with_doc:doc/*.html}
-%attr(755,root,root) %{_bindir}/avconv
 %attr(755,root,root) %{_bindir}/ffmpeg
 %attr(755,root,root) %{_bindir}/ffprobe
 %attr(755,root,root) %{_bindir}/qt-faststart
 %dir %{_datadir}/ffmpeg
 %{_datadir}/ffmpeg/*.ffpreset
-%{?with_doc:%{_mandir}/man1/avconv.1*}
+%{_datadir}/ffmpeg/ffprobe.xsd
 %{?with_doc:%{_mandir}/man1/ffmpeg.1*}
 %{?with_doc:%{_mandir}/man1/ffprobe.1*}
 
@@ -465,7 +463,7 @@ fi
 %attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libavutil.so.51
 %attr(755,root,root) %{_libdir}/libpostproc.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libpostproc.so.51
+%attr(755,root,root) %ghost %{_libdir}/libpostproc.so.52
 %attr(755,root,root) %{_libdir}/libswresample.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libswresample.so.0
 %attr(755,root,root) %{_libdir}/libswscale.so.*.*.*

@@ -1,5 +1,5 @@
---- configure.orig	2011-06-21 21:29:25.000000000 +0200
-+++ configure	2011-06-26 20:07:17.579181375 +0200
+--- ffmpeg-0.10/configure.orig	2011-06-21 21:29:25.000000000 +0200
++++ ffmpeg-0.10/configure	2011-06-26 20:07:17.579181375 +0200
 @@ -3071,7 +3071,7 @@
      "dirac_decoder_init dirac_encoder_init"
  enabled libfaac    && require2 libfaac "stdint.h faac.h" faacEncGetVersion -lfaac
@@ -9,14 +9,14 @@
  enabled libmodplug && require  libmodplug libmodplug/modplug.h ModPlug_Load -lmodplug
  enabled libmp3lame && require  "libmp3lame >= 3.98.3" lame/lame.h lame_set_VBR_quality -lmp3lame
  enabled libnut     && require  libnut libnut.h nut_demuxer_init -lnut
---- libavcodec/libgsm.c~	2010-04-20 16:45:34.000000000 +0200
-+++ libavcodec/libgsm.c	2010-06-18 08:05:19.692574999 +0200
-@@ -28,7 +28,7 @@
+--- ffmpeg-0.10/libavcodec/libgsm.c.orig	2012-01-26 23:15:59.000000000 +0100
++++ ffmpeg-0.10/libavcodec/libgsm.c	2012-01-27 17:58:28.495275196 +0100
+@@ -27,7 +27,7 @@
+ 
  // The idiosyncrasies of GSM-in-WAV are explained at http://kbs.cs.tu-berlin.de/~jutta/toast.html
  
- #include "avcodec.h"
 -#include <gsm/gsm.h>
 +#include <gsm.h>
  
- // gsm.h misses some essential constants
- #define GSM_BLOCK_SIZE 33
+ #include "avcodec.h"
+ #include "gsm.h"
