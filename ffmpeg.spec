@@ -9,14 +9,14 @@
 Summary:	FFmpeg is a very fast video and audio converter
 Summary(pl.UTF-8):	Koder audio/wideo czasu rzeczywistego oraz serwer strumieni
 Name:		ffmpeg
-Version:	0.5.5
+Version:	0.5.8
 Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, ac3, xvid, x264, faad)
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.mplayerhq.hu/releases/%{name}-%{version}.tar.bz2
-# Source0-md5:	9b1f676be005326a49a142b5a453f45d
+# Source0-md5:	570be94cce2a68c9efe5a8d7b338ff8e
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
@@ -60,6 +60,7 @@ BuildRequires:	perl-tools-pod
 BuildRequires:	pkgconfig
 BuildRequires:	rpmbuild(macros) >= 1.470
 BuildRequires:	schroedinger-devel
+BuildRequires:	orc-devel >= 0.4
 BuildRequires:	tetex
 BuildRequires:	texinfo
 BuildRequires:	xvid-devel >= 1:1.1.0
