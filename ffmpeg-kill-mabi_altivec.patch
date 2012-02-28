@@ -1,0 +1,18 @@
+ when compiled with -mabi=altivec gcc saves and restores altivec registers
+ in long jump macro, it's bad, mplayer don't use long jump much, but uses it
+ for returning from sigill catch routine, so the problem was ILL was sent
+ before sigill catch was completely prepared
+ I hope -mabi=altivec is not really needed
+					-- Sparky
+
+--- ffmpeg-export-2006-12-04/configure~	2006-12-05 14:03:28.645649333 +0200
++++ ffmpeg-export-2006-12-04/configure	2006-12-05 14:04:21.376838155 +0200
+@@ -1327,7 +1327,7 @@
+         if test -n "`$cc -v 2>&1 | grep version | grep Apple`"; then
+             add_cflags "-faltivec"
+         else
+-            add_cflags "-maltivec -mabi=altivec"
++            add_cflags "-maltivec"
+         fi
+     fi
+ fi

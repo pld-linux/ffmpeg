@@ -1,0 +1,56 @@
+--- ffmpeg-export-2006-12-04/configure.orig	2006-11-29 00:55:24.000000000 +0100
++++ ffmpeg-export-2006-12-04/configure	2006-12-09 15:54:35.240089115 +0100
+@@ -2019,7 +2019,7 @@
+ cat <<EOF >libavutil.pc
+ prefix=$PREFIX
+ exec_prefix=\${prefix}
+-libdir=\${exec_prefix}/lib
++libdir=$libdir
+ includedir=\${prefix}/include
+ 
+ Name: libavutil
+@@ -2050,7 +2050,7 @@
+ cat <<EOF >libavcodec.pc
+ prefix=$PREFIX
+ exec_prefix=\${prefix}
+-libdir=\${exec_prefix}/lib
++libdir=$libdir
+ includedir=\${prefix}/include
+ 
+ Name: libavcodec
+@@ -2059,7 +2059,7 @@
+ Requires: $pkg_requires libavutil = $lavu_version
+ Conflicts:
+ Libs: -L\${libdir} -lavcodec $extralibs
+-Cflags: -I\${includedir} -I\${includedir}/ffmpeg
++Cflags: -I\${includedir}/ffmpeg
+ EOF
+ 
+ cat <<EOF >libavcodec-uninstalled.pc
+@@ -2081,7 +2081,7 @@
+ cat <<EOF >libavformat.pc
+ prefix=$PREFIX
+ exec_prefix=\${prefix}
+-libdir=\${exec_prefix}/lib
++libdir=$libdir
+ includedir=\${prefix}/include
+ 
+ Name: libavformat
+@@ -2113,7 +2113,7 @@
+ cat <<EOF >libpostproc.pc
+ prefix=$PREFIX
+ exec_prefix=\${prefix}
+-libdir=\${exec_prefix}/lib
++libdir=$libdir
+ includedir=\${prefix}/include
+ 
+ Name: libpostproc
+@@ -2153,7 +2153,7 @@
+ cat <<EOF >libswscale.pc
+ prefix=$PREFIX
+ exec_prefix=\${prefix}
+-libdir=\${exec_prefix}/lib
++libdir=$libdir
+ includedir=\${prefix}/include
+ 
+ Name: libswscale
