@@ -1,0 +1,10 @@
+--- ffmpeg-0.10.1/libavcodec/libx264.c~	2012-03-17 01:45:47.000000000 +0100
++++ ffmpeg-0.10.1/libavcodec/libx264.c	2012-03-17 18:54:52.643475029 +0100
+@@ -70,7 +70,6 @@
+     char *partitions;
+     int direct_pred;
+     int slice_max_size;
+-    char *stats;
+ } X264Context;
+ 
+ static void X264_log(void *p, int level, const char *fmt, va_list args)
