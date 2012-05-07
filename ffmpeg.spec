@@ -25,7 +25,7 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	0.10.2
+Version:	0.10.3
 Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, xavs, xvid, x11grab)
@@ -33,7 +33,7 @@ Release:	1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.bz2
-# Source0-md5:	de1bd5fc4bbf3ef730a5361ee596fedd
+# Source0-md5:	775d184933f71ff44a2fff4968e78b2b
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
