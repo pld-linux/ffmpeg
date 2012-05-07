@@ -93,6 +93,7 @@ BuildRequires:	schroedinger-devel
 %{?with_doc:BuildRequires:	texi2html}
 %{?with_doc:BuildRequires:	texinfo}
 %{?with_utvideo:BuildRequires:	utvideo-devel}
+BuildRequires:	yasm
 BuildRequires:	vo-aacenc-devel
 BuildRequires:	vo-amrwbenc-devel
 BuildRequires:	xavs-devel
