@@ -37,11 +37,12 @@ Source3:	ffserver.conf
 Patch0:		%{name}-gsm.patch
 URL:		http://www.ffmpeg.org/
 %{?with_openal:BuildRequires:	OpenAL-devel}
-BuildRequires:	SDL-devel
+BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
 BuildRequires:	bzip2-devel
 BuildRequires:	celt-devel >= 0.11.0
 %{?with_nonfree:BuildRequires:	faac-devel}
+BuildRequires:	fontconfig-devel
 BuildRequires:	freetype-devel
 %{?with_frei0r:BuildRequires:	frei0r-devel}
 %ifarch ppc
@@ -53,6 +54,7 @@ BuildRequires:	jack-audio-connection-kit-devel
 BuildRequires:	lame-libs-devel >= 3.98.3
 %{?with_aacplus:BuildRequires:	libaacplus-devel >= 2.0.0}
 BuildRequires:	libass-devel
+BuildRequires:	libbluray-devel
 BuildRequires:	libcdio-devel
 BuildRequires:	libdc1394-devel >= 2
 BuildRequires:	libgsm-devel
@@ -155,13 +157,16 @@ Summary(pl.UTF-8):	Pliki nagłówkowe ffmpeg
 Group:		Development/Libraries
 Requires:	%{name}-libs = %{version}-%{release}
 # Libs.private from *.pc (unreasonably they are all the same)
-Requires:	SDL-devel
+Requires:	SDL-devel >= 1.2.1
 Requires:	alsa-lib-devel
 Requires:	bzip2-devel
 Requires:	celt-devel >= 0.11.0
 %{?with_nonfree:Requires:	faac-devel}
+Requires:	fontconfig-devel
+Requires:	freetype-devel
 Requires:	jack-audio-connection-kit-devel
 Requires:	lame-libs-devel >= 3.98.3
+Requires:	libbluray-devel
 Requires:	libdc1394-devel >= 2
 Requires:	libgsm-devel
 Requires:	libnut-devel
@@ -317,12 +322,15 @@ EOF
 	--enable-gnutls \
 	--enable-gpl \
 	--enable-version3 \
+	--enable-fontconfig \
 	%{?with_frei0r:--enable-frei0r} \
 	%{?with_aacplus:--enable-libaacplus} \
 	--enable-libass \
+	--enable-libbluray \
 	--enable-libcelt \
 	--enable-libcdio \
 	--enable-libdc1394 \
+	--enable-libfreetype \
 	--enable-libgsm \
 	--enable-libmodplug \
 	--enable-libmp3lame \
