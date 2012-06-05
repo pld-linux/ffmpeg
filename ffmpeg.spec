@@ -1,9 +1,6 @@
-# TODO
-# - is bug803 patch still needed? the code changed somehow
 #
-# Workaround ffmpeg.spec & opencv.spec updating:
-#
-# 	1. make-request -r --without opencv ffmpeg.spec
+# How to deal with ffmpeg/opencv checken-egg problem:
+#	1. make-request -r --without opencv ffmpeg.spec
 #	2. make-request -r opencv.spec
 #	3. bump release of ffmpeg.spec
 #	4. make-request -r ffmpeg.spec
@@ -25,27 +22,25 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	0.10.3
-Release:	1
+Version:	0.11
+Release:	0.1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, xavs, xvid, x11grab)
 # using v3 allows Apache-licensed libs (opencore-amr, libvo-*enc)
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.bz2
-# Source0-md5:	775d184933f71ff44a2fff4968e78b2b
+# Source0-md5:	101e1092582bbfca8f2a204cbcecb8fc
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
-Patch0:		%{name}-bug-803.patch
-Patch1:		%{name}-gsm.patch
+Patch0:		%{name}-gsm.patch
 URL:		http://www.ffmpeg.org/
 %{?with_openal:BuildRequires:	OpenAL-devel}
 BuildRequires:	SDL-devel
 BuildRequires:	alsa-lib-devel
 BuildRequires:	bzip2-devel
 BuildRequires:	celt-devel >= 0.11.0
-BuildRequires:	dirac-devel >= 1.0.0
 %{?with_nonfree:BuildRequires:	faac-devel}
 BuildRequires:	freetype-devel
 %{?with_frei0r:BuildRequires:	frei0r-devel}
@@ -164,7 +159,6 @@ Requires:	SDL-devel
 Requires:	alsa-lib-devel
 Requires:	bzip2-devel
 Requires:	celt-devel >= 0.11.0
-Requires:	dirac-devel >= 1.0.0
 %{?with_nonfree:Requires:	faac-devel}
 Requires:	jack-audio-connection-kit-devel
 Requires:	lame-libs-devel >= 3.98.3
@@ -249,7 +243,6 @@ dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
 %prep
 %setup -q
 %patch0 -p1
-%patch1 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
@@ -330,7 +323,6 @@ EOF
 	--enable-libcelt \
 	--enable-libcdio \
 	--enable-libdc1394 \
-	--enable-libdirac \
 	--enable-libgsm \
 	--enable-libmodplug \
 	--enable-libmp3lame \
@@ -456,13 +448,15 @@ fi
 %files libs
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libavcodec.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavcodec.so.53
+%attr(755,root,root) %ghost %{_libdir}/libavcodec.so.54
 %attr(755,root,root) %{_libdir}/libavdevice.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavdevice.so.53
+%attr(755,root,root) %ghost %{_libdir}/libavdevice.so.54
 %attr(755,root,root) %{_libdir}/libavfilter.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libavfilter.so.2
 %attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavformat.so.53
+%attr(755,root,root) %ghost %{_libdir}/libavformat.so.54
+%attr(755,root,root) %{_libdir}/libavresample.so.*.*.*
+%attr(755,root,root) %ghost %{_libdir}/libavresample.so.0
 %attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libavutil.so.51
 %attr(755,root,root) %{_libdir}/libpostproc.so.*.*.*
@@ -480,6 +474,7 @@ fi
 %attr(755,root,root) %{_libdir}/libavdevice.so
 %attr(755,root,root) %{_libdir}/libavfilter.so
 %attr(755,root,root) %{_libdir}/libavformat.so
+%attr(755,root,root) %{_libdir}/libavresample.so
 %attr(755,root,root) %{_libdir}/libavutil.so
 %attr(755,root,root) %{_libdir}/libpostproc.so
 %attr(755,root,root) %{_libdir}/libswresample.so
@@ -489,6 +484,7 @@ fi
 %{_includedir}/libavdevice
 %{_includedir}/libavfilter
 %{_includedir}/libavformat
+%{_includedir}/libavresample
 %{_includedir}/libavutil
 %{_includedir}/libpostproc
 %{_includedir}/libswresample
@@ -497,6 +493,7 @@ fi
 %{_pkgconfigdir}/libavdevice.pc
 %{_pkgconfigdir}/libavfilter.pc
 %{_pkgconfigdir}/libavformat.pc
+%{_pkgconfigdir}/libavresample.pc
 %{_pkgconfigdir}/libavutil.pc
 %{_pkgconfigdir}/libpostproc.pc
 %{_pkgconfigdir}/libswresample.pc
@@ -508,6 +505,7 @@ fi
 %{_libdir}/libavdevice.a
 %{_libdir}/libavfilter.a
 %{_libdir}/libavformat.a
+%{_libdir}/libavresample.a
 %{_libdir}/libavutil.a
 %{_libdir}/libpostproc.a
 %{_libdir}/libswresample.a
