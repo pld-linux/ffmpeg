@@ -31,7 +31,7 @@ start() {
 	# Check if the service is already running?
 	if [ ! -f /var/lock/subsys/ffserver ]; then
 		msg_starting ffserver
-		daemon --user ffserver ffserver
+		daemon --user ffserver /usr/sbin/ffserver
 		RETVAL=$?
 		[ $RETVAL -eq 0 ] && touch /var/lock/subsys/ffserver
 	else
