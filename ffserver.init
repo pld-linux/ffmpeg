@@ -29,35 +29,38 @@ fi
 
 start() {
 	# Check if the service is already running?
-	if [ ! -f /var/lock/subsys/ffserver ]; then
-		msg_starting ffserver
-		daemon --user ffserver /usr/sbin/ffserver
-		RETVAL=$?
-		[ $RETVAL -eq 0 ] && touch /var/lock/subsys/ffserver
-	else
+	if [ -f /var/lock/subsys/ffserver ]; then
 		msg_already_running ffserver
+		return
 	fi
+
+	msg_starting ffserver
+	daemon --user ffserver /usr/sbin/ffserver
+	RETVAL=$?
+	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/ffserver
 }
 
 stop() {
-	if [ -f /var/lock/subsys/ffserver ]; then
-		# Stop daemons.
-		msg_stopping ffserver
-		killproc ffserver
-		rm -f /var/lock/subsys/ffserver
-	else
+	if [ ! -f /var/lock/subsys/ffserver ]; then
 		msg_not_running ffserver
+		return
 	fi
+
+	# Stop daemons.
+	msg_stopping ffserver
+	killproc ffserver
+	rm -f /var/lock/subsys/ffserver
 }
 
 condrestart() {
-	if [ -f /var/lock/subsys/ffserver ]; then
-		stop
-		start
-	else
+	if [ ! -f /var/lock/subsys/ffserver ]; then
 		msg_not_running ffserver
 		RETVAL=$1
+		return
 	fi
+
+	stop
+	start
 }
 
 # See how we were called.
