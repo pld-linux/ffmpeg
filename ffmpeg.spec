@@ -22,20 +22,21 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	0.11.1
-Release:	3
+Version:	0.11.2
+Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, xavs, xvid, x11grab)
 # using v3 allows Apache-licensed libs (opencore-amr, libvo-*enc)
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.bz2
-# Source0-md5:	ff8cb914f657e164dd60ea1008b555a8
+# Source0-md5:	93c1908022567b321df74db7214da6ac
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
 Patch0:		%{name}-gsm.patch
 Patch1:		%{name}-opencv24.patch
+Patch2:		%{name}-openjpeg.patch
 URL:		http://www.ffmpeg.org/
 %{?with_openal:BuildRequires:	OpenAL-devel}
 BuildRequires:	SDL-devel >= 1.2.1
@@ -74,7 +75,7 @@ BuildRequires:	libvorbis-devel
 %{?with_x264:BuildRequires:	libx264-devel >= 0.1.3-1.20111212_2245}
 BuildRequires:	opencore-amr-devel
 %{?with_opencv:BuildRequires:	opencv-devel}
-BuildRequires:	openjpeg-devel >= 1.3-2
+BuildRequires:	openjpeg-devel >= 1.5
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
 BuildRequires:	speex-devel >= 1:1.2-rc1
 %ifarch %{ix86}
@@ -179,7 +180,7 @@ Requires:	libvorbis-devel
 %{?with_vpx:Requires:	libvpx-devel >= 0.9.6}
 %{?with_x264:Requires:	libx264-devel >= 0.1.3-1.20110625_2245}
 Requires:	opencore-amr-devel
-Requires:	openjpeg-devel >= 1.3-2
+Requires:	openjpeg-devel >= 1.5
 Requires:	schroedinger-devel
 Requires:	speex-devel >= 1:1.2-rc1
 Requires:	vo-aacenc-devel
@@ -250,6 +251,7 @@ dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
 %setup -q
 %patch0 -p1
 %patch1 -p0
+%patch2 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
