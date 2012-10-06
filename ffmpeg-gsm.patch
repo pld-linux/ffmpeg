@@ -1,14 +1,14 @@
---- ffmpeg-0.10/configure.orig	2011-06-21 21:29:25.000000000 +0200
-+++ ffmpeg-0.10/configure	2011-06-26 20:07:17.579181375 +0200
-@@ -3071,7 +3071,7 @@
-     "dirac_decoder_init dirac_encoder_init"
- enabled libfaac    && require2 libfaac "stdint.h faac.h" faacEncGetVersion -lfaac
+--- ffmpeg-1.0/configure.orig	2012-10-05 22:11:11.888434415 +0200
++++ ffmpeg-1.0/configure	2012-10-05 22:12:56.018432244 +0200
+@@ -3646,7 +3646,7 @@
+ flite_libs="-lflite_cmu_time_awb -lflite_cmu_us_awb -lflite_cmu_us_kal -lflite_cmu_us_kal16 -lflite_cmu_us_rms -lflite_cmu_us_slt -lflite_usenglish -lflite_cmulex -lflite"
+ enabled libflite   && require2 libflite "flite/flite.h" flite_init $flite_libs
  enabled libfreetype && require_pkg_config freetype2 "ft2build.h freetype/freetype.h" FT_Init_FreeType
 -enabled libgsm     && require  libgsm gsm/gsm.h gsm_create -lgsm
 +enabled libgsm     && require  libgsm gsm.h gsm_create -lgsm
+ enabled libilbc    && require  libilbc ilbc.h WebRtcIlbcfix_InitDecode -lilbc
  enabled libmodplug && require  libmodplug libmodplug/modplug.h ModPlug_Load -lmodplug
  enabled libmp3lame && require  "libmp3lame >= 3.98.3" lame/lame.h lame_set_VBR_quality -lmp3lame
- enabled libnut     && require  libnut libnut.h nut_demuxer_init -lnut
 --- ffmpeg-0.10/libavcodec/libgsm.c.orig	2012-01-26 23:15:59.000000000 +0100
 +++ ffmpeg-0.10/libavcodec/libgsm.c	2012-01-27 17:58:28.495275196 +0100
 @@ -27,7 +27,7 @@
