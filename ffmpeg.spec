@@ -1,4 +1,3 @@
-# TODO: libilbc (requires webrtc.org version)
 #
 # How to deal with ffmpeg/opencv checken-egg problem:
 #	1. make-request -r --without opencv ffmpeg.spec
@@ -13,7 +12,7 @@
 %bcond_without	caca		# textual display using libcaca
 %bcond_without	flite		# flite voice synthesis support
 %bcond_without	frei0r		# frei0r video filtering
-%bcond_with	ilbc		# iLBC de/encoding via libilbc
+%bcond_without	ilbc		# iLBC de/encoding via WebRTC libilbc
 %bcond_without	openal		# OpenAL 1.1 capture support
 %bcond_without	opencv		# OpenCV video filtering
 %bcond_without	pulseaudio	# PulseAudio input support
@@ -69,7 +68,6 @@ BuildRequires:	libcdio-devel
 BuildRequires:	libdc1394-devel >= 2
 BuildRequires:	libgsm-devel
 BuildRequires:	libiec61883-devel
-%{?with_ilbc:BuildRequires:	libilbc-devel}
 BuildRequires:	libmodplug-devel
 BuildRequires:	libnut-devel
 BuildRequires:	libraw1394-devel >= 2
@@ -104,13 +102,14 @@ BuildRequires:	speex-devel >= 1:1.2-rc1
 %{?with_doc:BuildRequires:	texinfo}
 BuildRequires:	twolame-devel
 %{?with_utvideo:BuildRequires:	utvideo-devel}
-BuildRequires:	yasm
 BuildRequires:	vo-aacenc-devel
 BuildRequires:	vo-amrwbenc-devel
+%{?with_ilbc:BuildRequires:	webrtc-libilbc-devel}
 BuildRequires:	xavs-devel
 BuildRequires:	xorg-lib-libXext-devel
 BuildRequires:	xorg-lib-libXfixes-devel
 BuildRequires:	xvid-devel >= 1:1.1.0
+BuildRequires:	yasm
 BuildRequires:	zlib-devel
 %{?with_autoreqdep:BuildConflicts:	libpostproc}
 # overflows maximum hash table size
@@ -190,7 +189,6 @@ Requires:	libcdio-devel
 Requires:	libdc1394-devel >= 2
 Requires:	libgsm-devel
 Requires:	libiec61883-devel
-%{?with_ilbc:Requires:	libilbc-devel}
 Requires:	libmodplug-devel
 Requires:	libnut-devel
 Requires:	libraw1394-devel >= 2
@@ -207,6 +205,7 @@ Requires:	speex-devel >= 1:1.2-rc1
 Requires:	twolame-devel
 Requires:	vo-aacenc-devel
 Requires:	vo-amrwbenc-devel
+%{?with_ilbc:Requires:	webrtc-libilbc-devel}
 Requires:	xavs-devel
 Requires:	xorg-lib-libXext-devel
 Requires:	xorg-lib-libXfixes-devel
