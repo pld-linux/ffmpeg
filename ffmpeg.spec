@@ -26,7 +26,7 @@ Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
 Version:	1.0
-Release:	2
+Release:	3
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, xavs, xvid, x11grab)
 # using v3 allows Apache-licensed libs (opencore-amr, libvo-*enc)
@@ -199,6 +199,7 @@ Requires:	libvorbis-devel
 %{?with_vpx:Requires:	libvpx-devel >= 0.9.6}
 %{?with_x264:Requires:	libx264-devel >= 0.1.3-1.20110625_2245}
 Requires:	opencore-amr-devel
+%{?with_opencv:Requires:	opencv-devel}
 Requires:	openjpeg-devel >= 1.5
 Requires:	schroedinger-devel
 Requires:	speex-devel >= 1:1.2-rc1
