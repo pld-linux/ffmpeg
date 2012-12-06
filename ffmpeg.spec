@@ -40,6 +40,7 @@ Source3:	ffserver.conf
 Patch0:		%{name}-gsm.patch
 Patch1:		%{name}-opencv24.patch
 Patch2:		%{name}-openjpeg.patch
+Patch3:		%{name}-cdio-paranoia.patch
 URL:		http://www.ffmpeg.org/
 %{?with_openal:BuildRequires:	OpenAL-devel}
 BuildRequires:	SDL-devel >= 1.2.1
@@ -64,7 +65,7 @@ BuildRequires:	libass-devel
 BuildRequires:	libavc1394-devel
 BuildRequires:	libbluray-devel
 %{?with_caca:BuildRequires:	libcaca-devel}
-BuildRequires:	libcdio-devel
+BuildRequires:	libcdio-paranoia-devel >= 0.90-2
 BuildRequires:	libdc1394-devel >= 2
 BuildRequires:	libgsm-devel
 BuildRequires:	libiec61883-devel
@@ -186,7 +187,7 @@ Requires:	lame-libs-devel >= 3.98.3
 Requires:	libass-devel
 Requires:	libavc1394-devel
 Requires:	libbluray-devel
-Requires:	libcdio-devel
+Requires:	libcdio-paranoia-devel >= 0.90-2
 Requires:	libdc1394-devel >= 2
 Requires:	libgsm-devel
 Requires:	libiec61883-devel
@@ -275,6 +276,7 @@ dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
 %patch0 -p1
 %patch1 -p0
 %patch2 -p1
+%patch3 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
