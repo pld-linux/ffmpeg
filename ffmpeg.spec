@@ -357,7 +357,7 @@ EOF
 	%{?with_aacplus:--enable-libaacplus} \
 	--enable-libass \
 	--enable-libbluray \
-	%{?with_libcaca:--enable-libcaca} \
+	%{?with_caca:--enable-libcaca} \
 	--enable-libcelt \
 	--enable-libcdio \
 	--enable-libdc1394 \
