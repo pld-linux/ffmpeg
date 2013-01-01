@@ -425,20 +425,16 @@ install -d $RPM_BUILD_ROOT{%{_sysconfdir},%{_sbindir},/etc/{sysconfig,rc.d/init.
 	$RPM_BUILD_ROOT%{_includedir}/ffmpeg \
 	$RPM_BUILD_ROOT/var/{cache,log}/ffserver
 
-%{__make} install \
+%{__make} install install-headers \
 	DESTDIR=$RPM_BUILD_ROOT \
 	V=1
 
+# install nonstandard, non-public headers manually
 cp -a config.h $RPM_BUILD_ROOT%{_includedir}/ffmpeg
-cp -a libavutil/intreadwrite.h $RPM_BUILD_ROOT%{_includedir}/libavutil
-cp -a libavutil/bswap.h $RPM_BUILD_ROOT%{_includedir}/libavutil
-cp -a libavutil/common.h $RPM_BUILD_ROOT%{_includedir}/libavutil
-cp -a libavutil/mem.h $RPM_BUILD_ROOT%{_includedir}/libavutil
 for a in libavutil/*/bswap.h; do
-	install -D $a $RPM_BUILD_ROOT%{_includedir}/$a
+	install -Dp $a $RPM_BUILD_ROOT%{_includedir}/$a
 done
 cp -a libavformat/riff.h $RPM_BUILD_ROOT%{_includedir}/libavformat
-cp -a libavformat/avio.h $RPM_BUILD_ROOT%{_includedir}/libavformat
 # for lim-omx ffmpeg components
 cp -a libavcodec/audioconvert.h $RPM_BUILD_ROOT%{_includedir}/libavcodec
 
