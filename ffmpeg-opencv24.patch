@@ -1,11 +1,11 @@
---- configure.orig	2012-07-09 07:30:07.231478952 +0200
-+++ configure	2012-07-09 08:46:38.701177339 +0200
-@@ -3222,7 +3222,7 @@
+--- ffmpeg-1.1/configure.orig	2013-01-12 19:03:23.233511454 +0100
++++ ffmpeg-1.1/configure	2013-01-12 20:14:37.403422370 +0100
+@@ -3834,7 +3834,7 @@
  enabled libnut     && require  libnut libnut.h nut_demuxer_init -lnut
  enabled libopencore_amrnb  && require libopencore_amrnb opencore-amrnb/interf_dec.h Decoder_Interface_init -lopencore-amrnb
  enabled libopencore_amrwb  && require libopencore_amrwb opencore-amrwb/dec_if.h D_IF_init -lopencore-amrwb
 -enabled libopencv  && require_pkg_config opencv opencv/cxcore.h cvCreateImageHeader
 +enabled libopencv  && add_extralibs -lopencv_core -lopencv_features2d -lopencv_imgproc -lopencv_objdetect -lgcrypt
- enabled libopenjpeg && require libopenjpeg openjpeg.h opj_version -lopenjpeg
- enabled libpulse && require_pkg_config libpulse-simple pulse/simple.h pa_simple_new
- enabled librtmp    && require_pkg_config librtmp librtmp/rtmp.h RTMP_Socket
+ enabled libopenjpeg && { check_lib openjpeg-1.5/openjpeg.h opj_version -lopenjpeg ||
+                          check_lib openjpeg.h opj_version -lopenjpeg ||
+                          die "ERROR: libopenjpeg not found"; }

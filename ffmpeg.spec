@@ -1,3 +1,4 @@
+# TODO: libsoxr [libsoxr, soxr.h]
 #
 # How to deal with ffmpeg/opencv checken-egg problem:
 #	1. make-request -r --without opencv ffmpeg.spec
@@ -25,7 +26,7 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	1.0.1
+Version:	1.1
 Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, xavs, xvid, x11grab)
@@ -33,16 +34,15 @@ Release:	1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.bz2
-# Source0-md5:	dbbb88ce5525dea22b24aaa098a9bcc2
+# Source0-md5:	578c590a0e996c1fc71acb666c0ed858
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
 Patch0:		%{name}-gsm.patch
 Patch1:		%{name}-opencv24.patch
-Patch2:		%{name}-openjpeg.patch
-Patch3:		%{name}-cdio-paranoia.patch
+Patch2:		%{name}-cdio-paranoia.patch
 URL:		http://www.ffmpeg.org/
-%{?with_openal:BuildRequires:	OpenAL-devel}
+%{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
 BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
 BuildRequires:	bzip2-devel
@@ -79,7 +79,7 @@ BuildRequires:	libv4l-devel
 %{?with_va:BuildRequires:	libva-devel >= 1.0.3}
 BuildRequires:	libvdpau-devel >= 0.2
 BuildRequires:	libvorbis-devel
-%{?with_vpx:BuildRequires:	libvpx-devel >= 0.9.6}
+%{?with_vpx:BuildRequires:	libvpx-devel >= 0.9.7}
 # X264_BUILD >= 118
 %{?with_x264:BuildRequires:	libx264-devel >= 0.1.3-1.20111212_2245}
 %ifarch %{ix86}
@@ -107,6 +107,7 @@ BuildRequires:	vo-aacenc-devel
 BuildRequires:	vo-amrwbenc-devel
 %{?with_ilbc:BuildRequires:	webrtc-libilbc-devel}
 BuildRequires:	xavs-devel
+BuildRequires:	xorg-lib-libX11-devel
 BuildRequires:	xorg-lib-libXext-devel
 BuildRequires:	xorg-lib-libXfixes-devel
 BuildRequires:	xvid-devel >= 1:1.1.0
@@ -187,6 +188,7 @@ Requires:	lame-libs-devel >= 3.98.3
 Requires:	libass-devel
 Requires:	libavc1394-devel
 Requires:	libbluray-devel
+%{?with_caca:Requires:	libcaca-devel}
 Requires:	libcdio-paranoia-devel >= 0.90-2
 Requires:	libdc1394-devel >= 2
 Requires:	libgsm-devel
@@ -198,7 +200,7 @@ Requires:	librtmp-devel
 Requires:	libtheora-devel >= 1.0-0.beta3
 %{?with_va:Requires:	libva-devel >= 1.0.3}
 Requires:	libvorbis-devel
-%{?with_vpx:Requires:	libvpx-devel >= 0.9.6}
+%{?with_vpx:Requires:	libvpx-devel >= 0.9.7}
 %{?with_x264:Requires:	libx264-devel >= 0.1.3-1.20110625_2245}
 Requires:	opencore-amr-devel
 %{?with_opencv:Requires:	opencv-devel}
@@ -274,9 +276,8 @@ dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
 %prep
 %setup -q
 %patch0 -p1
-%patch1 -p0
+%patch1 -p1
 %patch2 -p1
-%patch3 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
@@ -449,6 +450,12 @@ install -p tools/qt-faststart $RPM_BUILD_ROOT%{_bindir}
 # simple to do (by querying pkgconfig), but why?
 install -p ffmpeg-avconfig $RPM_BUILD_ROOT%{_bindir}/ffmpeg-avconfig
 
+# fix man page
+%if %{with doc}
+install -d $RPM_BUILD_ROOT%{_mandir}/man3
+%{__mv} $RPM_BUILD_ROOT%{_mandir}/man1/lib*.3 $RPM_BUILD_ROOT%{_mandir}/man3
+%endif
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -484,8 +491,19 @@ fi
 %dir %{_datadir}/ffmpeg
 %{_datadir}/ffmpeg/*.ffpreset
 %{_datadir}/ffmpeg/ffprobe.xsd
-%{?with_doc:%{_mandir}/man1/ffmpeg.1*}
-%{?with_doc:%{_mandir}/man1/ffprobe.1*}
+%if %{with doc}
+%{_mandir}/man1/ffmpeg.1*
+%{_mandir}/man1/ffmpeg-bitstream-filters.1*
+%{_mandir}/man1/ffmpeg-codecs.1*
+%{_mandir}/man1/ffmpeg-devices.1*
+%{_mandir}/man1/ffmpeg-filters.1*
+%{_mandir}/man1/ffmpeg-formats.1*
+%{_mandir}/man1/ffmpeg-protocols.1*
+%{_mandir}/man1/ffmpeg-resampler.1*
+%{_mandir}/man1/ffmpeg-scaler.1*
+%{_mandir}/man1/ffmpeg-utils.1*
+%{_mandir}/man1/ffprobe.1*
+%endif
 
 %files libs
 %defattr(644,root,root,755)
@@ -498,9 +516,9 @@ fi
 %attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libavformat.so.54
 %attr(755,root,root) %{_libdir}/libavresample.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavresample.so.0
+%attr(755,root,root) %ghost %{_libdir}/libavresample.so.1
 %attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavutil.so.51
+%attr(755,root,root) %ghost %{_libdir}/libavutil.so.52
 %attr(755,root,root) %{_libdir}/libpostproc.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libpostproc.so.52
 %attr(755,root,root) %{_libdir}/libswresample.so.*.*.*
@@ -540,6 +558,15 @@ fi
 %{_pkgconfigdir}/libpostproc.pc
 %{_pkgconfigdir}/libswresample.pc
 %{_pkgconfigdir}/libswscale.pc
+%if %{with doc}
+%{_mandir}/man3/libavcodec.3*
+%{_mandir}/man3/libavdevice.3*
+%{_mandir}/man3/libavfilter.3*
+%{_mandir}/man3/libavformat.3*
+%{_mandir}/man3/libavutil.3*
+%{_mandir}/man3/libswresample.3*
+%{_mandir}/man3/libswscale.3*
+%endif
 
 %files static
 %defattr(644,root,root,755)
