@@ -1,4 +1,3 @@
-# TODO: libsoxr [libsoxr, soxr.h]
 #
 # How to deal with ffmpeg/opencv checken-egg problem:
 #	1. make-request -r --without opencv ffmpeg.spec
@@ -17,6 +16,7 @@
 %bcond_without	openal		# OpenAL 1.1 capture support
 %bcond_without	opencv		# OpenCV video filtering
 %bcond_without	pulseaudio	# PulseAudio input support
+%bcond_without	soxr		# SoX Resampler support
 %bcond_without	x264		# x264 encoder
 %bcond_without	utvideo		# Ut Video decoder
 %bcond_without	va		# VAAPI (Video Acceleration API)
@@ -41,6 +41,7 @@ Source3:	ffserver.conf
 Patch0:		%{name}-gsm.patch
 Patch1:		%{name}-opencv24.patch
 Patch2:		%{name}-cdio-paranoia.patch
+Patch3:		%{name}-utvideo.patch
 URL:		http://www.ffmpeg.org/
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
 BuildRequires:	SDL-devel >= 1.2.1
@@ -97,12 +98,13 @@ BuildRequires:	pkgconfig
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
 BuildRequires:	rpmbuild(macros) >= 1.470
 BuildRequires:	schroedinger-devel
+%{?with_soxr:BuildRequires:	soxr-devel}
 BuildRequires:	speex-devel >= 1:1.2-rc1
 %{?with_doc:BuildRequires:	tetex}
 %{?with_doc:BuildRequires:	texi2html}
 %{?with_doc:BuildRequires:	texinfo}
 BuildRequires:	twolame-devel
-%{?with_utvideo:BuildRequires:	utvideo-devel}
+%{?with_utvideo:BuildRequires:	utvideo-devel >= 12}
 BuildRequires:	vo-aacenc-devel
 BuildRequires:	vo-amrwbenc-devel
 %{?with_ilbc:BuildRequires:	webrtc-libilbc-devel}
@@ -117,6 +119,7 @@ BuildRequires:	zlib-devel
 # overflows maximum hash table size
 BuildConflicts:	pdksh < 5.2.14-57
 Requires:	%{name}-libs = %{version}-%{release}
+%{?with_utvideo:Requires:	utvideo >= 12}
 %{?with_ilbc:Requires:	webrtc-libilbc}
 Requires:	xvid >= 1:1.1.0
 Obsoletes:	libpostproc
@@ -206,8 +209,10 @@ Requires:	opencore-amr-devel
 %{?with_opencv:Requires:	opencv-devel}
 Requires:	openjpeg-devel >= 1.5
 Requires:	schroedinger-devel
+%{?with_soxr:Requires:	soxr-devel}
 Requires:	speex-devel >= 1:1.2-rc1
 Requires:	twolame-devel
+%{?with_utvideo:Requires:	utvideo-devel >= 12}
 Requires:	vo-aacenc-devel
 Requires:	vo-amrwbenc-devel
 %{?with_ilbc:Requires:	webrtc-libilbc-devel}
@@ -278,6 +283,7 @@ dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
+%patch3 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
@@ -379,6 +385,7 @@ EOF
 	%{?with_pulseaudio:--enable-libpulse} \
 	--enable-librtmp \
 	--enable-libschroedinger \
+	%{?with_soxr:--enable-libsoxr} \
 	--enable-libspeex \
 	--enable-libtheora \
 	--enable-libtwolame \

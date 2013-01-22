@@ -1,0 +1,33 @@
+--- ffmpeg-1.1/libavcodec/libutvideodec.cpp.orig	2013-01-06 22:53:29.000000000 +0100
++++ ffmpeg-1.1/libavcodec/libutvideodec.cpp	2013-01-22 20:20:53.825406063 +0100
+@@ -61,11 +61,11 @@ static av_cold int utvideo_decode_init(A
+         break;
+     case MKTAG('U', 'L', 'R', 'G'):
+         avctx->pix_fmt = AV_PIX_FMT_BGR24;
+-        format = UTVF_RGB24_WIN;
++        format = UTVF_NFCC_BGR_BU;
+         break;
+     case MKTAG('U', 'L', 'R', 'A'):
+         avctx->pix_fmt = AV_PIX_FMT_RGB32;
+-        format = UTVF_RGB32_WIN;
++        format = UTVF_NFCC_BGRA_BU;
+         break;
+     default:
+         av_log(avctx, AV_LOG_ERROR,
+--- ffmpeg-1.1/libavcodec/libutvideoenc.cpp.orig	2013-01-06 22:53:29.000000000 +0100
++++ ffmpeg-1.1/libavcodec/libutvideoenc.cpp	2013-01-22 20:21:17.268738905 +0100
+@@ -51,12 +51,12 @@ static av_cold int utvideo_encode_init(A
+         avctx->codec_tag = MKTAG('U', 'L', 'Y', '2');
+         break;
+     case AV_PIX_FMT_BGR24:
+-        in_format = UTVF_RGB24_WIN;
++        in_format = UTVF_NFCC_BGR_BU;
+         avctx->bits_per_coded_sample = 24;
+         avctx->codec_tag = MKTAG('U', 'L', 'R', 'G');
+         break;
+     case AV_PIX_FMT_RGB32:
+-        in_format = UTVF_RGB32_WIN;
++        in_format = UTVF_NFCC_BGRA_BU;
+         avctx->bits_per_coded_sample = 32;
+         avctx->codec_tag = MKTAG('U', 'L', 'R', 'A');
+         break;
