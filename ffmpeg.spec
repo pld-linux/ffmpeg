@@ -27,7 +27,7 @@ Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
 Version:	1.2
-Release:	1
+Release:	2
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, xavs, xvid, x11grab)
 # using v3 allows Apache-licensed libs (opencore-amr, libvo-*enc)
@@ -284,37 +284,45 @@ dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
 #! /bin/sh
-_libavdecoders_all="`sed -n 's/^[^#]*DEC.*(.*, *\(.*\)).*/\1_decoder/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`"
-_libavencoders_all="`sed -n 's/^[^#]*ENC.*(.*, *\(.*\)).*/\1_encoder/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`"
-_libavparsers_all="`sed -n 's/^[^#]*PARSER.*(.*, *\(.*\)).*/\1_parser/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`"
-_libavbsfs_all="`sed -n 's/^[^#]*BSF.*(.*, *\(.*\)).*/\1_bsf/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`"
-_libavdemuxers_all="`sed -n 's/^[^#]*DEMUX.*(.*, *\(.*\)).*/\1_demuxer/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]'`"
-_libavmuxers_all="`sed -n 's/^[^#]*_MUX.*(.*, *\(.*\)).*/\1_muxer/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]'`"
-_libavprotocols_all="`sed -n 's/^[^#]*PROTOCOL.*(.*, *\(.*\)).*/\1_protocol/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]'`"
+libavdecoders_all="$(sed -n 's/^[^#]*DEC.*(.*, *\(.*\)).*/\1_decoder/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]')"
+libavencoders_all="$(sed -n 's/^[^#]*ENC.*(.*, *\(.*\)).*/\1_encoder/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]')"
+libavparsers_all="$(sed -n 's/^[^#]*PARSER.*(.*, *\(.*\)).*/\1_parser/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]')"
+libavbsfs_all="$(sed -n 's/^[^#]*BSF.*(.*, *\(.*\)).*/\1_bsf/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]')"
+libavdemuxers_all="$(sed -n 's/^[^#]*DEMUX.*(.*, *\(.*\)).*/\1_demuxer/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]')"
+libavmuxers_all="$(sed -n 's/^[^#]*_MUX.*(.*, *\(.*\)).*/\1_muxer/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]')"
+libavprotocols_all="$(sed -n 's/^[^#]*PROTOCOL.*(.*, *\(.*\)).*/\1_protocol/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]')"
+libavhwaccels_all="$(sed -n 's/^[^#]*HWACCEL.*(.*, *\(.*\)).*/\1_hwaccel/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]')"
+libavfilters_all="$(sed -n 's/^[^#]*FILTER.*(.*, *\(.*\),.*).*/\1_filter/p' libavfilter/allfilters.c | tr '[a-z]' '[A-Z]')"
 EOF
 cat <<'EOF' >> ffmpeg-avconfig
 
 case "$1" in
 --decoders)
-	echo $_libavdecoders_all
+	echo $libavdecoders_all
 	;;
 --encoders)
-	echo $_libavencoders_all
+	echo $libavencoders_all
 	;;
 --parsers)
-	echo $_libavparsers_all
+	echo $libavparsers_all
 	;;
 --bsfs)
-	echo $_libavbsfs_all
+	echo $libavbsfs_all
 	;;
 --demuxers)
-	echo $_libavdemuxers_all
+	echo $libavdemuxers_all
 	;;
 --muxers)
-	echo $_libavmuxers_all
+	echo $libavmuxers_all
 	;;
 --protocols)
-	echo $_libavprotocols_all
+	echo $libavprotocols_all
+	;;
+--hwaccels)
+	echo $libavhwaccels_all
+	;;
+--filters)
+	echo $libavfilters_all
 	;;
 *)
 	cat <<USAGE
@@ -327,6 +335,8 @@ Options:
   --demuxers
   --muxers
   --protocols
+  --hwaccels
+  --filters
 USAGE
 	exit 1;;
 esac
