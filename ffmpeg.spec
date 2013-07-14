@@ -1,3 +1,4 @@
+# TODO: libshine, libvidstab, libzmq, opencl ?
 #
 # How to deal with ffmpeg/opencv checken-egg problem:
 #	1. make-request -r --without opencv ffmpeg.spec
@@ -12,21 +13,24 @@
 %bcond_without	caca		# textual display using libcaca
 %bcond_without	flite		# flite voice synthesis support
 %bcond_without	frei0r		# frei0r video filtering
+%bcond_without	gme		# Game Music Emu support
 %bcond_without	ilbc		# iLBC de/encoding via WebRTC libilbc
 %bcond_without	openal		# OpenAL 1.1 capture support
 %bcond_without	opencv		# OpenCV video filtering
 %bcond_without	pulseaudio	# PulseAudio input support
+%bcond_without	quvi		# quvi input support
 %bcond_without	soxr		# SoX Resampler support
 %bcond_without	x264		# x264 encoder
 %bcond_without	utvideo		# Ut Video decoder
 %bcond_without	va		# VAAPI (Video Acceleration API)
 %bcond_without	vpx		# VP8, a high-quality video codec
+%bcond_without	wavpack		# wavpack encoding support
 %bcond_without	doc		# don't build docs
 
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	1.2.1
+Version:	2.0
 Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, xavs, xvid, x11grab)
@@ -34,12 +38,11 @@ Release:	1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.bz2
-# Source0-md5:	5071a26cc149f380908ce79ec2a677ef
+# Source0-md5:	13a0feb74474f89052f6b8ba1bce46be
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
 Patch0:		%{name}-opencv24.patch
-Patch1:		%{name}-utvideo.patch
 URL:		http://www.ffmpeg.org/
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
 BuildRequires:	SDL-devel >= 1.2.1
@@ -52,6 +55,7 @@ BuildRequires:	celt-devel >= 0.11.0
 BuildRequires:	fontconfig-devel
 BuildRequires:	freetype-devel
 %{?with_frei0r:BuildRequires:	frei0r-devel}
+%{?with_gme:BuildRequires:	game-music-emu-devel}
 %ifarch ppc
 # require version with altivec support fixed
 BuildRequires:	gcc >= 5:3.3.2-3
@@ -70,6 +74,7 @@ BuildRequires:	libgsm-devel
 BuildRequires:	libiec61883-devel
 BuildRequires:	libmodplug-devel
 BuildRequires:	libnut-devel
+%{?with_quvi:BuildRequires:	libquvi-devel}
 BuildRequires:	libraw1394-devel >= 2
 BuildRequires:	librtmp-devel
 BuildRequires:	libtheora-devel >= 1.0-0.beta3
@@ -105,6 +110,7 @@ BuildRequires:	twolame-devel
 %{?with_utvideo:BuildRequires:	utvideo-devel >= 12}
 BuildRequires:	vo-aacenc-devel
 BuildRequires:	vo-amrwbenc-devel
+%{?with_wavpack:BuildRequires:	wavpack-devel}
 %{?with_ilbc:BuildRequires:	webrtc-libilbc-devel}
 BuildRequires:	xavs-devel
 BuildRequires:	xorg-lib-libX11-devel
@@ -182,6 +188,7 @@ Requires:	celt-devel >= 0.11.0
 %{?with_fdk_aac:Requires:	fdk-aac-devel}
 Requires:	fontconfig-devel
 Requires:	freetype-devel
+%{?with_gme:Requires:	game-music-emu-devel}
 Requires:	jack-audio-connection-kit-devel
 %{?with_flite:Requires:	flite-devel >= 1.4}
 Requires:	lame-libs-devel >= 3.98.3
@@ -196,6 +203,7 @@ Requires:	libgsm-devel
 Requires:	libiec61883-devel
 Requires:	libmodplug-devel
 Requires:	libnut-devel
+%{?with_quvi:Requires:	libquvi-devel}
 Requires:	libraw1394-devel >= 2
 Requires:	librtmp-devel
 Requires:	libtheora-devel >= 1.0-0.beta3
@@ -213,6 +221,7 @@ Requires:	twolame-devel
 %{?with_utvideo:Requires:	utvideo-devel >= 12}
 Requires:	vo-aacenc-devel
 Requires:	vo-amrwbenc-devel
+%{?with_wavpack:Requires:	wavpack-devel}
 %{?with_ilbc:Requires:	webrtc-libilbc-devel}
 Requires:	xavs-devel
 Requires:	xorg-lib-libXext-devel
@@ -279,7 +288,6 @@ dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
 %prep
 %setup -q
 %patch0 -p1
-%patch1 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
@@ -377,6 +385,7 @@ EOF
 	%{?with_fdk_aac:--enable-libfdk-aac} \
 	%{?with_flite:--enable-libflite} \
 	--enable-libfreetype \
+	%{?with_gme:--enable-libgme} \
 	--enable-libgsm \
 	--enable-libiec61883 \
 	%{?with_ilbc:--enable-libilbc} \
@@ -389,6 +398,7 @@ EOF
 	--enable-libopenjpeg \
 	--enable-libopus \
 	%{?with_pulseaudio:--enable-libpulse} \
+	%{?with_quvi:--enable-libquvi} \
 	--enable-librtmp \
 	--enable-libschroedinger \
 	%{?with_soxr:--enable-libsoxr} \
@@ -401,6 +411,7 @@ EOF
 	--enable-libvo-amrwbenc \
 	--enable-libvorbis \
 	%{?with_vpx:--enable-libvpx} \
+	%{?with_wavpack:--enable-libwavpack} \
 	%{?with_x264:--enable-libx264} \
 	--enable-libxavs \
 	--enable-libxvid \
@@ -409,8 +420,7 @@ EOF
 	--enable-pthreads \
 	--enable-shared \
 	--enable-swscale \
-	%{?with_va:--enable-vaapi} \
-	--enable-vdpau \
+	%{!?with_va:--disable-vaapi} \
 	--enable-x11grab \
 %ifnarch %{ix86} %{x8664}
 	--disable-mmx \
@@ -463,12 +473,6 @@ install -p tools/qt-faststart $RPM_BUILD_ROOT%{_bindir}
 # simple to do (by querying pkgconfig), but why?
 install -p ffmpeg-avconfig $RPM_BUILD_ROOT%{_bindir}/ffmpeg-avconfig
 
-# fix man page
-%if %{with doc}
-install -d $RPM_BUILD_ROOT%{_mandir}/man3
-%{__mv} $RPM_BUILD_ROOT%{_mandir}/man1/lib*.3 $RPM_BUILD_ROOT%{_mandir}/man3
-%endif
-
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -506,6 +510,7 @@ fi
 %{_datadir}/ffmpeg/ffprobe.xsd
 %if %{with doc}
 %{_mandir}/man1/ffmpeg.1*
+%{_mandir}/man1/ffmpeg-all.1*
 %{_mandir}/man1/ffmpeg-bitstream-filters.1*
 %{_mandir}/man1/ffmpeg-codecs.1*
 %{_mandir}/man1/ffmpeg-devices.1*
@@ -516,18 +521,19 @@ fi
 %{_mandir}/man1/ffmpeg-scaler.1*
 %{_mandir}/man1/ffmpeg-utils.1*
 %{_mandir}/man1/ffprobe.1*
+%{_mandir}/man1/ffprobe-all.1*
 %endif
 
 %files libs
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libavcodec.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavcodec.so.54
+%attr(755,root,root) %ghost %{_libdir}/libavcodec.so.55
 %attr(755,root,root) %{_libdir}/libavdevice.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavdevice.so.54
+%attr(755,root,root) %ghost %{_libdir}/libavdevice.so.55
 %attr(755,root,root) %{_libdir}/libavfilter.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libavfilter.so.3
 %attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavformat.so.54
+%attr(755,root,root) %ghost %{_libdir}/libavformat.so.55
 %attr(755,root,root) %{_libdir}/libavresample.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libavresample.so.1
 %attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
@@ -596,7 +602,10 @@ fi
 %files ffplay
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/ffplay
-%{?with_doc:%{_mandir}/man1/ffplay.1*}
+%if %{with doc}
+%{_mandir}/man1/ffplay.1*
+%{_mandir}/man1/ffplay-all.1*
+%endif
 
 %files ffserver
 %defattr(644,root,root,755)
@@ -604,6 +613,9 @@ fi
 %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/ffserver
 %attr(755,root,root) %{_sbindir}/ffserver
 %attr(754,root,root) /etc/rc.d/init.d/ffserver
-%{?with_doc:%{_mandir}/man1/ffserver.1*}
+%if %{with doc}
+%{_mandir}/man1/ffserver.1*
+%{_mandir}/man1/ffserver-all.1*
+%endif
 %dir %attr(770,root,ffserver) /var/cache/ffserver
 %dir %attr(770,root,ffserver) /var/log/ffserver
