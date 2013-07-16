@@ -1,4 +1,4 @@
-# TODO: libshine, libvidstab, libzmq, opencl ?
+# TODO: libzmq ?
 #
 # How to deal with ffmpeg/opencv checken-egg problem:
 #	1. make-request -r --without opencv ffmpeg.spec
@@ -16,13 +16,16 @@
 %bcond_without	gme		# Game Music Emu support
 %bcond_without	ilbc		# iLBC de/encoding via WebRTC libilbc
 %bcond_without	openal		# OpenAL 1.1 capture support
+%bcond_with	opencl		# OpenCL code [OpenCL 1.2, but Mesa 9.1.x headers don't suffice]
 %bcond_without	opencv		# OpenCV video filtering
 %bcond_without	pulseaudio	# PulseAudio input support
 %bcond_without	quvi		# quvi input support
+%bcond_without	shine		# shine fixed-point MP3 encoder
 %bcond_without	soxr		# SoX Resampler support
 %bcond_without	x264		# x264 encoder
 %bcond_without	utvideo		# Ut Video decoder
 %bcond_without	va		# VAAPI (Video Acceleration API)
+%bcond_without	vidstab		# vid.stab video stabilization support
 %bcond_without	vpx		# VP8, a high-quality video codec
 %bcond_without	wavpack		# wavpack encoding support
 %bcond_without	doc		# don't build docs
@@ -45,6 +48,7 @@ Source3:	ffserver.conf
 Patch0:		%{name}-opencv24.patch
 URL:		http://www.ffmpeg.org/
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
+%{?with_opencl:BuildRequires:	OpenCL-devel}
 BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
 BuildRequires:	bzip2-devel
@@ -77,6 +81,7 @@ BuildRequires:	libnut-devel
 %{?with_quvi:BuildRequires:	libquvi-devel}
 BuildRequires:	libraw1394-devel >= 2
 BuildRequires:	librtmp-devel
+%{?with_shine:BuildRequires:	shine-devel}
 BuildRequires:	libtheora-devel >= 1.0-0.beta3
 BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	libv4l-devel
@@ -108,6 +113,7 @@ BuildRequires:	speex-devel >= 1:1.2-rc1
 %{?with_doc:BuildRequires:	texinfo}
 BuildRequires:	twolame-devel
 %{?with_utvideo:BuildRequires:	utvideo-devel >= 12}
+%{?with_vidstab:BuildRequires:	vid.stab-devel}
 BuildRequires:	vo-aacenc-devel
 BuildRequires:	vo-amrwbenc-devel
 %{?with_wavpack:BuildRequires:	wavpack-devel}
@@ -180,6 +186,7 @@ Summary(pl.UTF-8):	Pliki nagłówkowe ffmpeg
 Group:		Development/Libraries
 Requires:	%{name}-libs = %{version}-%{release}
 # Libs.private from *.pc (unreasonably they are all the same)
+%{?with_opencl:Requires:	OpenCL-devel}
 Requires:	SDL-devel >= 1.2.1
 Requires:	alsa-lib-devel
 Requires:	bzip2-devel
@@ -215,10 +222,12 @@ Requires:	opencore-amr-devel
 %{?with_opencv:Requires:	opencv-devel}
 Requires:	openjpeg-devel >= 1.5
 Requires:	schroedinger-devel
+%{?with_shine:Requires:	shine-devel}
 %{?with_soxr:Requires:	soxr-devel}
 Requires:	speex-devel >= 1:1.2-rc1
 Requires:	twolame-devel
 %{?with_utvideo:Requires:	utvideo-devel >= 12}
+%{?with_vidstab:Requires:	vid.stab-devel}
 Requires:	vo-aacenc-devel
 Requires:	vo-amrwbenc-devel
 %{?with_wavpack:Requires:	wavpack-devel}
@@ -401,12 +410,14 @@ EOF
 	%{?with_quvi:--enable-libquvi} \
 	--enable-librtmp \
 	--enable-libschroedinger \
+	%{?with_shine:--enable-libshine} \
 	%{?with_soxr:--enable-libsoxr} \
 	--enable-libspeex \
 	--enable-libtheora \
 	--enable-libtwolame \
 	%{?with_utvideo:--enable-libutvideo} \
 	--enable-libv4l2 \
+	%{?with_vidstab:--enable-libvidstab} \
 	--enable-libvo-aacenc \
 	--enable-libvo-amrwbenc \
 	--enable-libvorbis \
@@ -416,6 +427,7 @@ EOF
 	--enable-libxavs \
 	--enable-libxvid \
 	%{?with_openal:--enable-openal} \
+	%{?with_opencl:--enable-opencl} \
 	--enable-postproc \
 	--enable-pthreads \
 	--enable-shared \
