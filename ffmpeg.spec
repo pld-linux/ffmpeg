@@ -28,6 +28,7 @@
 %bcond_without	vidstab		# vid.stab video stabilization support
 %bcond_without	vpx		# VP8, a high-quality video codec
 %bcond_without	wavpack		# wavpack encoding support
+%bcond_without	zmq		# 0MQ message passing
 %bcond_without	doc		# don't build docs
 
 Summary:	FFmpeg - a very fast video and audio converter
@@ -48,7 +49,7 @@ Source3:	ffserver.conf
 Patch0:		%{name}-opencv24.patch
 URL:		http://www.ffmpeg.org/
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
-%{?with_opencl:BuildRequires:	OpenCL-devel}
+%{?with_opencl:BuildRequires:	OpenCL-devel >= 1.2}
 BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
 BuildRequires:	bzip2-devel
@@ -124,6 +125,7 @@ BuildRequires:	xorg-lib-libXext-devel
 BuildRequires:	xorg-lib-libXfixes-devel
 BuildRequires:	xvid-devel >= 1:1.1.0
 BuildRequires:	yasm
+%{?with_zmq:BuildRequires:	zeromq-devel}
 BuildRequires:	zlib-devel
 %{?with_autoreqdep:BuildConflicts:	libpostproc}
 # overflows maximum hash table size
@@ -186,7 +188,7 @@ Summary(pl.UTF-8):	Pliki nagłówkowe ffmpeg
 Group:		Development/Libraries
 Requires:	%{name}-libs = %{version}-%{release}
 # Libs.private from *.pc (unreasonably they are all the same)
-%{?with_opencl:Requires:	OpenCL-devel}
+%{?with_opencl:Requires:	OpenCL-devel >= 1.2}
 Requires:	SDL-devel >= 1.2.1
 Requires:	alsa-lib-devel
 Requires:	bzip2-devel
@@ -236,6 +238,7 @@ Requires:	xavs-devel
 Requires:	xorg-lib-libXext-devel
 Requires:	xorg-lib-libXfixes-devel
 Requires:	xvid-devel >= 1:1.1.0
+%{?with_zmq:Requires:	zeromq-devel}
 Requires:	zlib-devel
 Obsoletes:	libpostproc-devel
 
@@ -426,6 +429,7 @@ EOF
 	%{?with_x264:--enable-libx264} \
 	--enable-libxavs \
 	--enable-libxvid \
+	%{?with_zmq:--enable-libzmq} \
 	%{?with_openal:--enable-openal} \
 	%{?with_opencl:--enable-opencl} \
 	--enable-postproc \
