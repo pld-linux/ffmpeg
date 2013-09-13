@@ -82,7 +82,6 @@ BuildRequires:	libnut-devel
 %{?with_quvi:BuildRequires:	libquvi-devel}
 BuildRequires:	libraw1394-devel >= 2
 BuildRequires:	librtmp-devel
-%{?with_shine:BuildRequires:	shine-devel}
 BuildRequires:	libtheora-devel >= 1.0-0.beta3
 BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	libv4l-devel
@@ -90,6 +89,7 @@ BuildRequires:	libv4l-devel
 BuildRequires:	libvdpau-devel >= 0.2
 BuildRequires:	libvorbis-devel
 %{?with_vpx:BuildRequires:	libvpx-devel >= 0.9.7}
+%{?with_shine:BuildRequires:	shine-devel}
 # X264_BUILD >= 118
 %{?with_x264:BuildRequires:	libx264-devel >= 0.1.3-1.20111212_2245}
 %ifarch %{ix86}
@@ -195,11 +195,11 @@ Requires:	bzip2-devel
 Requires:	celt-devel >= 0.11.0
 %{?with_nonfree:Requires:	faac-devel}
 %{?with_fdk_aac:Requires:	fdk-aac-devel}
+%{?with_flite:Requires:	flite-devel >= 1.4}
 Requires:	fontconfig-devel
 Requires:	freetype-devel
 %{?with_gme:Requires:	game-music-emu-devel}
 Requires:	jack-audio-connection-kit-devel
-%{?with_flite:Requires:	flite-devel >= 1.4}
 Requires:	lame-libs-devel >= 3.98.3
 %{?with_aacplus:Requires:	libaacplus-devel >= 2.0.0}
 Requires:	libass-devel
@@ -296,6 +296,28 @@ FFserver to serwer strumieni dla dźwięku i obrazu. Obsługuje kilka
 czasie dla źródeł na żywo (można przeskakiwać na położenia w
 przeszłości dla każdego źródła na żywo, pod warunkiem odpowiednio
 dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
+
+%package doc
+Summary:	Manual for ffmpeg
+Summary(fr.UTF-8):	Documentation pour ffmpeg
+Summary(it.UTF-8):	Documentazione di ffmpeg
+Summary(pl.UTF-8):	Podręcznik dla ffmpeg
+Group:		Documentation
+%if "%{_rpmversion}" >= "5"
+BuildArch:	noarch
+%endif
+
+%description doc
+Documentation for ffmpeg.
+
+%description doc -l fr.UTF-8
+Documentation pour ffmpeg.
+
+%description doc -l it.UTF-8
+Documentazione di ffmpeg.
+
+%description doc -l pl.UTF-8
+Dokumentacja do ffmpeg.
 
 %prep
 %setup -q
@@ -517,7 +539,7 @@ fi
 
 %files
 %defattr(644,root,root,755)
-%doc CREDITS LICENSE MAINTAINERS README doc/{APIchanges,RELEASE_NOTES} %{?with_doc:doc/*.html}
+%doc CREDITS LICENSE MAINTAINERS README doc/{APIchanges,RELEASE_NOTES}
 %attr(755,root,root) %{_bindir}/ffmpeg
 %attr(755,root,root) %{_bindir}/ffprobe
 %attr(755,root,root) %{_bindir}/qt-faststart
@@ -635,3 +657,9 @@ fi
 %endif
 %dir %attr(770,root,ffserver) /var/cache/ffserver
 %dir %attr(770,root,ffserver) /var/log/ffserver
+
+%if %{with doc}
+%files doc
+%defattr(644,root,root,755)
+%doc doc/*.html
+%endif
