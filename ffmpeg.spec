@@ -34,7 +34,7 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	2.0.2
+Version:	2.1
 Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, xavs, xvid, x11grab)
@@ -42,7 +42,7 @@ Release:	1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.bz2
-# Source0-md5:	6c5cfed204d8a108325d1fc439ab734a
+# Source0-md5:	4ec1cedd4c7753512462f70b347c338a
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
@@ -107,6 +107,7 @@ BuildRequires:	pkgconfig
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
 BuildRequires:	rpmbuild(macros) >= 1.470
 BuildRequires:	schroedinger-devel
+BuildRequires:	shine-devel >= 3.0.0
 %{?with_soxr:BuildRequires:	soxr-devel}
 BuildRequires:	speex-devel >= 1:1.2-rc1
 %{?with_doc:BuildRequires:	tetex}
@@ -471,9 +472,6 @@ EOF
 	--enable-libfaac \
 %endif
 	--enable-runtime-cpudetect
-
-# force oldscaler build
-%{__sed} -i -e 's|#define.*CONFIG_OLDSCALER.*0|#define CONFIG_OLDSCALER 1|g' config.h
 
 %{__make} \
 	V=1
