@@ -89,7 +89,6 @@ BuildRequires:	libv4l-devel
 BuildRequires:	libvdpau-devel >= 0.2
 BuildRequires:	libvorbis-devel
 %{?with_vpx:BuildRequires:	libvpx-devel >= 0.9.7}
-%{?with_shine:BuildRequires:	shine-devel}
 # X264_BUILD >= 118
 %{?with_x264:BuildRequires:	libx264-devel >= 0.1.3-1.20111212_2245}
 %ifarch %{ix86}
@@ -107,7 +106,7 @@ BuildRequires:	pkgconfig
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
 BuildRequires:	rpmbuild(macros) >= 1.470
 BuildRequires:	schroedinger-devel
-BuildRequires:	shine-devel >= 3.0.0
+%{?with_shine:BuildRequires:	shine-devel >= 3.0.0}
 %{?with_soxr:BuildRequires:	soxr-devel}
 BuildRequires:	speex-devel >= 1:1.2-rc1
 %{?with_doc:BuildRequires:	tetex}
@@ -225,7 +224,7 @@ Requires:	opencore-amr-devel
 %{?with_opencv:Requires:	opencv-devel}
 Requires:	openjpeg-devel >= 1.5
 Requires:	schroedinger-devel
-%{?with_shine:Requires:	shine-devel}
+%{?with_shine:Requires:	shine-devel >= 3.0.0}
 %{?with_soxr:Requires:	soxr-devel}
 Requires:	speex-devel >= 1:1.2-rc1
 Requires:	twolame-devel
