@@ -9,12 +9,14 @@
 # Conditional build:
 %bcond_with	nonfree		# non free options of package (currently: faac)
 %bcond_with	aacplus		# AAC+ encoding via libaacplus (requires nonfree)
-%bcond_with	fdk_aac		# AAC encoding via libfdk_aac (requires nonfree)
+%bcond_with	fdk_aac		# AAC de/encoding via libfdk_aac (requires nonfree)
 %bcond_without	caca		# textual display using libcaca
 %bcond_without	flite		# flite voice synthesis support
 %bcond_without	frei0r		# frei0r video filtering
 %bcond_without	gme		# Game Music Emu support
 %bcond_without	ilbc		# iLBC de/encoding via WebRTC libilbc
+%bcond_without	ladspa		# LADSPA audio filtering
+%bcond_without	ssh		# SFTP protocol support via libssh
 %bcond_without	openal		# OpenAL 1.1 capture support
 %bcond_with	opencl		# OpenCL code [OpenCL 1.2, but Mesa 9.1.x headers don't suffice]
 %bcond_without	opencv		# OpenCV video filtering
@@ -29,6 +31,7 @@
 %bcond_without	vpx		# VP8, a high-quality video codec
 %bcond_without	wavpack		# wavpack encoding support
 %bcond_without	zmq		# 0MQ message passing
+%bcond_without	zvbi		# teletext via libzvbi
 %bcond_without	doc		# don't build docs
 
 Summary:	FFmpeg - a very fast video and audio converter
@@ -67,6 +70,7 @@ BuildRequires:	gcc >= 5:3.3.2-3
 %endif
 BuildRequires:	gnutls-devel
 BuildRequires:	jack-audio-connection-kit-devel
+%{?with_ladspa:BuildRequires:	ladspa-devel}
 BuildRequires:	lame-libs-devel >= 3.98.3
 %{?with_aacplus:BuildRequires:	libaacplus-devel >= 2.0.0}
 BuildRequires:	libass-devel
@@ -82,6 +86,7 @@ BuildRequires:	libnut-devel
 %{?with_quvi:BuildRequires:	libquvi-devel}
 BuildRequires:	libraw1394-devel >= 2
 BuildRequires:	librtmp-devel
+%{?with_ssh:BuildRequires:	libssh-devel}
 BuildRequires:	libtheora-devel >= 1.0-0.beta3
 BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	libv4l-devel
@@ -126,6 +131,7 @@ BuildRequires:	xorg-lib-libXfixes-devel
 BuildRequires:	xvid-devel >= 1:1.1.0
 BuildRequires:	yasm
 %{?with_zmq:BuildRequires:	zeromq-devel}
+%{?with_zvbi:BuildRequires:	zvbi-devel}
 BuildRequires:	zlib-devel
 %{?with_autoreqdep:BuildConflicts:	libpostproc}
 # overflows maximum hash table size
@@ -409,6 +415,7 @@ EOF
 	--enable-version3 \
 	--enable-fontconfig \
 	%{?with_frei0r:--enable-frei0r} \
+	%{?with_ladspa:--enable-ladspa} \
 	%{?with_aacplus:--enable-libaacplus} \
 	--enable-libass \
 	--enable-libbluray \
@@ -438,6 +445,7 @@ EOF
 	%{?with_shine:--enable-libshine} \
 	%{?with_soxr:--enable-libsoxr} \
 	--enable-libspeex \
+	%{?with_ssh:--enable-libssh} \
 	--enable-libtheora \
 	--enable-libtwolame \
 	%{?with_utvideo:--enable-libutvideo} \
@@ -452,6 +460,7 @@ EOF
 	--enable-libxavs \
 	--enable-libxvid \
 	%{?with_zmq:--enable-libzmq} \
+	%{?with_zvbi:--enable-libzvbi} \
 	%{?with_openal:--enable-openal} \
 	%{?with_opencl:--enable-opencl} \
 	--enable-postproc \
