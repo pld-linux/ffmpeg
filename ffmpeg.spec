@@ -61,7 +61,7 @@ BuildRequires:	celt-devel >= 0.11.0
 %{?with_fdk_aac:BuildRequires:	fdk-aac-devel}
 %{?with_flite:BuildRequires:	flite-devel >= 1.4}
 BuildRequires:	fontconfig-devel
-BuildRequires:	freetype2-devel
+BuildRequires:	freetype-devel
 %{?with_frei0r:BuildRequires:	frei0r-devel}
 %{?with_gme:BuildRequires:	game-music-emu-devel}
 %ifarch ppc
@@ -203,7 +203,7 @@ Requires:	celt-devel >= 0.11.0
 %{?with_fdk_aac:Requires:	fdk-aac-devel}
 %{?with_flite:Requires:	flite-devel >= 1.4}
 Requires:	fontconfig-devel
-Requires:	freetype2-devel
+Requires:	freetype-devel
 %{?with_gme:Requires:	game-music-emu-devel}
 Requires:	jack-audio-connection-kit-devel
 Requires:	lame-libs-devel >= 3.98.3
