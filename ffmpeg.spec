@@ -38,7 +38,7 @@ Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
 Version:	2.1.1
-Release:	2
+Release:	2.1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, xavs, xvid, x11grab)
 # using v3 allows Apache-licensed libs (opencore-amr, libvo-*enc)
@@ -61,7 +61,7 @@ BuildRequires:	celt-devel >= 0.11.0
 %{?with_fdk_aac:BuildRequires:	fdk-aac-devel}
 %{?with_flite:BuildRequires:	flite-devel >= 1.4}
 BuildRequires:	fontconfig-devel
-BuildRequires:	freetype-devel
+BuildRequires:	freetype2-devel
 %{?with_frei0r:BuildRequires:	frei0r-devel}
 %{?with_gme:BuildRequires:	game-music-emu-devel}
 %ifarch ppc
@@ -203,7 +203,7 @@ Requires:	celt-devel >= 0.11.0
 %{?with_fdk_aac:Requires:	fdk-aac-devel}
 %{?with_flite:Requires:	flite-devel >= 1.4}
 Requires:	fontconfig-devel
-Requires:	freetype-devel
+Requires:	freetype2-devel
 %{?with_gme:Requires:	game-music-emu-devel}
 Requires:	jack-audio-connection-kit-devel
 Requires:	lame-libs-devel >= 3.98.3
