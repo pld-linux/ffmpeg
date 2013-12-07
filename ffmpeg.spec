@@ -171,6 +171,7 @@ telewizyjnej.
 %package libs
 Summary:	ffmpeg libraries
 Summary(pl.UTF-8):	Biblioteki ffmpeg
+Requires:	gnutls-libs >= 3.0.20
 Group:		Libraries
 
 %description libs
