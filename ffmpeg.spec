@@ -1,4 +1,3 @@
-# TODO: libzmq ?
 #
 # How to deal with ffmpeg/opencv checken-egg problem:
 #	1. make-request -r --without opencv ffmpeg.spec
@@ -18,7 +17,7 @@
 %bcond_without	ladspa		# LADSPA audio filtering
 %bcond_without	ssh		# SFTP protocol support via libssh
 %bcond_without	openal		# OpenAL 1.1 capture support
-%bcond_with	opencl		# OpenCL code [OpenCL 1.2, but Mesa 9.1.x headers don't suffice]
+%bcond_with	opencl		# OpenCL code [OpenCL 1.2, not available in Mesa yet]
 %bcond_without	opencv		# OpenCV video filtering
 %bcond_without	pulseaudio	# PulseAudio input support
 %bcond_without	quvi		# quvi input support
@@ -171,7 +170,10 @@ telewizyjnej.
 %package libs
 Summary:	ffmpeg libraries
 Summary(pl.UTF-8):	Biblioteki ffmpeg
+%if "%(rpm -q --qf '%{V}' gnutls-devel)" >= "3.0.20"
+# uses gnutls_certificate_set_x509_system_trust if >= 3.0.20
 Requires:	gnutls-libs >= 3.0.20
+%endif
 Group:		Libraries
 
 %description libs
@@ -306,26 +308,18 @@ przeszłości dla każdego źródła na żywo, pod warunkiem odpowiednio
 dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
 
 %package doc
-Summary:	Manual for ffmpeg
-Summary(fr.UTF-8):	Documentation pour ffmpeg
-Summary(it.UTF-8):	Documentazione di ffmpeg
-Summary(pl.UTF-8):	Podręcznik dla ffmpeg
+Summary:	FFmpeg documentation in HTML format
+Summary(pl.UTF-8):	Dokumentacja pakietu FFmpeg w formacie HTML
 Group:		Documentation
 %if "%{_rpmversion}" >= "5"
 BuildArch:	noarch
 %endif
 
 %description doc
-Documentation for ffmpeg.
-
-%description doc -l fr.UTF-8
-Documentation pour ffmpeg.
-
-%description doc -l it.UTF-8
-Documentazione di ffmpeg.
+FFmpeg documentation in HTML format.
 
 %description doc -l pl.UTF-8
-Dokumentacja do ffmpeg.
+Dokumentacja pakietu FFmpeg w formacie HTML.
 
 %prep
 %setup -q
