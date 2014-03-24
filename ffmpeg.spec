@@ -36,7 +36,7 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	2.1.4
+Version:	2.2
 Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, xavs, xvid, x11grab)
@@ -44,7 +44,7 @@ Release:	1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.bz2
-# Source0-md5:	dedc28003a77c69432c42ab16e5f6982
+# Source0-md5:	744febca199548c9393b1f1ed05ccdd8
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
@@ -118,7 +118,7 @@ BuildRequires:	speex-devel >= 1:1.2-rc1
 %{?with_doc:BuildRequires:	texinfo}
 BuildRequires:	twolame-devel
 %{?with_utvideo:BuildRequires:	utvideo-devel >= 12}
-%{?with_vidstab:BuildRequires:	vid.stab-devel}
+%{?with_vidstab:BuildRequires:	vid.stab-devel >= 0.98}
 BuildRequires:	vo-aacenc-devel
 BuildRequires:	vo-amrwbenc-devel
 %{?with_wavpack:BuildRequires:	wavpack-devel}
@@ -238,7 +238,7 @@ Requires:	schroedinger-devel
 Requires:	speex-devel >= 1:1.2-rc1
 Requires:	twolame-devel
 %{?with_utvideo:Requires:	utvideo-devel >= 12}
-%{?with_vidstab:Requires:	vid.stab-devel}
+%{?with_vidstab:Requires:	vid.stab-devel >= 0.98}
 Requires:	vo-aacenc-devel
 Requires:	vo-amrwbenc-devel
 %{?with_wavpack:Requires:	wavpack-devel}
@@ -570,7 +570,7 @@ fi
 %attr(755,root,root) %{_libdir}/libavdevice.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libavdevice.so.55
 %attr(755,root,root) %{_libdir}/libavfilter.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavfilter.so.3
+%attr(755,root,root) %ghost %{_libdir}/libavfilter.so.4
 %attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libavformat.so.55
 %attr(755,root,root) %{_libdir}/libavresample.so.*.*.*
