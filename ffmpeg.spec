@@ -18,17 +18,20 @@
 %bcond_without	ssh		# SFTP protocol support via libssh
 %bcond_without	openal		# OpenAL 1.1 capture support
 %bcond_with	opencl		# OpenCL code [OpenCL 1.2, not available in Mesa yet]
+%bcond_without	opengl		# OpenGL rendering support
 %bcond_without	opencv		# OpenCV video filtering
 %bcond_without	pulseaudio	# PulseAudio input support
 %bcond_without	quvi		# quvi input support
 %bcond_without	shine		# shine fixed-point MP3 encoder
 %bcond_without	soxr		# SoX Resampler support
-%bcond_without	x264		# x264 encoder
+%bcond_without	x264		# H.264 x264 encoder
+%bcond_with	x265		# HEVC x265 encoder
 %bcond_without	utvideo		# Ut Video decoder
 %bcond_without	va		# VAAPI (Video Acceleration API)
 %bcond_without	vidstab		# vid.stab video stabilization support
 %bcond_without	vpx		# VP8, a high-quality video codec
 %bcond_without	wavpack		# wavpack encoding support
+%bcond_without	webp		# WebP encoding support
 %bcond_without	zmq		# 0MQ message passing
 %bcond_without	zvbi		# teletext via libzvbi
 %bcond_without	doc		# don't build docs
@@ -39,7 +42,7 @@ Name:		ffmpeg
 Version:	2.2
 Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
-# (postprocessing, some filters, x264, xavs, xvid, x11grab)
+# (postprocessing, some filters, x264, x265, xavs, xvid, x11grab)
 # using v3 allows Apache-licensed libs (opencore-amr, libvo-*enc)
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
@@ -52,6 +55,7 @@ Patch0:		%{name}-opencv24.patch
 URL:		http://www.ffmpeg.org/
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
 %{?with_opencl:BuildRequires:	OpenCL-devel >= 1.2}
+%{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
 BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
 BuildRequires:	bzip2-devel
@@ -93,8 +97,11 @@ BuildRequires:	libv4l-devel
 BuildRequires:	libvdpau-devel >= 0.2
 BuildRequires:	libvorbis-devel
 %{?with_vpx:BuildRequires:	libvpx-devel >= 0.9.7}
+%{?with_webp:BuildRequires:	libwebp-devel}
 # X264_BUILD >= 118
 %{?with_x264:BuildRequires:	libx264-devel >= 0.1.3-1.20111212_2245}
+# X265_BUILD >= 7
+%{?with_x265:BuildRequires:	libx265-devel}
 %ifarch %{ix86}
 %ifnarch i386 i486
 BuildRequires:	nasm
@@ -451,6 +458,7 @@ EOF
 	--enable-libvorbis \
 	%{?with_vpx:--enable-libvpx} \
 	%{?with_wavpack:--enable-libwavpack} \
+	%{?with_webp:--enable-libwebp} \
 	%{?with_x264:--enable-libx264} \
 	--enable-libxavs \
 	--enable-libxvid \
@@ -458,6 +466,7 @@ EOF
 	%{?with_zvbi:--enable-libzvbi} \
 	%{?with_openal:--enable-openal} \
 	%{?with_opencl:--enable-opencl} \
+	%{?with_opengl:--enable-opengl} \
 	--enable-postproc \
 	--enable-pthreads \
 	--enable-shared \
