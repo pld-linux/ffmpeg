@@ -26,7 +26,7 @@
 %bcond_without	shine		# shine fixed-point MP3 encoder
 %bcond_without	soxr		# SoX Resampler support
 %bcond_without	x264		# H.264 x264 encoder
-%bcond_with	x265		# HEVC x265 encoder
+%bcond_without	x265		# H.265/HEVC x265 encoder
 %bcond_without	utvideo		# Ut Video decoder
 %bcond_without	va		# VAAPI (Video Acceleration API)
 %bcond_without	vidstab		# vid.stab video stabilization support
@@ -103,7 +103,7 @@ BuildRequires:	libvorbis-devel
 # X264_BUILD >= 118
 %{?with_x264:BuildRequires:	libx264-devel >= 0.1.3-1.20111212_2245}
 # X265_BUILD >= 7
-%{?with_x265:BuildRequires:	libx265-devel}
+%{?with_x265:BuildRequires:	libx265-devel >= 0.7}
 %ifarch %{ix86}
 %ifnarch i386 i486
 BuildRequires:	nasm
@@ -240,6 +240,7 @@ Requires:	libvorbis-devel
 %{?with_vpx:Requires:	libvpx-devel >= 0.9.7}
 %{?with_webp:Requires:	libwebp-devel}
 %{?with_x264:Requires:	libx264-devel >= 0.1.3-1.20110625_2245}
+%{?with_x265:Requires:	libx265-devel >= 0.7}
 Requires:	opencore-amr-devel
 %{?with_opencv:Requires:	opencv-devel}
 Requires:	openjpeg-devel >= 1.5
@@ -465,6 +466,7 @@ EOF
 	%{?with_wavpack:--enable-libwavpack} \
 	%{?with_webp:--enable-libwebp} \
 	%{?with_x264:--enable-libx264} \
+	%{?with_x265:--enable-libx265} \
 	--enable-libxavs \
 	--enable-libxvid \
 	%{?with_zmq:--enable-libzmq} \
