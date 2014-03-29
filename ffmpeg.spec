@@ -10,6 +10,7 @@
 %bcond_with	aacplus		# AAC+ encoding via libaacplus (requires nonfree)
 %bcond_with	fdk_aac		# AAC de/encoding via libfdk_aac (requires nonfree)
 %bcond_without	caca		# textual display using libcaca
+%bcond_without	decklink	# Blackmagic DeskLink output support
 %bcond_without	flite		# flite voice synthesis support
 %bcond_without	frei0r		# frei0r video filtering
 %bcond_without	gme		# Game Music Emu support
@@ -53,6 +54,7 @@ Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
 Patch0:		%{name}-opencv24.patch
 URL:		http://www.ffmpeg.org/
+%{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
 %{?with_opencl:BuildRequires:	OpenCL-devel >= 1.2}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
@@ -205,6 +207,7 @@ Group:		Development/Libraries
 Requires:	%{name}-libs = %{version}-%{release}
 # Libs.private from *.pc (unreasonably they are all the same)
 %{?with_opencl:Requires:	OpenCL-devel >= 1.2}
+%{?with_opengl:Requires:	OpenGL-devel}
 Requires:	SDL-devel >= 1.2.1
 Requires:	alsa-lib-devel
 Requires:	bzip2-devel
@@ -235,6 +238,7 @@ Requires:	libtheora-devel >= 1.0-0.beta3
 %{?with_va:Requires:	libva-devel >= 1.0.3}
 Requires:	libvorbis-devel
 %{?with_vpx:Requires:	libvpx-devel >= 0.9.7}
+%{?with_webp:Requires:	libwebp-devel}
 %{?with_x264:Requires:	libx264-devel >= 0.1.3-1.20110625_2245}
 Requires:	opencore-amr-devel
 %{?with_opencv:Requires:	opencv-devel}
@@ -404,7 +408,7 @@ EOF
 	--libdir=%{_libdir} \
 	--shlibdir=%{_libdir} \
 	--mandir=%{_mandir} \
-	--extra-cflags="-D_GNU_SOURCE=1 %{rpmcppflags} %{rpmcflags}" \
+	--extra-cflags="-D_GNU_SOURCE=1 %{rpmcppflags} %{rpmcflags}%{?with_decklink: -I/usr/include/decklink}" \
 	--extra-ldflags="%{rpmcflags} %{rpmldflags}" \
 	--cc="%{__cc}" \
 	--disable-debug \
@@ -412,6 +416,7 @@ EOF
 	--disable-stripping \
 	--enable-avfilter \
 	--enable-avresample \
+	%{?with_decklink:--enable-decklink} \
 	--enable-gnutls \
 	--enable-gpl \
 	--enable-version3 \
