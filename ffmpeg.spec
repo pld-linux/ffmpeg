@@ -37,6 +37,12 @@
 %bcond_without	zvbi		# teletext via libzvbi
 %bcond_without	doc		# don't build docs
 
+%ifnarch %{ix86} %{x8664} arm
+%undefine	with_x265
+%endif
+%ifarch i386 i486
+%undefine	with_x265
+%endif
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
@@ -528,6 +534,12 @@ install -p tools/qt-faststart $RPM_BUILD_ROOT%{_bindir}
 # simple to do (by querying pkgconfig), but why?
 install -p ffmpeg-avconfig $RPM_BUILD_ROOT%{_bindir}/ffmpeg-avconfig
 
+# packaged as %doc in -doc
+%{__rm} $RPM_BUILD_ROOT%{_docdir}/ffmpeg/*.html
+
+install -d $RPM_BUILD_ROOT%{_examplesdir}
+%{__mv} $RPM_BUILD_ROOT%{_datadir}/ffmpeg/examples $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -641,6 +653,7 @@ fi
 %{_mandir}/man3/libswresample.3*
 %{_mandir}/man3/libswscale.3*
 %endif
+%{_examplesdir}/%{name}-%{version}
 
 %files static
 %defattr(644,root,root,755)
