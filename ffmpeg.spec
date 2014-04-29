@@ -516,7 +516,7 @@ install -d $RPM_BUILD_ROOT{%{_sysconfdir},%{_sbindir},/etc/{sysconfig,rc.d/init.
 
 # install nonstandard, non-public headers manually
 cp -a config.h $RPM_BUILD_ROOT%{_includedir}/ffmpeg
-for a in libavutil/*/bswap.h; do
+for a in libavutil/*/{asm,bswap}.h; do
 	install -Dp $a $RPM_BUILD_ROOT%{_includedir}/$a
 done
 cp -a libavformat/riff.h $RPM_BUILD_ROOT%{_includedir}/libavformat
