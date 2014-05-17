@@ -18,7 +18,7 @@
 %bcond_without	ladspa		# LADSPA audio filtering
 %bcond_without	ssh		# SFTP protocol support via libssh
 %bcond_without	openal		# OpenAL 1.1 capture support
-%bcond_with	opencl		# OpenCL code [OpenCL 1.2, not available in Mesa yet]
+%bcond_without	opencl		# OpenCL 1.2 code
 %bcond_without	opengl		# OpenGL rendering support
 %bcond_without	opencv		# OpenCV video filtering
 %bcond_without	pulseaudio	# PulseAudio input support
