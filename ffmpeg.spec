@@ -47,7 +47,7 @@ Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
 Version:	2.2.2
-Release:	1
+Release:	2
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, x265, xavs, xvid, x11grab)
 # using v3 allows Apache-licensed libs (opencore-amr, libvo-*enc)
@@ -104,7 +104,7 @@ BuildRequires:	libv4l-devel
 %{?with_va:BuildRequires:	libva-devel >= 1.0.3}
 BuildRequires:	libvdpau-devel >= 0.2
 BuildRequires:	libvorbis-devel
-%{?with_vpx:BuildRequires:	libvpx-devel >= 0.9.7}
+%{?with_vpx:BuildRequires:	libvpx-devel >= 1.3.0}
 %{?with_webp:BuildRequires:	libwebp-devel}
 # X264_BUILD >= 118
 %{?with_x264:BuildRequires:	libx264-devel >= 0.1.3-1.20111212_2245}
@@ -184,11 +184,12 @@ telewizyjnej.
 %package libs
 Summary:	ffmpeg libraries
 Summary(pl.UTF-8):	Biblioteki ffmpeg
+Group:		Libraries
 %if "%(rpm -q --qf '%{V}' gnutls-devel)" >= "3.0.20"
 # uses gnutls_certificate_set_x509_system_trust if >= 3.0.20
 Requires:	gnutls-libs >= 3.0.20
 %endif
-Group:		Libraries
+%{?with_vpx:Requires:	libvpx >= 1.3.0}
 
 %description libs
 This package contains the ffmpeg shared libraries:
@@ -243,7 +244,7 @@ Requires:	librtmp-devel
 Requires:	libtheora-devel >= 1.0-0.beta3
 %{?with_va:Requires:	libva-devel >= 1.0.3}
 Requires:	libvorbis-devel
-%{?with_vpx:Requires:	libvpx-devel >= 0.9.7}
+%{?with_vpx:Requires:	libvpx-devel >= 1.3.0}
 %{?with_webp:Requires:	libwebp-devel}
 %{?with_x264:Requires:	libx264-devel >= 0.1.3-1.20110625_2245}
 %{?with_x265:Requires:	libx265-devel >= 0.7}
