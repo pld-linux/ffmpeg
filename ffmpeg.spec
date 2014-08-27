@@ -9,10 +9,12 @@
 %bcond_with	nonfree		# non free options of package (currently: faac)
 %bcond_with	aacplus		# AAC+ encoding via libaacplus (requires nonfree)
 %bcond_with	fdk_aac		# AAC de/encoding via libfdk_aac (requires nonfree)
+%bcond_without	bs2b		# BS2B audio filter support
 %bcond_without	caca		# textual display using libcaca
 %bcond_without	decklink	# Blackmagic DeskLink output support
 %bcond_without	flite		# flite voice synthesis support
 %bcond_without	frei0r		# frei0r video filtering
+%bcond_without	fribidi		# fribidi support
 %bcond_without	gme		# Game Music Emu support
 %bcond_without	ilbc		# iLBC de/encoding via WebRTC libilbc
 %bcond_without	ladspa		# LADSPA audio filtering
@@ -24,6 +26,7 @@
 %bcond_without	pulseaudio	# PulseAudio input support
 %bcond_without	quvi		# quvi input support
 %bcond_without	shine		# shine fixed-point MP3 encoder
+%bcond_with	smb		# SMB support via libsmbclient
 %bcond_without	soxr		# SoX Resampler support
 %bcond_without	x264		# H.264 x264 encoder
 %bcond_without	x265		# H.265/HEVC x265 encoder
@@ -74,6 +77,7 @@ BuildRequires:	celt-devel >= 0.11.0
 BuildRequires:	fontconfig-devel
 BuildRequires:	freetype-devel
 %{?with_frei0r:BuildRequires:	frei0r-devel}
+%{?with_fribidi:BuildRequires:	fribidi-devel}
 %{?with_gme:BuildRequires:	game-music-emu-devel}
 %ifarch ppc
 # require version with altivec support fixed
@@ -86,6 +90,7 @@ BuildRequires:	lame-libs-devel >= 3.98.3
 %{?with_aacplus:BuildRequires:	libaacplus-devel >= 2.0.0}
 BuildRequires:	libass-devel
 BuildRequires:	libavc1394-devel
+%{?with_bs2b:BuildRequires:	libbs2b-devel}
 BuildRequires:	libbluray-devel
 %{?with_caca:BuildRequires:	libcaca-devel}
 BuildRequires:	libcdio-paranoia-devel >= 0.90-2
@@ -98,6 +103,7 @@ BuildRequires:	libnut-devel
 BuildRequires:	libraw1394-devel >= 2
 BuildRequires:	librtmp-devel
 %{?with_ssh:BuildRequires:	libssh-devel}
+%{?with_smb:BuildRequires:	libsmbclient-devel}
 BuildRequires:	libtheora-devel >= 1.0-0.beta3
 BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	libv4l-devel
@@ -224,6 +230,7 @@ Requires:	celt-devel >= 0.11.0
 %{?with_flite:Requires:	flite-devel >= 1.4}
 Requires:	fontconfig-devel
 Requires:	freetype-devel
+%{?with_fribidi:Requires:	fribidi-devel}
 %{?with_gme:Requires:	game-music-emu-devel}
 Requires:	jack-audio-connection-kit-devel
 Requires:	lame-libs-devel >= 3.98.3
@@ -231,6 +238,7 @@ Requires:	lame-libs-devel >= 3.98.3
 Requires:	libass-devel
 Requires:	libavc1394-devel
 Requires:	libbluray-devel
+%{?with_bs2b:Requires:	libbs2b-devel}
 %{?with_caca:Requires:	libcaca-devel}
 Requires:	libcdio-paranoia-devel >= 0.90-2
 Requires:	libdc1394-devel >= 2
@@ -241,6 +249,7 @@ Requires:	libnut-devel
 %{?with_quvi:Requires:	libquvi-devel}
 Requires:	libraw1394-devel >= 2
 Requires:	librtmp-devel
+%{?with_smb:Requires:	libsmbclient-devel}
 Requires:	libtheora-devel >= 1.0-0.beta3
 %{?with_va:Requires:	libva-devel >= 1.0.3}
 Requires:	libvorbis-devel
@@ -434,6 +443,7 @@ EOF
 	%{?with_aacplus:--enable-libaacplus} \
 	--enable-libass \
 	--enable-libbluray \
+	%{?with_bs2b:--enable-libbs2b} \
 	%{?with_caca:--enable-libcaca} \
 	--enable-libcelt \
 	--enable-libcdio \
@@ -441,6 +451,7 @@ EOF
 	%{?with_fdk_aac:--enable-libfdk-aac} \
 	%{?with_flite:--enable-libflite} \
 	--enable-libfreetype \
+	%{?with_fribidi:--enable-libfribidi} \
 	%{?with_gme:--enable-libgme} \
 	--enable-libgsm \
 	--enable-libiec61883 \
@@ -458,6 +469,7 @@ EOF
 	--enable-librtmp \
 	--enable-libschroedinger \
 	%{?with_shine:--enable-libshine} \
+	%{?with_smb:--enable-libsmbclient} \
 	%{?with_soxr:--enable-libsoxr} \
 	--enable-libspeex \
 	%{?with_ssh:--enable-libssh} \
