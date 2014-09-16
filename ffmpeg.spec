@@ -49,7 +49,7 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	2.3.3
+Version:	2.4
 Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, x265, xavs, xvid, x11grab)
@@ -57,7 +57,7 @@ Release:	1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.bz2
-# Source0-md5:	72361d3b8717b6db3ad2b9da8df7af5e
+# Source0-md5:	89a9c464cdf572f9028285eee605454d
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
@@ -607,23 +607,23 @@ fi
 %files libs
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libavcodec.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavcodec.so.55
+%attr(755,root,root) %ghost %{_libdir}/libavcodec.so.56
 %attr(755,root,root) %{_libdir}/libavdevice.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavdevice.so.55
+%attr(755,root,root) %ghost %{_libdir}/libavdevice.so.56
 %attr(755,root,root) %{_libdir}/libavfilter.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavfilter.so.4
+%attr(755,root,root) %ghost %{_libdir}/libavfilter.so.5
 %attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavformat.so.55
+%attr(755,root,root) %ghost %{_libdir}/libavformat.so.56
 %attr(755,root,root) %{_libdir}/libavresample.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavresample.so.1
+%attr(755,root,root) %ghost %{_libdir}/libavresample.so.2
 %attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavutil.so.52
+%attr(755,root,root) %ghost %{_libdir}/libavutil.so.54
 %attr(755,root,root) %{_libdir}/libpostproc.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libpostproc.so.52
+%attr(755,root,root) %ghost %{_libdir}/libpostproc.so.53
 %attr(755,root,root) %{_libdir}/libswresample.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libswresample.so.0
+%attr(755,root,root) %ghost %{_libdir}/libswresample.so.1
 %attr(755,root,root) %{_libdir}/libswscale.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libswscale.so.2
+%attr(755,root,root) %ghost %{_libdir}/libswscale.so.3
 
 %files devel
 %defattr(644,root,root,755)
