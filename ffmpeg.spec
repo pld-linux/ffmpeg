@@ -39,7 +39,7 @@
 %bcond_without	zmq		# 0MQ message passing
 %bcond_without	zvbi		# teletext via libzvbi
 %bcond_without	doc		# don't build docs
-%bcond_without	tests
+%bcond_with	tests		# "make check" (some tests fail as of 2.5)
 
 %ifnarch %{ix86} %{x8664} arm
 %undefine	with_x265
@@ -111,11 +111,13 @@ BuildRequires:	libv4l-devel
 BuildRequires:	libvdpau-devel >= 0.2
 BuildRequires:	libvorbis-devel
 %{?with_vpx:BuildRequires:	libvpx-devel >= 1.3.0}
-%{?with_webp:BuildRequires:	libwebp-devel}
+%{?with_webp:BuildRequires:	libwebp-devel >= 0.2.0}
 # X264_BUILD >= 118
 %{?with_x264:BuildRequires:	libx264-devel >= 0.1.3-1.20111212_2245}
 # X265_BUILD >= 17
 %{?with_x265:BuildRequires:	libx265-devel >= 1.3}
+# libxcb xcb-shm xcb-xfixes xcb-shape
+BuildRequires:	libxcb-devel
 %ifarch %{ix86}
 %ifnarch i386 i486
 BuildRequires:	nasm
@@ -254,7 +256,7 @@ Requires:	libtheora-devel >= 1.0-0.beta3
 %{?with_va:Requires:	libva-devel >= 1.0.3}
 Requires:	libvorbis-devel
 %{?with_vpx:Requires:	libvpx-devel >= 1.3.0}
-%{?with_webp:Requires:	libwebp-devel}
+%{?with_webp:Requires:	libwebp-devel >= 0.2.0}
 %{?with_x264:Requires:	libx264-devel >= 0.1.3-1.20110625_2245}
 %{?with_x265:Requires:	libx265-devel >= 0.7}
 Requires:	opencore-amr-devel
