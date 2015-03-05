@@ -506,6 +506,9 @@ EOF
 %ifarch i386 i486
 	--disable-mmx \
 %endif
+%ifarch x32
+	--disable-asm \
+%endif
 %if %{with nonfree}
 	--enable-nonfree \
 	--enable-libfaac \
