@@ -1,0 +1,10 @@
+--- ffmpeg-2.6/libavutil/opencl.c~	2015-03-06 23:35:33.000000000 +0100
++++ ffmpeg-2.6/libavutil/opencl.c	2015-03-08 08:06:27.318661228 +0100
+@@ -588,6 +588,7 @@ end:
+ 
+ void av_opencl_uninit(void)
+ {
++    int i;
+     cl_int status;
+     LOCK_OPENCL;
+     opencl_ctx.init_count--;
