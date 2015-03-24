@@ -132,7 +132,7 @@ BuildRequires:	nasm
 #%{?with_nvenc:BuildRequires:	NVIDIA-NVENC-API}
 BuildRequires:	opencore-amr-devel
 %{?with_opencv:BuildRequires:	opencv-devel}
-%{?with_openh264:BuildRequires:	openh264-devel}
+%{?with_openh264:BuildRequires:	openh264-devel >= 1.3}
 BuildRequires:	openjpeg-devel >= 1.5
 BuildRequires:	opus-devel
 BuildRequires:	perl-Encode
@@ -270,7 +270,7 @@ Requires:	libvorbis-devel
 %{?with_mfx:Requires:	mfx_dispatch-devel}
 Requires:	opencore-amr-devel
 %{?with_opencv:Requires:	opencv-devel}
-%{?with_openh264:Requires:	openh264-devel}
+%{?with_openh264:Requires:	openh264-devel >= 1.3}
 Requires:	openjpeg-devel >= 1.5
 Requires:	schroedinger-devel
 %{?with_shine:Requires:	shine-devel >= 3.0.0}
