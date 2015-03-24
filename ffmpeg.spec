@@ -18,14 +18,17 @@
 %bcond_without	gme		# Game Music Emu support
 %bcond_without	ilbc		# iLBC de/encoding via WebRTC libilbc
 %bcond_without	ladspa		# LADSPA audio filtering
-%bcond_without	ssh		# SFTP protocol support via libssh
+%bcond_with	mfx		# MFX hardware acceleration support
+%bcond_with	nvenc		# NVIDIA NVENC support (requires nonfree)
 %bcond_without	openal		# OpenAL 1.1 capture support
 %bcond_without	opencl		# OpenCL 1.2 code
-%bcond_without	opengl		# OpenGL rendering support
 %bcond_without	opencv		# OpenCV video filtering
+%bcond_without	opengl		# OpenGL rendering support
+%bcond_with	openh264	# OpenH264 H.264 encoder
 %bcond_without	pulseaudio	# PulseAudio input support
 %bcond_without	quvi		# quvi input support
 %bcond_without	shine		# shine fixed-point MP3 encoder
+%bcond_without	ssh		# SFTP protocol support via libssh
 %bcond_with	smb		# SMB support via libsmbclient
 %bcond_without	soxr		# SoX Resampler support
 %bcond_without	x264		# H.264 x264 encoder
@@ -118,14 +121,18 @@ BuildRequires:	libvorbis-devel
 # X265_BUILD >= 17
 %{?with_x265:BuildRequires:	libx265-devel >= 1.3}
 # libxcb xcb-shm xcb-xfixes xcb-shape
-BuildRequires:	libxcb-devel
+BuildRequires:	libxcb-devel >= 1.4
+%{?with_mfx:BuildRequires:	mfx_dispatch-devel}
 %ifarch %{ix86}
 %ifnarch i386 i486
 BuildRequires:	nasm
 %endif
 %endif
+# which package?
+#%{?with_nvenc:BuildRequires:	NVIDIA-NVENC-API}
 BuildRequires:	opencore-amr-devel
 %{?with_opencv:BuildRequires:	opencv-devel}
+%{?with_openh264:BuildRequires:	openh264-devel}
 BuildRequires:	openjpeg-devel >= 1.5
 BuildRequires:	opus-devel
 BuildRequires:	perl-Encode
@@ -260,8 +267,10 @@ Requires:	libvorbis-devel
 %{?with_webp:Requires:	libwebp-devel >= 0.2.0}
 %{?with_x264:Requires:	libx264-devel >= 0.1.3-1.20110625_2245}
 %{?with_x265:Requires:	libx265-devel >= 0.7}
+%{?with_mfx:Requires:	mfx_dispatch-devel}
 Requires:	opencore-amr-devel
 %{?with_opencv:Requires:	opencv-devel}
+%{?with_openh264:Requires:	openh264-devel}
 Requires:	openjpeg-devel >= 1.5
 Requires:	schroedinger-devel
 %{?with_shine:Requires:	shine-devel >= 3.0.0}
@@ -459,12 +468,14 @@ EOF
 	--enable-libgsm \
 	--enable-libiec61883 \
 	%{?with_ilbc:--enable-libilbc} \
+	%{?with_mfx:--enable-libmfx} \
 	--enable-libmodplug \
 	--enable-libmp3lame \
 	--enable-libnut \
 	--enable-libopencore-amrnb \
 	--enable-libopencore-amrwb \
 	%{?with_opencv:--enable-libopencv} \
+	%{?with_openh264:--enable-libopenh264} \
 	--enable-libopenjpeg \
 	--enable-libopus \
 	%{?with_pulseaudio:--enable-libpulse} \
@@ -493,6 +504,7 @@ EOF
 	--enable-libxvid \
 	%{?with_zmq:--enable-libzmq} \
 	%{?with_zvbi:--enable-libzvbi} \
+	%{?with_nvenc:--enable-nvenc} \
 	%{?with_openal:--enable-openal} \
 	%{?with_opencl:--enable-opencl} \
 	%{?with_opengl:--enable-opengl} \
