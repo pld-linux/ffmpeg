@@ -1,11 +1,12 @@
 #
 # How to deal with ffmpeg/opencv checken-egg problem:
-#	1. make-request -r --without opencv ffmpeg.spec
+#	1. make-request -r --with bootstrap ffmpeg.spec
 #	2. make-request -r opencv.spec
 #	3. bump release of ffmpeg.spec
 #	4. make-request -r ffmpeg.spec
 #
 # Conditional build:
+%bcond_with	bootstrap	# disable features to able to build without installed ffmpeg
 %bcond_with	nonfree		# non free options of package (currently: faac)
 %bcond_with	aacplus		# AAC+ encoding via libaacplus (requires nonfree)
 %bcond_with	fdk_aac		# AAC de/encoding via libfdk_aac (requires nonfree)
@@ -44,6 +45,10 @@
 %bcond_without	doc		# don't build docs
 %bcond_with	tests		# "make check" (some tests fail as of 2.5)
 
+%if %{with bootstrap}
+%undefine	with_opencv
+%endif
+
 %ifnarch %{ix86} %{x8664} arm
 %undefine	with_x265
 %endif
@@ -54,7 +59,7 @@ Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
 Version:	2.7
-Release:	1
+Release:	1.1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, x265, xavs, xvid, x11grab)
 # using v3 allows Apache-licensed libs (opencore-amr, libvo-*enc)
