@@ -53,19 +53,18 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	2.6.3
-Release:	2
+Version:	2.7
+Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, x265, xavs, xvid, x11grab)
 # using v3 allows Apache-licensed libs (opencore-amr, libvo-*enc)
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.bz2
-# Source0-md5:	e2cc3c209f91393d35ab58598e41cf22
+# Source0-md5:	5a16425b0bde1b952f58cff71b569a45
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
-Patch0:		%{name}-build.patch
 URL:		http://www.ffmpeg.org/
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
@@ -119,7 +118,7 @@ BuildRequires:	libvorbis-devel
 # X264_BUILD >= 118
 %{?with_x264:BuildRequires:	libx264-devel >= 0.1.3-1.20111212_2245}
 # X265_BUILD >= 17
-%{?with_x265:BuildRequires:	libx265-devel >= 1.3}
+%{?with_x265:BuildRequires:	libx265-devel >= 1.3-0.20150610.1}
 # libxcb xcb-shm xcb-xfixes xcb-shape
 BuildRequires:	libxcb-devel >= 1.4
 %{?with_mfx:BuildRequires:	mfx_dispatch-devel}
@@ -266,7 +265,7 @@ Requires:	libvorbis-devel
 %{?with_vpx:Requires:	libvpx-devel >= 1.3.0}
 %{?with_webp:Requires:	libwebp-devel >= 0.2.0}
 %{?with_x264:Requires:	libx264-devel >= 0.1.3-1.20110625_2245}
-%{?with_x265:Requires:	libx265-devel >= 0.7}
+%{?with_x265:Requires:	libx265-devel >= 1.3-0.20150610.1}
 %{?with_mfx:Requires:	mfx_dispatch-devel}
 Requires:	opencore-amr-devel
 %{?with_opencv:Requires:	opencv-devel}
@@ -362,7 +361,6 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 
 %prep
 %setup -q
-%patch0 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
