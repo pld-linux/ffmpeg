@@ -12,6 +12,7 @@
 %bcond_with	fdk_aac		# AAC de/encoding via libfdk_aac (requires nonfree)
 %bcond_without	bs2b		# BS2B audio filter support
 %bcond_without	caca		# textual display using libcaca
+%bcond_without	dcadec		# DCA decoding via libdcadec
 %bcond_without	decklink	# Blackmagic DeskLink output support
 %bcond_without	flite		# flite voice synthesis support
 %bcond_without	frei0r		# frei0r video filtering
@@ -79,6 +80,7 @@ BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
 BuildRequires:	bzip2-devel
 BuildRequires:	celt-devel >= 0.11.0
+%{?with_dcadec:BuildRequires:	dcadec-devel}
 %{?with_nonfree:BuildRequires:	faac-devel}
 %{?with_fdk_aac:BuildRequires:	fdk-aac-devel}
 %{?with_flite:BuildRequires:	flite-devel >= 1.4}
@@ -91,6 +93,7 @@ BuildRequires:	freetype-devel
 # require version with altivec support fixed
 BuildRequires:	gcc >= 5:3.3.2-3
 %endif
+BuildRequires:	gmp-devel
 BuildRequires:	gnutls-devel
 BuildRequires:	jack-audio-connection-kit-devel
 %{?with_ladspa:BuildRequires:	ladspa-devel}
@@ -119,10 +122,10 @@ BuildRequires:	libv4l-devel
 BuildRequires:	libvdpau-devel >= 0.2
 BuildRequires:	libvorbis-devel
 %{?with_vpx:BuildRequires:	libvpx-devel >= 1.3.0}
-%{?with_webp:BuildRequires:	libwebp-devel >= 0.2.0}
+%{?with_webp:BuildRequires:	libwebp-devel >= 0.4.0}
 # X264_BUILD >= 118
 %{?with_x264:BuildRequires:	libx264-devel >= 0.1.3-1.20111212_2245}
-# X265_BUILD >= 17
+# X265_BUILD >= 57
 %{?with_x265:BuildRequires:	libx265-devel >= 1.3-0.20150610.1}
 # libxcb xcb-shm xcb-xfixes xcb-shape
 BuildRequires:	libxcb-devel >= 1.4
@@ -239,6 +242,7 @@ Requires:	SDL-devel >= 1.2.1
 Requires:	alsa-lib-devel
 Requires:	bzip2-devel
 Requires:	celt-devel >= 0.11.0
+%{?with_dcadec:Requires:	dcadec-devel}
 %{?with_nonfree:Requires:	faac-devel}
 %{?with_fdk_aac:Requires:	fdk-aac-devel}
 %{?with_flite:Requires:	flite-devel >= 1.4}
@@ -268,7 +272,7 @@ Requires:	libtheora-devel >= 1.0-0.beta3
 %{?with_va:Requires:	libva-devel >= 1.0.3}
 Requires:	libvorbis-devel
 %{?with_vpx:Requires:	libvpx-devel >= 1.3.0}
-%{?with_webp:Requires:	libwebp-devel >= 0.2.0}
+%{?with_webp:Requires:	libwebp-devel >= 0.4.0}
 %{?with_x264:Requires:	libx264-devel >= 0.1.3-1.20110625_2245}
 %{?with_x265:Requires:	libx265-devel >= 1.3-0.20150610.1}
 %{?with_mfx:Requires:	mfx_dispatch-devel}
@@ -463,6 +467,7 @@ EOF
 	--enable-libcelt \
 	--enable-libcdio \
 	--enable-libdc1394 \
+	%{?with_dcadec:--enable-libdcadec} \
 	%{?with_fdk_aac:--enable-libfdk-aac} \
 	%{?with_flite:--enable-libflite} \
 	--enable-libfreetype \
