@@ -19,6 +19,7 @@
 %bcond_without	fribidi		# fribidi support
 %bcond_without	gme		# Game Music Emu support
 %bcond_without	ilbc		# iLBC de/encoding via WebRTC libilbc
+%bcond_without	kvazaar		# Kvazaar HEVC encoder support
 %bcond_without	ladspa		# LADSPA audio filtering
 %bcond_with	mfx		# MFX hardware acceleration support
 %bcond_with	nvenc		# NVIDIA NVENC support (requires nonfree)
@@ -30,6 +31,7 @@
 %bcond_without	pulseaudio	# PulseAudio input support
 %bcond_without	quvi		# quvi input support
 %bcond_without	shine		# shine fixed-point MP3 encoder
+%bcond_without	snappy		# Snappy compression support (needed for hap encoding)
 %bcond_without	ssh		# SFTP protocol support via libssh
 %bcond_with	smb		# SMB support via libsmbclient
 %bcond_without	soxr		# SoX Resampler support
@@ -71,6 +73,7 @@ Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.bz2
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
+Patch0:		%{name}-kvazaar.patch
 URL:		http://www.ffmpeg.org/
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
@@ -96,6 +99,7 @@ BuildRequires:	gcc >= 5:3.3.2-3
 BuildRequires:	gmp-devel
 BuildRequires:	gnutls-devel
 BuildRequires:	jack-audio-connection-kit-devel
+%{?with_kvazaar:BuildRequires:	kvazaar-devel >= 0.7}
 %{?with_ladspa:BuildRequires:	ladspa-devel}
 BuildRequires:	lame-libs-devel >= 3.98.3
 %{?with_aacplus:BuildRequires:	libaacplus-devel >= 2.0.0}
@@ -149,6 +153,7 @@ BuildRequires:	pkgconfig
 BuildRequires:	rpmbuild(macros) >= 1.470
 BuildRequires:	schroedinger-devel
 %{?with_shine:BuildRequires:	shine-devel >= 3.0.0}
+%{?with_snappy:BuildRequires:	snappy-devel}
 %{?with_soxr:BuildRequires:	soxr-devel}
 BuildRequires:	speex-devel >= 1:1.2-rc1
 %{?with_doc:BuildRequires:	tetex}
@@ -251,6 +256,7 @@ Requires:	freetype-devel
 %{?with_fribidi:Requires:	fribidi-devel}
 %{?with_gme:Requires:	game-music-emu-devel}
 Requires:	jack-audio-connection-kit-devel
+%{?with_kvazaar:Requires:	kvazaar-devel >= 0.7}
 Requires:	lame-libs-devel >= 3.98.3
 %{?with_aacplus:Requires:	libaacplus-devel >= 2.0.0}
 Requires:	libass-devel
@@ -282,6 +288,7 @@ Requires:	opencore-amr-devel
 Requires:	openjpeg-devel >= 1.5
 Requires:	schroedinger-devel
 %{?with_shine:Requires:	shine-devel >= 3.0.0}
+%{?with_snappy:Requires:	snappy-devel}
 %{?with_soxr:Requires:	soxr-devel}
 Requires:	speex-devel >= 1:1.2-rc1
 Requires:	twolame-devel
@@ -370,6 +377,7 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 
 %prep
 %setup -q
+%patch0 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
@@ -476,6 +484,7 @@ EOF
 	--enable-libgsm \
 	--enable-libiec61883 \
 	%{?with_ilbc:--enable-libilbc} \
+	%{?with_kvazaar:--enable-libkvazaar} \
 	%{?with_mfx:--enable-libmfx} \
 	--enable-libmodplug \
 	--enable-libmp3lame \
@@ -492,6 +501,7 @@ EOF
 	--enable-libschroedinger \
 	%{?with_shine:--enable-libshine} \
 	%{?with_smb:--enable-libsmbclient} \
+	%{?with_snappy:--enable-libsnappy} \
 	%{?with_soxr:--enable-libsoxr} \
 	--enable-libspeex \
 	%{?with_ssh:--enable-libssh} \

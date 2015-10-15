@@ -1,0 +1,11 @@
+--- ffmpeg-2.8/libavcodec/libkvazaar.c.orig	2015-09-09 03:17:45.000000000 +0200
++++ ffmpeg-2.8/libavcodec/libkvazaar.c	2015-10-15 16:14:57.344277118 +0200
+@@ -173,7 +173,7 @@
+         }
+     }
+ 
+-    if (!ctx->api->encoder_encode(ctx->encoder, img_in, &data_out, &len_out, NULL)) {
++    if (!ctx->api->encoder_encode(ctx->encoder, img_in, &data_out, &len_out, NULL, NULL, NULL)) {
+         av_log(avctx, AV_LOG_ERROR, "Failed to encode frame.\n");
+         retval = AVERROR_EXTERNAL;
+         goto done;
