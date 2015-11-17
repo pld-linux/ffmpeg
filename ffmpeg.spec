@@ -7,9 +7,10 @@
 #
 # Conditional build:
 %bcond_with	bootstrap	# disable features to able to build without installed ffmpeg
-%bcond_with	nonfree		# non free options of package (currently: faac)
+%bcond_with	nonfree		# non free options of package (currently: aacplus, faac, fdk_aac, nvenc)
 %bcond_with	aacplus		# AAC+ encoding via libaacplus (requires nonfree)
 %bcond_with	fdk_aac		# AAC de/encoding via libfdk_aac (requires nonfree)
+%bcond_with	faac		# faac (requires nonfree)
 %bcond_without	bs2b		# BS2B audio filter support
 %bcond_without	caca		# textual display using libcaca
 %bcond_without	dcadec		# DCA decoding via libdcadec
@@ -52,6 +53,13 @@
 %undefine	with_opencv
 %endif
 
+%if %{without nonfree}
+%undefine	with_aacplus
+%undefine	with_fdk_aac
+%undefine	with_faac
+%undefine	with_nvenc
+%endif
+
 %ifnarch %{ix86} %{x8664} arm
 %undefine	with_x265
 %endif
@@ -84,7 +92,7 @@ BuildRequires:	alsa-lib-devel
 BuildRequires:	bzip2-devel
 BuildRequires:	celt-devel >= 0.11.0
 %{?with_dcadec:BuildRequires:	dcadec-devel}
-%{?with_nonfree:BuildRequires:	faac-devel}
+%{?with_faac:BuildRequires:	faac-devel}
 %{?with_fdk_aac:BuildRequires:	fdk-aac-devel}
 %{?with_flite:BuildRequires:	flite-devel >= 1.4}
 BuildRequires:	fontconfig-devel
@@ -248,7 +256,7 @@ Requires:	alsa-lib-devel
 Requires:	bzip2-devel
 Requires:	celt-devel >= 0.11.0
 %{?with_dcadec:Requires:	dcadec-devel}
-%{?with_nonfree:Requires:	faac-devel}
+%{?with_faac:Requires:	faac-devel}
 %{?with_fdk_aac:Requires:	fdk-aac-devel}
 %{?with_flite:Requires:	flite-devel >= 1.4}
 Requires:	fontconfig-devel
@@ -467,7 +475,6 @@ EOF
 	--enable-fontconfig \
 	%{?with_frei0r:--enable-frei0r} \
 	%{?with_ladspa:--enable-ladspa} \
-	%{?with_aacplus:--enable-libaacplus} \
 	--enable-libass \
 	--enable-libbluray \
 	%{?with_bs2b:--enable-libbs2b} \
@@ -476,7 +483,6 @@ EOF
 	--enable-libcdio \
 	--enable-libdc1394 \
 	%{?with_dcadec:--enable-libdcadec} \
-	%{?with_fdk_aac:--enable-libfdk-aac} \
 	%{?with_flite:--enable-libflite} \
 	--enable-libfreetype \
 	%{?with_fribidi:--enable-libfribidi} \
@@ -522,7 +528,6 @@ EOF
 	--enable-libxvid \
 	%{?with_zmq:--enable-libzmq} \
 	%{?with_zvbi:--enable-libzvbi} \
-	%{?with_nvenc:--enable-nvenc} \
 	%{?with_openal:--enable-openal} \
 	%{?with_opencl:--enable-opencl} \
 	%{?with_opengl:--enable-opengl} \
@@ -543,7 +548,10 @@ EOF
 %endif
 %if %{with nonfree}
 	--enable-nonfree \
-	--enable-libfaac \
+	%{?with_aacplus:--enable-libaacplus} \
+	%{?with_faac:--enable-libfaac} \
+	%{?with_fdk_aac:--enable-libfdk-aac} \
+	%{?with_nvenc:--enable-nvenc} \
 %endif
 	--enable-runtime-cpudetect
 
