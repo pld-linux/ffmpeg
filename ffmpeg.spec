@@ -75,6 +75,7 @@ Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
 Patch0:		%{name}-kvazaar.patch
+Patch1:		libvpx-1.5.patch
 URL:		http://www.ffmpeg.org/
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
@@ -379,6 +380,7 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 %prep
 %setup -q
 %patch0 -p1
+%patch1 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
