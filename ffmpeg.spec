@@ -53,13 +53,6 @@
 %undefine	with_opencv
 %endif
 
-%if %{without nonfree}
-%undefine	with_aacplus
-%undefine	with_fdk_aac
-%undefine	with_faac
-%undefine	with_nvenc
-%endif
-
 %ifnarch %{ix86} %{x8664} arm
 %undefine	with_x265
 %endif
