@@ -461,6 +461,7 @@ EOF
 	--disable-debug \
 	--disable-optimizations \
 	--disable-stripping \
+	%{!?with_doc:--disable-doc} \
 	--enable-avfilter \
 	--enable-avresample \
 	%{?with_decklink:--enable-decklink} \
@@ -589,7 +590,9 @@ install -p tools/qt-faststart $RPM_BUILD_ROOT%{_bindir}
 install -p ffmpeg-avconfig $RPM_BUILD_ROOT%{_bindir}/ffmpeg-avconfig
 
 # packaged as %doc in -doc
+%if %{with doc}
 %{__rm} $RPM_BUILD_ROOT%{_docdir}/ffmpeg/*.html
+%endif
 
 install -d $RPM_BUILD_ROOT%{_examplesdir}
 %{__mv} $RPM_BUILD_ROOT%{_datadir}/ffmpeg/examples $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
