@@ -9,3 +9,14 @@
          av_log(avctx, AV_LOG_ERROR, "Failed to encode frame.\n");
          retval = AVERROR_EXTERNAL;
          goto done;
+--- ffmpeg-2.8.3/configure.orig	2015-11-27 14:41:22.000000000 +0100
++++ ffmpeg-2.8.3/configure	2015-11-29 21:24:42.660759291 +0100
+@@ -5240,7 +5240,7 @@
+                                    check_lib "${gsm_hdr}" gsm_create -lgsm && break;
+                                done || die "ERROR: libgsm not found"; }
+ enabled libilbc           && require libilbc ilbc.h WebRtcIlbcfix_InitDecode -lilbc
+-enabled libkvazaar        && require_pkg_config "kvazaar < 0.7.0" kvazaar.h kvz_api_get
++enabled libkvazaar        && require_pkg_config "kvazaar >= 0.7.0" kvazaar.h kvz_api_get
+ enabled libmfx            && require_pkg_config libmfx "mfx/mfxvideo.h" MFXInit
+ enabled libmodplug        && require_pkg_config libmodplug libmodplug/modplug.h ModPlug_Load
+ enabled libmp3lame        && require "libmp3lame >= 3.98.3" lame/lame.h lame_set_VBR_quality -lmp3lame

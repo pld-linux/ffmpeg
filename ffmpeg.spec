@@ -62,20 +62,21 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	2.8.1
-Release:	2
+Version:	2.8.3
+Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, x265, xavs, xvid, x11grab)
 # using v3 allows Apache-licensed libs (opencore-amr, libvo-*enc)
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
-Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.bz2
-# Source0-md5:	63b2cfeea930e942ff7579fd0064c5be
+Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.xz
+# Source0-md5:	2af2723dd53364ac0635efd20cf6e34e
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
 Patch0:		%{name}-kvazaar.patch
 Patch1:		libvpx-1.5.patch
+Patch2:		%{name}-utvideo.patch
 URL:		http://www.ffmpeg.org/
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
@@ -162,7 +163,7 @@ BuildRequires:	speex-devel >= 1:1.2-rc1
 %{?with_doc:BuildRequires:	texi2html}
 %{?with_doc:BuildRequires:	texinfo}
 BuildRequires:	twolame-devel
-%{?with_utvideo:BuildRequires:	utvideo-devel >= 12}
+%{?with_utvideo:BuildRequires:	utvideo-devel >= 15.3}
 %{?with_vidstab:BuildRequires:	vid.stab-devel >= 0.98}
 BuildRequires:	vo-aacenc-devel
 BuildRequires:	vo-amrwbenc-devel
@@ -181,7 +182,7 @@ BuildRequires:	zlib-devel
 # overflows maximum hash table size
 BuildConflicts:	pdksh < 5.2.14-57
 Requires:	%{name}-libs = %{version}-%{release}
-%{?with_utvideo:Requires:	utvideo >= 12}
+%{?with_utvideo:Requires:	utvideo >= 15.3}
 %{?with_ilbc:Requires:	webrtc-libilbc}
 Requires:	xvid >= 1:1.1.0
 Obsoletes:	libpostproc
@@ -294,7 +295,7 @@ Requires:	schroedinger-devel
 %{?with_soxr:Requires:	soxr-devel}
 Requires:	speex-devel >= 1:1.2-rc1
 Requires:	twolame-devel
-%{?with_utvideo:Requires:	utvideo-devel >= 12}
+%{?with_utvideo:Requires:	utvideo-devel >= 15.3}
 %{?with_vidstab:Requires:	vid.stab-devel >= 0.98}
 Requires:	vo-aacenc-devel
 Requires:	vo-amrwbenc-devel
@@ -381,6 +382,7 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 %setup -q
 %patch0 -p1
 %patch1 -p1
+%patch2 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig

@@ -1,0 +1,23 @@
+--- ffmpeg-2.8.3/libavcodec/libutvideodec.cpp.orig	2015-09-09 03:17:45.000000000 +0200
++++ ffmpeg-2.8.3/libavcodec/libutvideodec.cpp	2015-11-29 21:45:43.984039667 +0100
+@@ -150,7 +150,7 @@
+     pic->key_frame = 1;
+ 
+     /* Decode the frame */
+-    utv->codec->DecodeFrame(utv->buffer, avpkt->data, true);
++    utv->codec->DecodeFrame(utv->buffer, avpkt->data);
+ 
+     /* Set the output data depending on the colorspace */
+     switch (avctx->pix_fmt) {
+--- ffmpeg-2.8.3/libavcodec/libutvideoenc.cpp.orig	2015-11-27 14:41:23.000000000 +0100
++++ ffmpeg-2.8.3/libavcodec/libutvideoenc.cpp	2015-11-30 17:01:44.241128916 +0100
+@@ -122,8 +122,7 @@
+     /* Get extradata from encoder */
+     avctx->extradata_size = utv->codec->EncodeGetExtraDataSize();
+     utv->codec->EncodeGetExtraData(info, avctx->extradata_size, in_format,
+-                                   avctx->width, avctx->height,
+-                                   CBGROSSWIDTH_WINDOWS);
++                                   avctx->width, avctx->height);
+     avctx->extradata = (uint8_t *)info;
+ 
+     /* Set flags */
