@@ -62,21 +62,20 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	2.8.3
-Release:	3
+Version:	2.8.4
+Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, x265, xavs, xvid, x11grab)
 # using v3 allows Apache-licensed libs (opencore-amr, libvo-*enc)
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	2af2723dd53364ac0635efd20cf6e34e
+# Source0-md5:	ac1e3d6934f9efd8b67713677c7fd99f
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
 Patch0:		%{name}-kvazaar.patch
-Patch1:		libvpx-1.5.patch
-Patch2:		%{name}-utvideo.patch
+Patch1:		%{name}-utvideo.patch
 URL:		http://www.ffmpeg.org/
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
@@ -117,7 +116,7 @@ BuildRequires:	libgsm-devel
 BuildRequires:	libiec61883-devel
 BuildRequires:	libmodplug-devel
 BuildRequires:	libnut-devel
-%{?with_quvi:BuildRequires:	libquvi-devel}
+%{?with_quvi:BuildRequires:	libquvi-0.4-devel}
 BuildRequires:	libraw1394-devel >= 2
 BuildRequires:	librtmp-devel
 %{?with_ssh:BuildRequires:	libssh-devel}
@@ -273,7 +272,7 @@ Requires:	libgsm-devel
 Requires:	libiec61883-devel
 Requires:	libmodplug-devel
 Requires:	libnut-devel
-%{?with_quvi:Requires:	libquvi-devel}
+%{?with_quvi:Requires:	libquvi-0.4-devel}
 Requires:	libraw1394-devel >= 2
 Requires:	librtmp-devel
 %{?with_smb:Requires:	libsmbclient-devel}
@@ -382,7 +381,6 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 %setup -q
 %patch0 -p1
 %patch1 -p1
-%patch2 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
