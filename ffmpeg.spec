@@ -162,7 +162,7 @@ BuildRequires:	speex-devel >= 1:1.2-rc1
 %{?with_doc:BuildRequires:	texi2html}
 %{?with_doc:BuildRequires:	texinfo}
 BuildRequires:	twolame-devel
-%{?with_utvideo:BuildRequires:	utvideo-devel >= 15.3}
+%{?with_utvideo:BuildRequires:	utvideo-devel >= 15.4}
 %{?with_vidstab:BuildRequires:	vid.stab-devel >= 0.98}
 BuildRequires:	vo-aacenc-devel
 BuildRequires:	vo-amrwbenc-devel
@@ -181,7 +181,7 @@ BuildRequires:	zlib-devel
 # overflows maximum hash table size
 BuildConflicts:	pdksh < 5.2.14-57
 Requires:	%{name}-libs = %{version}-%{release}
-%{?with_utvideo:Requires:	utvideo >= 15.3}
+%{?with_utvideo:Requires:	utvideo >= 15.4}
 %{?with_ilbc:Requires:	webrtc-libilbc}
 Requires:	xvid >= 1:1.1.0
 Obsoletes:	libpostproc
@@ -294,7 +294,7 @@ Requires:	schroedinger-devel
 %{?with_soxr:Requires:	soxr-devel}
 Requires:	speex-devel >= 1:1.2-rc1
 Requires:	twolame-devel
-%{?with_utvideo:Requires:	utvideo-devel >= 15.3}
+%{?with_utvideo:Requires:	utvideo-devel >= 15.4}
 %{?with_vidstab:Requires:	vid.stab-devel >= 0.98}
 Requires:	vo-aacenc-devel
 Requires:	vo-amrwbenc-devel
