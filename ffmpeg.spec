@@ -30,7 +30,6 @@
 %bcond_without	opengl		# OpenGL rendering support
 %bcond_with	openh264	# OpenH264 H.264 encoder
 %bcond_without	pulseaudio	# PulseAudio input support
-%bcond_without	quvi		# quvi input support
 %bcond_without	shine		# shine fixed-point MP3 encoder
 %bcond_without	snappy		# Snappy compression support (needed for hap encoding)
 %bcond_without	ssh		# SFTP protocol support via libssh
@@ -62,20 +61,19 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	2.8.5
-Release:	2
+Version:	3.0
+Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, x265, xavs, xvid, x11grab)
 # using v3 allows Apache-licensed libs (opencore-amr, libvo-*enc)
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	b34164bd181f4f81c21da3dd131d919d
+# Source0-md5:	ef9b6634bb7c920efc940b4d55adf7b2
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
-Patch0:		%{name}-kvazaar.patch
-Patch1:		%{name}-utvideo.patch
+Patch0:		%{name}-utvideo.patch
 URL:		http://www.ffmpeg.org/
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
@@ -85,7 +83,7 @@ BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
 BuildRequires:	bzip2-devel
 BuildRequires:	celt-devel >= 0.11.0
-%{?with_dcadec:BuildRequires:	dcadec-devel}
+%{?with_dcadec:BuildRequires:	dcadec-devel >= 0.2.0}
 %{?with_faac:BuildRequires:	faac-devel}
 %{?with_fdk_aac:BuildRequires:	fdk-aac-devel}
 %{?with_flite:BuildRequires:	flite-devel >= 1.4}
@@ -101,7 +99,7 @@ BuildRequires:	gcc >= 5:3.3.2-3
 BuildRequires:	gmp-devel
 BuildRequires:	gnutls-devel
 BuildRequires:	jack-audio-connection-kit-devel
-%{?with_kvazaar:BuildRequires:	kvazaar-devel >= 0.7}
+%{?with_kvazaar:BuildRequires:	kvazaar-devel >= 0.8.1}
 %{?with_ladspa:BuildRequires:	ladspa-devel}
 BuildRequires:	lame-libs-devel >= 3.98.3
 %{?with_aacplus:BuildRequires:	libaacplus-devel >= 2.0.0}
@@ -116,7 +114,6 @@ BuildRequires:	libgsm-devel
 BuildRequires:	libiec61883-devel
 BuildRequires:	libmodplug-devel
 BuildRequires:	libnut-devel
-%{?with_quvi:BuildRequires:	libquvi-0.4-devel}
 BuildRequires:	libraw1394-devel >= 2
 BuildRequires:	librtmp-devel
 %{?with_ssh:BuildRequires:	libssh-devel}
@@ -164,7 +161,6 @@ BuildRequires:	speex-devel >= 1:1.2-rc1
 BuildRequires:	twolame-devel
 %{?with_utvideo:BuildRequires:	utvideo-devel >= 15.4}
 %{?with_vidstab:BuildRequires:	vid.stab-devel >= 0.98}
-BuildRequires:	vo-aacenc-devel
 BuildRequires:	vo-amrwbenc-devel
 %{?with_wavpack:BuildRequires:	wavpack-devel}
 %{?with_ilbc:BuildRequires:	webrtc-libilbc-devel}
@@ -249,7 +245,7 @@ Requires:	SDL-devel >= 1.2.1
 Requires:	alsa-lib-devel
 Requires:	bzip2-devel
 Requires:	celt-devel >= 0.11.0
-%{?with_dcadec:Requires:	dcadec-devel}
+%{?with_dcadec:Requires:	dcadec-devel >= 0.2.0}
 %{?with_faac:Requires:	faac-devel}
 %{?with_fdk_aac:Requires:	fdk-aac-devel}
 %{?with_flite:Requires:	flite-devel >= 1.4}
@@ -272,7 +268,6 @@ Requires:	libgsm-devel
 Requires:	libiec61883-devel
 Requires:	libmodplug-devel
 Requires:	libnut-devel
-%{?with_quvi:Requires:	libquvi-0.4-devel}
 Requires:	libraw1394-devel >= 2
 Requires:	librtmp-devel
 %{?with_smb:Requires:	libsmbclient-devel}
@@ -296,7 +291,6 @@ Requires:	speex-devel >= 1:1.2-rc1
 Requires:	twolame-devel
 %{?with_utvideo:Requires:	utvideo-devel >= 15.4}
 %{?with_vidstab:Requires:	vid.stab-devel >= 0.98}
-Requires:	vo-aacenc-devel
 Requires:	vo-amrwbenc-devel
 %{?with_wavpack:Requires:	wavpack-devel}
 %{?with_ilbc:Requires:	webrtc-libilbc-devel}
@@ -380,7 +374,6 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 %prep
 %setup -q
 %patch0 -p1
-%patch1 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
@@ -498,7 +491,6 @@ EOF
 	--enable-libopenjpeg \
 	--enable-libopus \
 	%{?with_pulseaudio:--enable-libpulse} \
-	%{?with_quvi:--enable-libquvi} \
 	--enable-librtmp \
 	--enable-libschroedinger \
 	%{?with_shine:--enable-libshine} \
@@ -512,7 +504,6 @@ EOF
 	%{?with_utvideo:--enable-libutvideo} \
 	--enable-libv4l2 \
 	%{?with_vidstab:--enable-libvidstab} \
-	--enable-libvo-aacenc \
 	--enable-libvo-amrwbenc \
 	--enable-libvorbis \
 	%{?with_vpx:--enable-libvpx} \
@@ -651,23 +642,23 @@ fi
 %files libs
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libavcodec.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavcodec.so.56
+%attr(755,root,root) %ghost %{_libdir}/libavcodec.so.57
 %attr(755,root,root) %{_libdir}/libavdevice.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavdevice.so.56
+%attr(755,root,root) %ghost %{_libdir}/libavdevice.so.57
 %attr(755,root,root) %{_libdir}/libavfilter.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavfilter.so.5
+%attr(755,root,root) %ghost %{_libdir}/libavfilter.so.6
 %attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavformat.so.56
+%attr(755,root,root) %ghost %{_libdir}/libavformat.so.57
 %attr(755,root,root) %{_libdir}/libavresample.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavresample.so.2
+%attr(755,root,root) %ghost %{_libdir}/libavresample.so.3
 %attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavutil.so.54
+%attr(755,root,root) %ghost %{_libdir}/libavutil.so.55
 %attr(755,root,root) %{_libdir}/libpostproc.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libpostproc.so.53
+%attr(755,root,root) %ghost %{_libdir}/libpostproc.so.54
 %attr(755,root,root) %{_libdir}/libswresample.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libswresample.so.1
+%attr(755,root,root) %ghost %{_libdir}/libswresample.so.2
 %attr(755,root,root) %{_libdir}/libswscale.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libswscale.so.3
+%attr(755,root,root) %ghost %{_libdir}/libswscale.so.4
 
 %files devel
 %defattr(644,root,root,755)

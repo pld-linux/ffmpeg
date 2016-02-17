@@ -56,7 +56,7 @@
 +                                   avctx->width, avctx->height);
      avctx->extradata = (uint8_t *)info;
  
-@@ -140,6 +135,7 @@
+@@ -140,6 +134,7 @@
      bool keyframe;
      uint8_t *y, *u, *v;
      uint8_t *dst;
@@ -64,7 +64,7 @@
  
      /* Alloc buffer */
      if ((ret = ff_alloc_packet2(avctx, pkt, utv->buf_size, 0)) < 0)
-@@ -150,6 +146,7 @@
+@@ -150,6 +145,7 @@
      /* Move input if needed data into Ut Video friendly buffer */
      switch (avctx->pix_fmt) {
      case AV_PIX_FMT_YUV420P:
@@ -72,7 +72,7 @@
          y = utv->buffer;
          u = y + w * h;
          v = u + w * h / 4;
-@@ -165,12 +162,14 @@
+@@ -165,12 +161,14 @@
          }
          break;
      case AV_PIX_FMT_YUYV422:
@@ -87,7 +87,7 @@
          /* Ut Video takes bottom-up BGR */
          rgb_size = avctx->pix_fmt == AV_PIX_FMT_BGR24 ? 3 : 4;
          for (i = 0; i < h; i++)
-@@ -183,7 +182,7 @@
+@@ -183,7 +181,7 @@
      }
  
      /* Encode frame */
@@ -164,14 +164,13 @@
  
      /* Check to see if the decoder initlized properly */
      if (begin_ret != 0) {
-@@ -143,14 +134,35 @@
+@@ -143,13 +134,34 @@
      UtVideoContext *utv = (UtVideoContext *)avctx->priv_data;
      AVFrame *pic = avctx->coded_frame;
      int w = avctx->width, h = avctx->height;
 +    int format;
  
      /* Set flags */
-     pic->reference = 0;
      pic->pict_type = AV_PICTURE_TYPE_I;
      pic->key_frame = 1;
  
