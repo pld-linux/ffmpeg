@@ -7,12 +7,12 @@
 #
 # Conditional build:
 %bcond_with	bootstrap	# disable features to able to build without installed ffmpeg
-%bcond_with	nonfree		# non free options of package (currently: aacplus, faac, fdk_aac, nvenc)
-%bcond_with	aacplus		# AAC+ encoding via libaacplus (requires nonfree)
+%bcond_with	nonfree		# non free options of package (currently: faac, fdk_aac, nvenc)
 %bcond_with	fdk_aac		# AAC de/encoding via libfdk_aac (requires nonfree)
 %bcond_with	faac		# faac (requires nonfree)
 %bcond_without	bs2b		# BS2B audio filter support
 %bcond_without	caca		# textual display using libcaca
+%bcond_without	chromaprint	# audio fingerprinting with chromaprint
 %bcond_without	dcadec		# DCA decoding via libdcadec
 %bcond_without	decklink	# Blackmagic DeskLink output support
 %bcond_without	flite		# flite voice synthesis support
@@ -30,6 +30,7 @@
 %bcond_without	opengl		# OpenGL rendering support
 %bcond_with	openh264	# OpenH264 H.264 encoder
 %bcond_without	pulseaudio	# PulseAudio input support
+%bcond_without	rubberband	# rubberband filter
 %bcond_without	shine		# shine fixed-point MP3 encoder
 %bcond_without	snappy		# Snappy compression support (needed for hap encoding)
 %bcond_without	ssh		# SFTP protocol support via libssh
@@ -102,13 +103,13 @@ BuildRequires:	jack-audio-connection-kit-devel
 %{?with_kvazaar:BuildRequires:	kvazaar-devel >= 0.8.1}
 %{?with_ladspa:BuildRequires:	ladspa-devel}
 BuildRequires:	lame-libs-devel >= 3.98.3
-%{?with_aacplus:BuildRequires:	libaacplus-devel >= 2.0.0}
 BuildRequires:	libass-devel
 BuildRequires:	libavc1394-devel
 %{?with_bs2b:BuildRequires:	libbs2b-devel}
 BuildRequires:	libbluray-devel
 %{?with_caca:BuildRequires:	libcaca-devel}
 BuildRequires:	libcdio-paranoia-devel >= 0.90-2
+%{?with_chromaprint:BuildRequires:	libchromaprint-devel}
 BuildRequires:	libdc1394-devel >= 2
 BuildRequires:	libgsm-devel
 BuildRequires:	libiec61883-devel
@@ -150,6 +151,7 @@ BuildRequires:	perl-tools-pod
 BuildRequires:	pkgconfig
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
 BuildRequires:	rpmbuild(macros) >= 1.470
+%{?with_rubberband:BuildRequires:	rubberband-devel >= 1.8.1}
 BuildRequires:	schroedinger-devel
 %{?with_shine:BuildRequires:	shine-devel >= 3.0.0}
 %{?with_snappy:BuildRequires:	snappy-devel}
@@ -216,6 +218,7 @@ Group:		Libraries
 Requires:	gnutls-libs >= 3.0.20
 %endif
 %{?with_vpx:Requires:	libvpx >= 1.3.0}
+%{?with_rubberband:Requires:	rubberband-libs >= 1.8.1}
 
 %description libs
 This package contains the ffmpeg shared libraries:
@@ -256,13 +259,13 @@ Requires:	freetype-devel
 Requires:	jack-audio-connection-kit-devel
 %{?with_kvazaar:Requires:	kvazaar-devel >= 0.7}
 Requires:	lame-libs-devel >= 3.98.3
-%{?with_aacplus:Requires:	libaacplus-devel >= 2.0.0}
 Requires:	libass-devel
 Requires:	libavc1394-devel
 Requires:	libbluray-devel
 %{?with_bs2b:Requires:	libbs2b-devel}
 %{?with_caca:Requires:	libcaca-devel}
 Requires:	libcdio-paranoia-devel >= 0.90-2
+%{?with_chromaprint:Requires:	libchromaprint-devel}
 Requires:	libdc1394-devel >= 2
 Requires:	libgsm-devel
 Requires:	libiec61883-devel
@@ -283,6 +286,7 @@ Requires:	opencore-amr-devel
 %{?with_opencv:Requires:	opencv-devel}
 %{?with_openh264:Requires:	openh264-devel >= 1.3}
 Requires:	openjpeg-devel >= 1.5
+%{?with_rubberband:Requires:	rubberband-devel >= 1.8.1}
 Requires:	schroedinger-devel
 %{?with_shine:Requires:	shine-devel >= 3.0.0}
 %{?with_snappy:Requires:	snappy-devel}
@@ -457,6 +461,7 @@ EOF
 	%{!?with_doc:--disable-doc} \
 	--enable-avfilter \
 	--enable-avresample \
+	%{?with_chromaprint:--enable-chromaprint} \
 	%{?with_decklink:--enable-decklink} \
 	--enable-gnutls \
 	--enable-gpl \
@@ -492,6 +497,7 @@ EOF
 	--enable-libopus \
 	%{?with_pulseaudio:--enable-libpulse} \
 	--enable-librtmp \
+	%{?with_rubberband:--enable-librubberband} \
 	--enable-libschroedinger \
 	%{?with_shine:--enable-libshine} \
 	%{?with_smb:--enable-libsmbclient} \
@@ -535,7 +541,6 @@ EOF
 %endif
 %if %{with nonfree}
 	--enable-nonfree \
-	%{?with_aacplus:--enable-libaacplus} \
 	%{?with_faac:--enable-libfaac} \
 	%{?with_fdk_aac:--enable-libfdk-aac} \
 	%{?with_nvenc:--enable-nvenc} \
