@@ -36,6 +36,7 @@
 %bcond_without	ssh		# SFTP protocol support via libssh
 %bcond_with	smb		# SMB support via libsmbclient
 %bcond_without	soxr		# SoX Resampler support
+%bcond_with	tesseract	# OCR filter based on Tesseract
 %bcond_without	x264		# H.264 x264 encoder
 %bcond_without	x265		# H.265/HEVC x265 encoder
 %bcond_without	utvideo		# Ut Video decoder
@@ -44,6 +45,7 @@
 %bcond_without	vpx		# VP8, a high-quality video codec
 %bcond_without	wavpack		# wavpack encoding support
 %bcond_without	webp		# WebP encoding support
+%bcond_without	zimg		# zscale filter based on z.lib
 %bcond_without	zmq		# 0MQ message passing
 %bcond_without	zvbi		# teletext via libzvbi
 %bcond_without	doc		# don't build docs
@@ -157,6 +159,7 @@ BuildRequires:	schroedinger-devel
 %{?with_snappy:BuildRequires:	snappy-devel}
 %{?with_soxr:BuildRequires:	soxr-devel}
 BuildRequires:	speex-devel >= 1:1.2-rc1
+%{?with_tesseract:BuildRequires:	tesseract-devel}
 %{?with_doc:BuildRequires:	tetex}
 %{?with_doc:BuildRequires:	texi2html}
 %{?with_doc:BuildRequires:	texinfo}
@@ -173,8 +176,9 @@ BuildRequires:	xorg-lib-libXfixes-devel
 BuildRequires:	xvid-devel >= 1:1.1.0
 BuildRequires:	yasm
 %{?with_zmq:BuildRequires:	zeromq-devel}
-%{?with_zvbi:BuildRequires:	zvbi-devel}
+%{?with_zimg:BuildRequires:	zimg-devel}
 BuildRequires:	zlib-devel
+%{?with_zvbi:BuildRequires:	zvbi-devel}
 %{?with_autoreqdep:BuildConflicts:	libpostproc}
 # overflows maximum hash table size
 BuildConflicts:	pdksh < 5.2.14-57
@@ -292,6 +296,7 @@ Requires:	schroedinger-devel
 %{?with_snappy:Requires:	snappy-devel}
 %{?with_soxr:Requires:	soxr-devel}
 Requires:	speex-devel >= 1:1.2-rc1
+%{?with_tesseract:Requires:	tesseract-devel}
 Requires:	twolame-devel
 %{?with_utvideo:Requires:	utvideo-devel >= 15.4}
 %{?with_vidstab:Requires:	vid.stab-devel >= 0.98}
@@ -303,6 +308,7 @@ Requires:	xorg-lib-libXext-devel
 Requires:	xorg-lib-libXfixes-devel
 Requires:	xvid-devel >= 1:1.1.0
 %{?with_zmq:Requires:	zeromq-devel}
+%{?with_zimg:Requires:	zimg-devel}
 Requires:	zlib-devel
 Obsoletes:	libpostproc-devel
 
@@ -505,6 +511,7 @@ EOF
 	%{?with_soxr:--enable-libsoxr} \
 	--enable-libspeex \
 	%{?with_ssh:--enable-libssh} \
+	%{?with_tesseract:--enable-libtesseract} \
 	--enable-libtheora \
 	--enable-libtwolame \
 	%{?with_utvideo:--enable-libutvideo} \
@@ -519,6 +526,7 @@ EOF
 	%{?with_x265:--enable-libx265} \
 	--enable-libxavs \
 	--enable-libxvid \
+	%{?with_zimg:--enable-libzimg} \
 	%{?with_zmq:--enable-libzmq} \
 	%{?with_zvbi:--enable-libzvbi} \
 	%{?with_openal:--enable-openal} \
