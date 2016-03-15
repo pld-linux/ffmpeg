@@ -1,9 +1,10 @@
 #
-# How to deal with ffmpeg/opencv checken-egg problem:
+# How to deal with ffmpeg/opencv/chromaprint checken-egg problem:
 #	1. make-request -r --with bootstrap ffmpeg.spec
-#	2. make-request -r opencv.spec
-#	3. bump release of ffmpeg.spec
-#	4. make-request -r ffmpeg.spec
+#	2  bump release of opencv.spec and chromaprint.spec
+#	3. make-request -r opencv.spec chromaprint.spec
+#	4. bump release of ffmpeg.spec
+#	5. make-request -r ffmpeg.spec
 #
 # Conditional build:
 %bcond_with	bootstrap	# disable features to able to build without installed ffmpeg
@@ -53,6 +54,7 @@
 
 %if %{with bootstrap}
 %undefine	with_opencv
+%undefine	with_chromaprint
 %endif
 
 %ifnarch %{ix86} %{x8664} arm
