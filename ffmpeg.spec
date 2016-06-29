@@ -14,7 +14,6 @@
 %bcond_without	bs2b		# BS2B audio filter support
 %bcond_without	caca		# textual display using libcaca
 %bcond_without	chromaprint	# audio fingerprinting with chromaprint
-%bcond_without	dcadec		# DCA decoding via libdcadec
 %bcond_without	decklink	# Blackmagic DeskLink output support
 %bcond_without	flite		# flite voice synthesis support
 %bcond_without	frei0r		# frei0r video filtering
@@ -40,7 +39,6 @@
 %bcond_with	tesseract	# OCR filter based on Tesseract
 %bcond_without	x264		# H.264 x264 encoder
 %bcond_without	x265		# H.265/HEVC x265 encoder
-%bcond_without	utvideo		# Ut Video decoder
 %bcond_without	va		# VAAPI (Video Acceleration API)
 %bcond_without	vidstab		# vid.stab video stabilization support
 %bcond_without	vpx		# VP8, a high-quality video codec
@@ -66,7 +64,7 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	3.0.2
+Version:	3.1
 Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, x265, xavs, xvid, x11grab)
@@ -74,11 +72,10 @@ Release:	1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	beb5c69c671aba1386e7156fc2af1ab6
+# Source0-md5:	24ef0c0d541c857c8bc39215619b126f
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
-Patch0:		%{name}-utvideo.patch
 URL:		http://www.ffmpeg.org/
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
@@ -88,7 +85,6 @@ BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
 BuildRequires:	bzip2-devel
 BuildRequires:	celt-devel >= 0.11.0
-%{?with_dcadec:BuildRequires:	dcadec-devel >= 0.2.0}
 %{?with_faac:BuildRequires:	faac-devel}
 %{?with_fdk_aac:BuildRequires:	fdk-aac-devel}
 %{?with_flite:BuildRequires:	flite-devel >= 1.4}
@@ -166,7 +162,6 @@ BuildRequires:	speex-devel >= 1:1.2-rc1
 %{?with_doc:BuildRequires:	texi2html}
 %{?with_doc:BuildRequires:	texinfo}
 BuildRequires:	twolame-devel
-%{?with_utvideo:BuildRequires:	utvideo-devel >= 15.4}
 %{?with_vidstab:BuildRequires:	vid.stab-devel >= 0.98}
 BuildRequires:	vo-amrwbenc-devel
 %{?with_wavpack:BuildRequires:	wavpack-devel}
@@ -185,7 +180,6 @@ BuildRequires:	zlib-devel
 # overflows maximum hash table size
 BuildConflicts:	pdksh < 5.2.14-57
 Requires:	%{name}-libs = %{version}-%{release}
-%{?with_utvideo:Requires:	utvideo >= 15.4}
 %{?with_ilbc:Requires:	webrtc-libilbc}
 Requires:	xvid >= 1:1.1.0
 Obsoletes:	libpostproc
@@ -254,7 +248,6 @@ Requires:	SDL-devel >= 1.2.1
 Requires:	alsa-lib-devel
 Requires:	bzip2-devel
 Requires:	celt-devel >= 0.11.0
-%{?with_dcadec:Requires:	dcadec-devel >= 0.2.0}
 %{?with_faac:Requires:	faac-devel}
 %{?with_fdk_aac:Requires:	fdk-aac-devel}
 %{?with_flite:Requires:	flite-devel >= 1.4}
@@ -300,7 +293,6 @@ Requires:	schroedinger-devel
 Requires:	speex-devel >= 1:1.2-rc1
 %{?with_tesseract:Requires:	tesseract-devel}
 Requires:	twolame-devel
-%{?with_utvideo:Requires:	utvideo-devel >= 15.4}
 %{?with_vidstab:Requires:	vid.stab-devel >= 0.98}
 Requires:	vo-amrwbenc-devel
 %{?with_wavpack:Requires:	wavpack-devel}
@@ -385,7 +377,6 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 
 %prep
 %setup -q
-%patch0 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
@@ -484,7 +475,6 @@ EOF
 	--enable-libcelt \
 	--enable-libcdio \
 	--enable-libdc1394 \
-	%{?with_dcadec:--enable-libdcadec} \
 	%{?with_flite:--enable-libflite} \
 	--enable-libfreetype \
 	%{?with_fribidi:--enable-libfribidi} \
@@ -516,7 +506,6 @@ EOF
 	%{?with_tesseract:--enable-libtesseract} \
 	--enable-libtheora \
 	--enable-libtwolame \
-	%{?with_utvideo:--enable-libutvideo} \
 	--enable-libv4l2 \
 	%{?with_vidstab:--enable-libvidstab} \
 	--enable-libvo-amrwbenc \
