@@ -14,7 +14,7 @@
 %bcond_without	bs2b		# BS2B audio filter support
 %bcond_without	caca		# textual display using libcaca
 %bcond_without	chromaprint	# audio fingerprinting with chromaprint
-%bcond_without	decklink	# Blackmagic DeskLink output support
+%bcond_with	decklink	# Blackmagic DeskLink output support
 %bcond_without	flite		# flite voice synthesis support
 %bcond_without	frei0r		# frei0r video filtering
 %bcond_without	fribidi		# fribidi support
@@ -64,21 +64,20 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	3.1
-Release:	4
+Version:	3.2.2
+Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, x265, xavs, xvid, x11grab)
 # using v3 allows Apache-licensed libs (opencore-amr, libvo-*enc)
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	24ef0c0d541c857c8bc39215619b126f
+# Source0-md5:	e34d1b92c5d844f2a3611c741a6dba18
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
-Patch0:		%{name}-openjpeg-build.patch
 URL:		http://www.ffmpeg.org/
-%{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK}
+%{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.6.1}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
 %{?with_opencl:BuildRequires:	OpenCL-devel >= 1.2}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
@@ -378,7 +377,6 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 
 %prep
 %setup -q
-%patch0 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
