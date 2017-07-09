@@ -64,15 +64,15 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	3.2.4
-Release:	6
+Version:	3.3.2
+Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
-# (postprocessing, some filters, x264, x265, xavs, xvid, x11grab)
+# (postprocessing, some filters, x264, x265, xavs, xvid, xcbgrab)
 # using v3 allows Apache-licensed libs (opencore-amr, libvo-*enc)
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	39fd71024ac76ba35f04397021af5606
+# Source0-md5:	d6c09c84e3d0d9ca8a51f481da660603
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
@@ -173,7 +173,7 @@ BuildRequires:	xorg-lib-libXfixes-devel
 BuildRequires:	xvid-devel >= 1:1.1.0
 BuildRequires:	yasm
 %{?with_zmq:BuildRequires:	zeromq-devel}
-%{?with_zimg:BuildRequires:	zimg-devel}
+%{?with_zimg:BuildRequires:	zimg-devel >= 2.3.0}
 BuildRequires:	zlib-devel
 %{?with_zvbi:BuildRequires:	zvbi-devel}
 %{?with_autoreqdep:BuildConflicts:	libpostproc}
@@ -182,6 +182,7 @@ BuildConflicts:	pdksh < 5.2.14-57
 Requires:	%{name}-libs = %{version}-%{release}
 %{?with_ilbc:Requires:	webrtc-libilbc}
 Requires:	xvid >= 1:1.1.0
+Requires:	zimg >= 2.3.0
 Obsoletes:	libpostproc
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -302,7 +303,7 @@ Requires:	xorg-lib-libXext-devel
 Requires:	xorg-lib-libXfixes-devel
 Requires:	xvid-devel >= 1:1.1.0
 %{?with_zmq:Requires:	zeromq-devel}
-%{?with_zimg:Requires:	zimg-devel}
+%{?with_zimg:Requires:	zimg-devel >= 2.3.0}
 Requires:	zlib-devel
 Obsoletes:	libpostproc-devel
 
@@ -528,7 +529,7 @@ EOF
 	--enable-shared \
 	--enable-swscale \
 	%{!?with_va:--disable-vaapi} \
-	--enable-x11grab \
+	--enable-libxcb \
 %ifnarch %{ix86} %{x8664}
 	--disable-mmx \
 %endif
