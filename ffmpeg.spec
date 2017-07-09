@@ -182,7 +182,6 @@ BuildConflicts:	pdksh < 5.2.14-57
 Requires:	%{name}-libs = %{version}-%{release}
 %{?with_ilbc:Requires:	webrtc-libilbc}
 Requires:	xvid >= 1:1.1.0
-Requires:	zimg >= 2.3.0
 Obsoletes:	libpostproc
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -220,6 +219,7 @@ Requires:	gnutls-libs >= 3.0.20
 %endif
 %{?with_vpx:Requires:	libvpx >= 1.3.0}
 %{?with_rubberband:Requires:	rubberband-libs >= 1.8.1}
+%{?with_zimg:Requires:	zimg >= 2.3.0}
 
 %description libs
 This package contains the ffmpeg shared libraries:
