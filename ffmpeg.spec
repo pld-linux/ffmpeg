@@ -1,5 +1,3 @@
-# TODO:
-# --enable-libopenmpt [BR: libopenmpt >= 0.2.6557]
 #
 # How to deal with ffmpeg/opencv/chromaprint checken-egg problem:
 #	1. make-request -r --with bootstrap ffmpeg.spec
@@ -34,6 +32,7 @@
 %bcond_without	opencv		# OpenCV video filtering
 %bcond_without	opengl		# OpenGL rendering support
 %bcond_with	openh264	# OpenH264 H.264 encoder
+%bcond_without	openmpt		# OpenMPT module decoder
 %bcond_without	pulseaudio	# PulseAudio input support
 %bcond_without	rubberband	# rubberband filter
 %bcond_without	shine		# shine fixed-point MP3 encoder
@@ -122,6 +121,7 @@ BuildRequires:	libgsm-devel
 BuildRequires:	libiec61883-devel
 BuildRequires:	libmodplug-devel
 BuildRequires:	libnut-devel
+%{?with_openmpt:BuildRequires: libopenmpt-devel >= 0.2.6557}
 BuildRequires:	libraw1394-devel >= 2
 BuildRequires:	librtmp-devel
 %{?with_ssh:BuildRequires:	libssh-devel}
@@ -228,6 +228,7 @@ Requires:	SDL2 >= 2.0.1
 # uses gnutls_certificate_set_x509_system_trust if >= 3.0.20
 Requires:	gnutls-libs >= 3.0.20
 %endif
+%{?with_openmpt:Requires: libopenmpt >= 0.2.6557}
 %{?with_vpx:Requires:	libvpx >= 1.3.0}
 %{?with_rubberband:Requires:	rubberband-libs >= 1.8.1}
 %{?with_zimg:Requires:	zimg >= 2.3.0}
@@ -281,6 +282,7 @@ Requires:	libgsm-devel
 Requires:	libiec61883-devel
 Requires:	libmodplug-devel
 Requires:	libnut-devel
+%{?with_openmpt:Requires: libopenmpt-devel >= 0.2.6557}
 Requires:	libraw1394-devel >= 2
 Requires:	librtmp-devel
 %{?with_smb:Requires:	libsmbclient-devel}
@@ -506,6 +508,7 @@ EOF
 	%{?with_opencv:--enable-libopencv} \
 	%{?with_openh264:--enable-libopenh264} \
 	--enable-libopenjpeg \
+	%{?with_openmpt:--enable-libopenmpt} \
 	--enable-libopus \
 	%{?with_pulseaudio:--enable-libpulse} \
 	--enable-librtmp \
