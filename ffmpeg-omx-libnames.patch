@@ -1,0 +1,11 @@
+--- ffmpeg-3.3.2/libavcodec/omx.c.orig	2017-06-07 04:03:54.000000000 +0200
++++ ffmpeg-3.3.2/libavcodec/omx.c	2017-07-23 09:13:04.496956783 +0200
+@@ -143,6 +143,8 @@
+ #if CONFIG_OMX_RPI
+         "/opt/vc/lib/libopenmaxil.so", "/opt/vc/lib/libbcm_host.so",
+ #else
++        "libomxil-bellagio.so.0", NULL,
++        "liblimoi-core.so.0", NULL,
+         "libOMX_Core.so", NULL,
+         "libOmxCore.so", NULL,
+ #endif

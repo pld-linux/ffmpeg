@@ -1,3 +1,5 @@
+# TODO:
+# --enable-libopenmpt [BR: libopenmpt >= 0.2.6557]
 #
 # How to deal with ffmpeg/opencv/chromaprint checken-egg problem:
 #	1. make-request -r --with bootstrap ffmpeg.spec
@@ -8,13 +10,14 @@
 #
 # Conditional build:
 %bcond_with	bootstrap	# disable features to able to build without installed ffmpeg
-%bcond_with	nonfree		# non free options of package (currently: faac, fdk_aac, nvenc)
-%bcond_with	fdk_aac		# AAC de/encoding via libfdk_aac (requires nonfree)
-%bcond_with	faac		# faac (requires nonfree)
+%bcond_with	nonfree		# non free options of package (currently: decklib, fdk_aac, openssl)
 %bcond_without	bs2b		# BS2B audio filter support
 %bcond_without	caca		# textual display using libcaca
 %bcond_without	chromaprint	# audio fingerprinting with chromaprint
-%bcond_with	decklink	# Blackmagic DeskLink output support
+%bcond_with	cuda		# NVIDIA CUDA code [BR: cuda.h]
+%bcond_with	cuvid		# NVIDIA CUVID support
+%bcond_with	decklink	# Blackmagic DeskLink output support (requires nonfree)
+%bcond_with	fdk_aac		# AAC de/encoding via libfdk_aac (requires nonfree)
 %bcond_without	flite		# flite voice synthesis support
 %bcond_without	frei0r		# frei0r video filtering
 %bcond_without	fribidi		# fribidi support
@@ -23,7 +26,9 @@
 %bcond_without	kvazaar		# Kvazaar HEVC encoder support
 %bcond_without	ladspa		# LADSPA audio filtering
 %bcond_with	mfx		# MFX hardware acceleration support
-%bcond_with	nvenc		# NVIDIA NVENC support (requires nonfree)
+%bcond_with	npp		# NVIDIA Performance Primitives-based code (requires nonfree) [BR: libnppc+libnppi, npp.h]
+%bcond_with	nvenc		# NVIDIA NVENC support
+%bcond_without	omx		# OpenMAX IL support
 %bcond_without	openal		# OpenAL 1.1 capture support
 %bcond_without	opencl		# OpenCL 1.2 code
 %bcond_without	opencv		# OpenCV video filtering
@@ -55,7 +60,7 @@
 %undefine	with_chromaprint
 %endif
 
-%ifnarch %{ix86} %{x8664} arm
+%ifnarch %{ix86} %{x8664} %{arm}
 %undefine	with_x265
 %endif
 %ifarch i386 i486
@@ -76,16 +81,18 @@ Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.xz
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
+Patch0:		%{name}-omx-libnames.patch
 URL:		http://www.ffmpeg.org/
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.6.1}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
 %{?with_opencl:BuildRequires:	OpenCL-devel >= 1.2}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
-BuildRequires:	SDL-devel >= 1.2.1
+# libomxil-bellagio-devel or limoi-core-devel (just headers, library is dlopened at runtime)
+%{?with_omx:BuildRequires:	OpenMAX-IL-devel}
+BuildRequires:	SDL2-devel >= 2.0.1
 BuildRequires:	alsa-lib-devel
 BuildRequires:	bzip2-devel
 BuildRequires:	celt-devel >= 0.11.0
-%{?with_faac:BuildRequires:	faac-devel}
 %{?with_fdk_aac:BuildRequires:	fdk-aac-devel}
 %{?with_flite:BuildRequires:	flite-devel >= 1.4}
 BuildRequires:	fontconfig-devel
@@ -122,7 +129,11 @@ BuildRequires:	librtmp-devel
 BuildRequires:	libtheora-devel >= 1.0-0.beta3
 BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	libv4l-devel
-%{?with_va:BuildRequires:	libva-devel >= 1.0.3}
+%if %{with va}
+BuildRequires:	libva-devel >= 1.0.3
+BuildRequires:	libva-drm-devel >= 1.0.3
+BuildRequires:	libva-x11-devel >= 1.0.3
+%endif
 BuildRequires:	libvdpau-devel >= 0.2
 BuildRequires:	libvorbis-devel
 %{?with_vpx:BuildRequires:	libvpx-devel >= 1.3.0}
@@ -140,11 +151,11 @@ BuildRequires:	nasm
 %endif
 %endif
 # which package?
-#%{?with_nvenc:BuildRequires:	NVIDIA-NVENC-API}
+#%{?with_nvenc:BuildRequires:	NVIDIA-NVENC-API} compat/nvenc/nvEncodeAPI.h
 BuildRequires:	opencore-amr-devel
 %{?with_opencv:BuildRequires:	opencv-devel}
 %{?with_openh264:BuildRequires:	openh264-devel >= 1.3}
-BuildRequires:	openjpeg-devel >= 1.5
+BuildRequires:	openjpeg2-devel >= 2.1
 BuildRequires:	opus-devel
 BuildRequires:	perl-Encode
 BuildRequires:	perl-tools-pod
@@ -171,6 +182,7 @@ BuildRequires:	xorg-lib-libX11-devel
 BuildRequires:	xorg-lib-libXext-devel
 BuildRequires:	xorg-lib-libXfixes-devel
 BuildRequires:	xvid-devel >= 1:1.1.0
+BuildRequires:	xz-devel
 BuildRequires:	yasm
 %{?with_zmq:BuildRequires:	zeromq-devel}
 %{?with_zimg:BuildRequires:	zimg-devel >= 2.3.0}
@@ -184,8 +196,6 @@ Requires:	%{name}-libs = %{version}-%{release}
 Requires:	xvid >= 1:1.1.0
 Obsoletes:	libpostproc
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
-
-%define		_noautoreqdep	libGL.so.1 libGLU.so.1
 
 %define		specflags	-fno-strict-aliasing
 
@@ -213,6 +223,7 @@ telewizyjnej.
 Summary:	ffmpeg libraries
 Summary(pl.UTF-8):	Biblioteki ffmpeg
 Group:		Libraries
+Requires:	SDL2 >= 2.0.1
 %if "%(rpm -q --qf '%{V}' gnutls-devel)" >= "3.0.20"
 # uses gnutls_certificate_set_x509_system_trust if >= 3.0.20
 Requires:	gnutls-libs >= 3.0.20
@@ -245,11 +256,10 @@ Requires:	%{name}-libs = %{version}-%{release}
 # Libs.private from *.pc (unreasonably they are all the same)
 %{?with_opencl:Requires:	OpenCL-devel >= 1.2}
 %{?with_opengl:Requires:	OpenGL-devel}
-Requires:	SDL-devel >= 1.2.1
+Requires:	SDL2-devel >= 2.0.1
 Requires:	alsa-lib-devel
 Requires:	bzip2-devel
 Requires:	celt-devel >= 0.11.0
-%{?with_faac:Requires:	faac-devel}
 %{?with_fdk_aac:Requires:	fdk-aac-devel}
 %{?with_flite:Requires:	flite-devel >= 1.4}
 Requires:	fontconfig-devel
@@ -285,7 +295,7 @@ Requires:	libvorbis-devel
 Requires:	opencore-amr-devel
 %{?with_opencv:Requires:	opencv-devel}
 %{?with_openh264:Requires:	openh264-devel >= 1.3}
-Requires:	openjpeg-devel >= 1.5
+Requires:	openjpeg2-devel >= 2.1
 %{?with_rubberband:Requires:	rubberband-devel >= 1.8.1}
 Requires:	schroedinger-devel
 %{?with_shine:Requires:	shine-devel >= 3.0.0}
@@ -378,6 +388,7 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 
 %prep
 %setup -q
+%patch0 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
@@ -462,11 +473,12 @@ EOF
 	--enable-avfilter \
 	--enable-avresample \
 	%{?with_chromaprint:--enable-chromaprint} \
+	%{!?with_cuda:--disable-cuda} \
+	%{!?with_cuvid:--disable-cuvid} \
 	%{?with_decklink:--enable-decklink} \
 	--enable-gnutls \
 	--enable-gpl \
 	--enable-version3 \
-	--enable-fontconfig \
 	%{?with_frei0r:--enable-frei0r} \
 	%{?with_ladspa:--enable-ladspa} \
 	--enable-libass \
@@ -477,6 +489,7 @@ EOF
 	--enable-libcdio \
 	--enable-libdc1394 \
 	%{?with_flite:--enable-libflite} \
+	--enable-libfontconfig \
 	--enable-libfreetype \
 	%{?with_fribidi:--enable-libfribidi} \
 	%{?with_gme:--enable-libgme} \
@@ -521,6 +534,8 @@ EOF
 	%{?with_zimg:--enable-libzimg} \
 	%{?with_zmq:--enable-libzmq} \
 	%{?with_zvbi:--enable-libzvbi} \
+	%{!?with_nvenc:--disable-nvenc} \
+	%{?with_omx:--enable-omx} \
 	%{?with_openal:--enable-openal} \
 	%{?with_opencl:--enable-opencl} \
 	%{?with_opengl:--enable-opengl} \
@@ -541,9 +556,8 @@ EOF
 %endif
 %if %{with nonfree}
 	--enable-nonfree \
-	%{?with_faac:--enable-libfaac} \
 	%{?with_fdk_aac:--enable-libfdk-aac} \
-	%{?with_nvenc:--enable-nvenc} \
+	%{?with_npp:--enable-libnpp} \
 %endif
 	--enable-runtime-cpudetect
 
