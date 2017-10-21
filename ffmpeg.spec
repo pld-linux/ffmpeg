@@ -68,7 +68,7 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	3.3.4
+Version:	3.4
 Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, x265, xavs, xvid, xcbgrab)
@@ -76,7 +76,7 @@ Release:	1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	e14a0200c78ce5c918427e57cd406a0d
+# Source0-md5:	c64ba7247bb91e516f6a5789348fd5b5
 Source1:	ffserver.init
 Source2:	ffserver.sysconfig
 Source3:	ffserver.conf
@@ -120,7 +120,6 @@ BuildRequires:	libdc1394-devel >= 2
 BuildRequires:	libgsm-devel
 BuildRequires:	libiec61883-devel
 BuildRequires:	libmodplug-devel
-BuildRequires:	libnut-devel
 %{?with_openmpt:BuildRequires: libopenmpt-devel >= 0.2.6557}
 BuildRequires:	libraw1394-devel >= 2
 BuildRequires:	librtmp-devel
@@ -163,7 +162,6 @@ BuildRequires:	pkgconfig
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
 BuildRequires:	rpmbuild(macros) >= 1.470
 %{?with_rubberband:BuildRequires:	rubberband-devel >= 1.8.1}
-BuildRequires:	schroedinger-devel
 %{?with_shine:BuildRequires:	shine-devel >= 3.0.0}
 %{?with_snappy:BuildRequires:	snappy-devel}
 %{?with_soxr:BuildRequires:	soxr-devel}
@@ -281,7 +279,6 @@ Requires:	libdc1394-devel >= 2
 Requires:	libgsm-devel
 Requires:	libiec61883-devel
 Requires:	libmodplug-devel
-Requires:	libnut-devel
 %{?with_openmpt:Requires: libopenmpt-devel >= 0.2.6557}
 Requires:	libraw1394-devel >= 2
 Requires:	librtmp-devel
@@ -299,7 +296,6 @@ Requires:	opencore-amr-devel
 %{?with_openh264:Requires:	openh264-devel >= 1.3}
 Requires:	openjpeg2-devel >= 2.1
 %{?with_rubberband:Requires:	rubberband-devel >= 1.8.1}
-Requires:	schroedinger-devel
 %{?with_shine:Requires:	shine-devel >= 3.0.0}
 %{?with_snappy:Requires:	snappy-devel}
 %{?with_soxr:Requires:	soxr-devel}
@@ -502,7 +498,6 @@ EOF
 	%{?with_mfx:--enable-libmfx} \
 	--enable-libmodplug \
 	--enable-libmp3lame \
-	--enable-libnut \
 	--enable-libopencore-amrnb \
 	--enable-libopencore-amrwb \
 	%{?with_opencv:--enable-libopencv} \
@@ -513,7 +508,6 @@ EOF
 	%{?with_pulseaudio:--enable-libpulse} \
 	--enable-librtmp \
 	%{?with_rubberband:--enable-librubberband} \
-	--enable-libschroedinger \
 	%{?with_shine:--enable-libshine} \
 	%{?with_smb:--enable-libsmbclient} \
 	%{?with_snappy:--enable-libsnappy} \
