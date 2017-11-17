@@ -266,7 +266,7 @@ Requires:	freetype-devel
 %{?with_fribidi:Requires:	fribidi-devel}
 %{?with_gme:Requires:	game-music-emu-devel}
 Requires:	jack-audio-connection-kit-devel
-%{?with_kvazaar:Requires:	kvazaar-devel >= 0.7}
+%{?with_kvazaar:Requires:	kvazaar-devel >= 0.8.1}
 Requires:	lame-libs-devel >= 3.98.3
 Requires:	libass-devel
 Requires:	libavc1394-devel
@@ -527,6 +527,7 @@ EOF
 	%{?with_x264:--enable-libx264} \
 	%{?with_x265:--enable-libx265} \
 	--enable-libxavs \
+	--enable-libxcb \
 	--enable-libxvid \
 	%{?with_zimg:--enable-libzimg} \
 	%{?with_zmq:--enable-libzmq} \
@@ -541,7 +542,6 @@ EOF
 	--enable-shared \
 	--enable-swscale \
 	%{!?with_va:--disable-vaapi} \
-	--enable-libxcb \
 %ifnarch %{ix86} %{x8664}
 	--disable-mmx \
 %endif
