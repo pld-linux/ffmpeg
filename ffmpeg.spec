@@ -1,3 +1,8 @@
+# TODO:
+# - libvmaf [BR: libvmaf.pc, libvmaf, libvmaf.h]
+# - libndi_newtek[nonfree, BR: Processing.NDI.Lib.h]
+# - libmysofa [BR: libmysofa, mysofa.h]
+# - rkmpp[GPLv3, BR: rockchip_mpp.pc, rockchip/rk_mpi_cmd.h, libdrm]
 #
 # How to deal with ffmpeg/opencv/chromaprint checken-egg problem:
 #	1. make-request -r --with bootstrap ffmpeg.spec
@@ -8,11 +13,12 @@
 #
 # Conditional build:
 %bcond_with	bootstrap	# disable features to able to build without installed ffmpeg
-%bcond_with	nonfree		# non free options of package (currently: decklib, fdk_aac, openssl)
+%bcond_with	nonfree		# unblock non free options of package (currently: cuda_sdk, decklib, fdk_aac, libndi_newtek, npp, openssl)
 %bcond_without	bs2b		# BS2B audio filter support
 %bcond_without	caca		# textual display using libcaca
 %bcond_without	chromaprint	# audio fingerprinting with chromaprint
-%bcond_with	cuda		# NVIDIA CUDA code [BR: cuda.h]
+%bcond_without	cuda		# NVIDIA CUDA code
+%bcond_with	cudasdk		# NVIDIA CUDA code using SDK [BR: cuda.h, non-free]
 %bcond_with	cuvid		# NVIDIA CUVID support
 %bcond_with	decklink	# Blackmagic DeskLink output support (requires nonfree)
 %bcond_with	fdk_aac		# AAC de/encoding via libfdk_aac (requires nonfree)
@@ -23,6 +29,9 @@
 %bcond_without	ilbc		# iLBC de/encoding via WebRTC libilbc
 %bcond_without	kvazaar		# Kvazaar HEVC encoder support
 %bcond_without	ladspa		# LADSPA audio filtering
+%bcond_with	libdrm		# Linux Direct Rendering Manager code
+%bcond_with	librsvg		# SVG rasterization via librsvg
+%bcond_with	libxml2		# XML parsing using libxml2
 %bcond_with	mfx		# MFX hardware acceleration support
 %bcond_with	npp		# NVIDIA Performance Primitives-based code (requires nonfree) [BR: libnppc+libnppi, npp.h]
 %bcond_with	nvenc		# NVIDIA NVENC support
@@ -89,6 +98,7 @@ URL:		http://www.ffmpeg.org/
 # libomxil-bellagio-devel or limoi-core-devel (just headers, library is dlopened at runtime)
 %{?with_omx:BuildRequires:	OpenMAX-IL-devel}
 BuildRequires:	SDL2-devel >= 2.0.1
+BuildRequires:	SDL2-devel < 2.1.0
 BuildRequires:	alsa-lib-devel
 BuildRequires:	bzip2-devel
 BuildRequires:	celt-devel >= 0.11.0
@@ -117,11 +127,13 @@ BuildRequires:	libbluray-devel
 BuildRequires:	libcdio-paranoia-devel >= 0.90-2
 %{?with_chromaprint:BuildRequires:	libchromaprint-devel}
 BuildRequires:	libdc1394-devel >= 2
+%{?with_libdrm:BuildRequires:	libdrm-devel}
 BuildRequires:	libgsm-devel
 BuildRequires:	libiec61883-devel
 BuildRequires:	libmodplug-devel
 %{?with_openmpt:BuildRequires: libopenmpt-devel >= 0.2.6557}
 BuildRequires:	libraw1394-devel >= 2
+%{?with_librsvg:BuildRequires:	librsvg-devel >= 2}
 BuildRequires:	librtmp-devel
 %{?with_ssh:BuildRequires:	libssh-devel}
 %{?with_smb:BuildRequires:	libsmbclient-devel}
@@ -139,10 +151,11 @@ BuildRequires:	libvorbis-devel
 %{?with_webp:BuildRequires:	libwebp-devel >= 0.4.0}
 # X264_BUILD >= 118
 %{?with_x264:BuildRequires:	libx264-devel >= 0.1.3-1.20111212_2245}
-# X265_BUILD >= 57
-%{?with_x265:BuildRequires:	libx265-devel >= 1.3-0.20150610.1}
+# X265_BUILD >= 68
+%{?with_x265:BuildRequires:	libx265-devel >= 1.8}
 # libxcb xcb-shm xcb-xfixes xcb-shape
 BuildRequires:	libxcb-devel >= 1.4
+%{?with_libxml2:BuildRequires:	libxml2-devel >= 2}
 %{?with_mfx:BuildRequires:	mfx_dispatch-devel}
 %ifarch %{ix86}
 %ifnarch i386 i486
@@ -276,11 +289,13 @@ Requires:	libbluray-devel
 Requires:	libcdio-paranoia-devel >= 0.90-2
 %{?with_chromaprint:Requires:	libchromaprint-devel}
 Requires:	libdc1394-devel >= 2
+%{?with_libdrm:Requires:	libdrm-devel}
 Requires:	libgsm-devel
 Requires:	libiec61883-devel
 Requires:	libmodplug-devel
 %{?with_openmpt:Requires: libopenmpt-devel >= 0.2.6557}
 Requires:	libraw1394-devel >= 2
+%{?with_librsvg:Requires:	librsvg-devel >= 2}
 Requires:	librtmp-devel
 %{?with_smb:Requires:	libsmbclient-devel}
 Requires:	libtheora-devel >= 1.0-0.beta3
@@ -289,7 +304,8 @@ Requires:	libvorbis-devel
 %{?with_vpx:Requires:	libvpx-devel >= 1.3.0}
 %{?with_webp:Requires:	libwebp-devel >= 0.4.0}
 %{?with_x264:Requires:	libx264-devel >= 0.1.3-1.20110625_2245}
-%{?with_x265:Requires:	libx265-devel >= 1.3-0.20150610.1}
+%{?with_x265:Requires:	libx265-devel >= 1.8}
+%{?with_libxml2:Requires:	libxml2-devel >= 2}
 %{?with_mfx:Requires:	mfx_dispatch-devel}
 Requires:	opencore-amr-devel
 %{?with_opencv:Requires:	opencv-devel}
@@ -472,6 +488,7 @@ EOF
 	--enable-avresample \
 	%{?with_chromaprint:--enable-chromaprint} \
 	%{!?with_cuda:--disable-cuda} \
+	%{?with_cudasdk:--enable-cuda-sdk} \
 	%{!?with_cuvid:--disable-cuvid} \
 	%{?with_decklink:--enable-decklink} \
 	--enable-gnutls \
@@ -486,6 +503,7 @@ EOF
 	--enable-libcelt \
 	--enable-libcdio \
 	--enable-libdc1394 \
+	%{?with_libdrm:--enable-libdrm} \
 	%{?with_flite:--enable-libflite} \
 	--enable-libfontconfig \
 	--enable-libfreetype \
@@ -506,7 +524,9 @@ EOF
 	%{?with_openmpt:--enable-libopenmpt} \
 	--enable-libopus \
 	%{?with_pulseaudio:--enable-libpulse} \
+	%{?with_librsvg:--enable-librsvg} \
 	--enable-librtmp \
+	%{?with_libxml2:--enable-libxml2} \
 	%{?with_rubberband:--enable-librubberband} \
 	%{?with_shine:--enable-libshine} \
 	%{?with_smb:--enable-libsmbclient} \
