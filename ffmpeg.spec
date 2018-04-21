@@ -77,18 +77,15 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	3.4.2
-Release:	3
+Version:	4.0
+Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, x265, xavs, xvid, xcbgrab)
 # using v3 allows Apache-licensed libs (opencore-amr, libvo-*enc)
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	cbf4ead227fcedddf54c86013705a988
-Source1:	ffserver.init
-Source2:	ffserver.sysconfig
-Source3:	ffserver.conf
+# Source0-md5:	1cc9e8cb027b9fd4c54f598f51002c19
 Patch0:		%{name}-omx-libnames.patch
 URL:		http://www.ffmpeg.org/
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.6.1}
@@ -196,7 +193,7 @@ BuildRequires:	xvid-devel >= 1:1.1.0
 BuildRequires:	xz-devel
 BuildRequires:	yasm
 %{?with_zmq:BuildRequires:	zeromq-devel}
-%{?with_zimg:BuildRequires:	zimg-devel >= 2.3.0}
+%{?with_zimg:BuildRequires:	zimg-devel >= 2.7.0}
 BuildRequires:	zlib-devel
 %{?with_zvbi:BuildRequires:	zvbi-devel}
 %{?with_autoreqdep:BuildConflicts:	libpostproc}
@@ -364,27 +361,6 @@ the various APIs of FFmpeg.
 FFplay to bardzo prosty i przenośny odtwarzacz mediów używający
 bibliotek FFmpeg oraz biblioteki SDL. Jest używany głównie do
 testowania różnych API FFmpeg.
-
-%package ffserver
-Summary:	FFserver video server
-Summary(pl.UTF-8):	FFserver - serwer strumieni obrazu
-Group:		Daemons
-Requires(post,preun):	/sbin/chkconfig
-Requires:	%{name}-libs = %{version}-%{release}
-Requires:	rc-scripts >= 0.4.0.10
-
-%description ffserver
-FFserver is a streaming server for both audio and video. It supports
-several live feeds, streaming from files and time shifting on live
-feeds (you can seek to positions in the past on each live feed,
-provided you specify a big enough feed storage in ffserver.conf).
-
-%description ffserver -l pl.UTF-8
-FFserver to serwer strumieni dla dźwięku i obrazu. Obsługuje kilka
-źródeł na żywo, przekazywanie strumieni z plików i przesuwanie w
-czasie dla źródeł na żywo (można przeskakiwać na położenia w
-przeszłości dla każdego źródła na żywo, pod warunkiem odpowiednio
-dużej przestrzeni na dane skonfigurowanej w ffserver.conf).
 
 %package doc
 Summary:	FFmpeg documentation in HTML format
@@ -589,8 +565,7 @@ EOF
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{%{_sysconfdir},%{_sbindir},/etc/{sysconfig,rc.d/init.d}} \
-	$RPM_BUILD_ROOT%{_includedir}/ffmpeg \
-	$RPM_BUILD_ROOT/var/{cache,log}/ffserver
+	$RPM_BUILD_ROOT%{_includedir}/ffmpeg
 
 %{__make} install install-headers \
 	DESTDIR=$RPM_BUILD_ROOT \
@@ -602,13 +577,7 @@ for a in libavutil/*/{asm,bswap}.h; do
 	install -Dp $a $RPM_BUILD_ROOT%{_includedir}/$a
 done
 cp -a libavformat/riff.h $RPM_BUILD_ROOT%{_includedir}/libavformat
-# for lim-omx ffmpeg components
-cp -a libavcodec/audioconvert.h $RPM_BUILD_ROOT%{_includedir}/libavcodec
 
-install -p %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/ffserver
-cp -a %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/ffserver
-cp -a %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/ffserver.conf
-mv -f $RPM_BUILD_ROOT{%{_bindir},%{_sbindir}}/ffserver
 install -p tools/qt-faststart $RPM_BUILD_ROOT%{_bindir}
 
 # install as ffmpeg-avconfig to avoid with possible programs looking for
@@ -629,26 +598,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %post	libs -p /sbin/ldconfig
 %postun	libs -p /sbin/ldconfig
-
-%pre ffserver
-%groupadd -g 167 ffserver
-%useradd -g ffserver -u 167 ffserver
-
-%post ffserver
-/sbin/chkconfig --add ffserver
-%service ffserver restart
-
-%preun ffserver
-if [ "$1" = 0 ]; then
-	%service ffserver stop
-	/sbin/chkconfig --del ffserver
-fi
-
-%postun ffserver
-if [ "$1" = 0 ]; then
-	%userremove ffserver
-	%groupremove ffserver
-fi
 
 %files
 %defattr(644,root,root,755)
@@ -678,23 +627,23 @@ fi
 %files libs
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libavcodec.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavcodec.so.57
+%attr(755,root,root) %ghost %{_libdir}/libavcodec.so.58
 %attr(755,root,root) %{_libdir}/libavdevice.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavdevice.so.57
+%attr(755,root,root) %ghost %{_libdir}/libavdevice.so.58
 %attr(755,root,root) %{_libdir}/libavfilter.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavfilter.so.6
+%attr(755,root,root) %ghost %{_libdir}/libavfilter.so.7
 %attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavformat.so.57
+%attr(755,root,root) %ghost %{_libdir}/libavformat.so.58
 %attr(755,root,root) %{_libdir}/libavresample.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavresample.so.3
+%attr(755,root,root) %ghost %{_libdir}/libavresample.so.4
 %attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavutil.so.55
+%attr(755,root,root) %ghost %{_libdir}/libavutil.so.56
 %attr(755,root,root) %{_libdir}/libpostproc.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libpostproc.so.54
+%attr(755,root,root) %ghost %{_libdir}/libpostproc.so.55
 %attr(755,root,root) %{_libdir}/libswresample.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libswresample.so.2
+%attr(755,root,root) %ghost %{_libdir}/libswresample.so.3
 %attr(755,root,root) %{_libdir}/libswscale.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libswscale.so.4
+%attr(755,root,root) %ghost %{_libdir}/libswscale.so.5
 
 %files devel
 %defattr(644,root,root,755)
@@ -758,19 +707,6 @@ fi
 %{_mandir}/man1/ffplay.1*
 %{_mandir}/man1/ffplay-all.1*
 %endif
-
-%files ffserver
-%defattr(644,root,root,755)
-%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/ffserver.conf
-%config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/ffserver
-%attr(755,root,root) %{_sbindir}/ffserver
-%attr(754,root,root) /etc/rc.d/init.d/ffserver
-%if %{with doc}
-%{_mandir}/man1/ffserver.1*
-%{_mandir}/man1/ffserver-all.1*
-%endif
-%dir %attr(770,root,ffserver) /var/cache/ffserver
-%dir %attr(770,root,ffserver) /var/log/ffserver
 
 %if %{with doc}
 %files doc
