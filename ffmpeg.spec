@@ -239,7 +239,7 @@ Requires:	gnutls-libs >= 3.0.20
 %{?with_openmpt:Requires: libopenmpt >= 0.2.6557}
 %{?with_vpx:Requires:	libvpx >= 1.3.0}
 %{?with_rubberband:Requires:	rubberband-libs >= 1.8.1}
-%{?with_zimg:Requires:	zimg >= 2.3.0}
+%{?with_zimg:Requires:	zimg >= 2.7.0}
 
 %description libs
 This package contains the ffmpeg shared libraries:
