@@ -78,7 +78,7 @@ Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
 Version:	4.0.2
-Release:	1
+Release:	2
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # (postprocessing, some filters, x264, x265, xavs, xvid, xcbgrab)
 # using v3 allows Apache-licensed libs (opencore-amr, libvo-*enc)
@@ -97,6 +97,7 @@ URL:		http://www.ffmpeg.org/
 BuildRequires:	SDL2-devel >= 2.0.1
 BuildRequires:	SDL2-devel < 2.1.0
 BuildRequires:	alsa-lib-devel
+BuildRequires:	aom-devel
 BuildRequires:	bzip2-devel
 BuildRequires:	celt-devel >= 0.11.0
 %{?with_fdk_aac:BuildRequires:	fdk-aac-devel}
@@ -472,6 +473,7 @@ EOF
 	--enable-version3 \
 	%{?with_frei0r:--enable-frei0r} \
 	%{?with_ladspa:--enable-ladspa} \
+	--enable-libaom \
 	--enable-libass \
 	--enable-libbluray \
 	%{?with_bs2b:--enable-libbs2b} \
