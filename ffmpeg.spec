@@ -145,7 +145,7 @@ BuildRequires:	libva-x11-devel >= 1.0.3
 %endif
 BuildRequires:	libvdpau-devel >= 0.2
 BuildRequires:	libvorbis-devel
-%{?with_vpx:BuildRequires:	libvpx-devel >= 1.3.0}
+%{?with_vpx:BuildRequires:	libvpx-devel >= 1.4.0}
 %{?with_webp:BuildRequires:	libwebp-devel >= 0.4.0}
 # X264_BUILD >= 118
 %{?with_x264:BuildRequires:	libx264-devel >= 0.1.3-1.20111212_2245}
@@ -181,7 +181,7 @@ BuildRequires:	speex-devel >= 1:1.2-rc1
 %{?with_doc:BuildRequires:	tetex}
 %{?with_doc:BuildRequires:	texi2html}
 %{?with_doc:BuildRequires:	texinfo}
-BuildRequires:	twolame-devel
+BuildRequires:	twolame-devel >= 0.3.10
 %{?with_vidstab:BuildRequires:	vid.stab-devel >= 0.98}
 BuildRequires:	vo-amrwbenc-devel
 %{?with_wavpack:BuildRequires:	wavpack-devel}
@@ -239,8 +239,9 @@ Requires:	aom >= 1.0.0
 Requires:	gnutls-libs >= 3.0.20
 %endif
 %{?with_openmpt:Requires: libopenmpt >= 0.2.6557}
-%{?with_vpx:Requires:	libvpx >= 1.3.0}
+%{?with_vpx:Requires:	libvpx >= 1.4.0}
 %{?with_rubberband:Requires:	rubberband-libs >= 1.8.1}
+Requires:	twolame-libs >= 0.3.10
 %{?with_zimg:Requires:	zimg >= 2.7.0}
 
 %description libs
@@ -300,7 +301,7 @@ Requires:	librtmp-devel
 Requires:	libtheora-devel >= 1.0-0.beta3
 %{?with_va:Requires:	libva-devel >= 1.0.3}
 Requires:	libvorbis-devel
-%{?with_vpx:Requires:	libvpx-devel >= 1.3.0}
+%{?with_vpx:Requires:	libvpx-devel >= 1.4.0}
 %{?with_webp:Requires:	libwebp-devel >= 0.4.0}
 %{?with_x264:Requires:	libx264-devel >= 0.1.3-1.20110625_2245}
 %{?with_x265:Requires:	libx265-devel >= 1.8}
@@ -316,7 +317,7 @@ Requires:	openjpeg2-devel >= 2.1
 %{?with_soxr:Requires:	soxr-devel}
 Requires:	speex-devel >= 1:1.2-rc1
 %{?with_tesseract:Requires:	tesseract-devel}
-Requires:	twolame-devel
+Requires:	twolame-devel >= 0.3.10
 %{?with_vidstab:Requires:	vid.stab-devel >= 0.98}
 Requires:	vo-amrwbenc-devel
 %{?with_wavpack:Requires:	wavpack-devel}
