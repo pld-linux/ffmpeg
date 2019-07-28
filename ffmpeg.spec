@@ -1,6 +1,5 @@
 # TODO:
 # - libndi_newtek[nonfree, BR: Processing.NDI.Lib.h - probably https://www.newtek.com/ndi/sdk/]
-# - libcodec2 [-lcodec2 codec2/codec2.h]
 # - libdavs2 [pkgconfig(davs2) >= 1.5.115 davs2.h]
 # - libklvanc [-lklvanc libklvanc/vanc.h]
 # - libtensorflow [-ltensorflow tensorflow/c/c_api.h]
@@ -19,6 +18,7 @@
 %bcond_with	nonfree		# unblock non free options of package (currently: cuda_sdk, decklib, fdk_aac, libndi_newtek, npp, openssl, libressl/libtls)
 %bcond_without	bs2b		# BS2B audio filter support
 %bcond_without	caca		# textual display using libcaca
+%bcond_without	codec2		# codec2 support using libcodec2
 %bcond_without	chromaprint	# audio fingerprinting with chromaprint
 %bcond_with	cudasdk		# NVIDIA CUDA code using SDK [BR: cuda.h, non-free]
 %bcond_with	decklink	# Blackmagic DeskLink output support (requires nonfree)
@@ -115,6 +115,7 @@ BuildRequires:	alsa-lib-devel
 BuildRequires:	aom-devel >= 1.0.0
 BuildRequires:	bzip2-devel
 BuildRequires:	celt-devel >= 0.11.0
+%{?with_codec2:BuildRequires:	codec2-devel}
 %{?with_fdk_aac:BuildRequires:	fdk-aac-devel}
 %{?with_flite:BuildRequires:	flite-devel >= 1.4}
 BuildRequires:	fontconfig-devel
@@ -181,7 +182,7 @@ BuildRequires:	nasm
 %endif
 %endif
 %{?with_ffnvcodec:BuildRequires:	nv-codec-headers >= 8.1.24.2}
-# which package?
+# amrnb,amrwb
 BuildRequires:	opencore-amr-devel
 %{?with_opencv:BuildRequires:	opencv-devel >= 2}
 %{?with_openh264:BuildRequires:	openh264-devel >= 1.3}
@@ -322,6 +323,7 @@ Requires:	alsa-lib-devel
 Requires:	aom-devel >= 1.0.0
 Requires:	bzip2-devel
 Requires:	celt-devel >= 0.11.0
+%{?with_codec2:Requires:	codec2-devel}
 %{?with_fdk_aac:Requires:	fdk-aac-devel}
 %{?with_flite:Requires:	flite-devel >= 1.4}
 Requires:	fontconfig-devel
@@ -553,6 +555,7 @@ EOF
 	%{?with_caca:--enable-libcaca} \
 	--enable-libcelt \
 	--enable-libcdio \
+	%{?with_codec2:--enable-libcodec2} \
 	--enable-libdc1394 \
 	%{?with_libdrm:--enable-libdrm} \
 	%{?with_flite:--enable-libflite} \
