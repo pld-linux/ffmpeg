@@ -91,7 +91,7 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	4.1.4
+Version:	4.2
 Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
@@ -100,7 +100,7 @@ Release:	1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	5307931aeb7aaee5e1509d9996040661
+# Source0-md5:	fb33a9110251873002869664686b2a3f
 Patch0:		%{name}-omx-libnames.patch
 URL:		http://www.ffmpeg.org/
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.9.5}
@@ -147,7 +147,7 @@ BuildRequires:	libdc1394-devel >= 2
 BuildRequires:	libgsm-devel
 BuildRequires:	libiec61883-devel
 BuildRequires:	libmodplug-devel
-%{?with_libmysofa:BuildRequires:	libmysofa-devel}
+%{?with_libmysofa:BuildRequires:	libmysofa-devel >= 0.7}
 %{?with_openmpt:BuildRequires: libopenmpt-devel >= 0.2.6557}
 BuildRequires:	libraw1394-devel >= 2
 %{?with_librsvg:BuildRequires:	librsvg-devel >= 2}
@@ -264,6 +264,7 @@ Requires:	celt >= 0.11.0
 Requires:	gnutls-libs >= 3.0.20
 %endif
 %{?with_kvazaar:Requires:	kvazaar-libs >= 0.8.1}
+%{?with_libmysofa:Requires:	libmysofa >= 0.7}
 %{?with_openmpt:Requires: libopenmpt >= 0.2.6557}
 Requires:	libtheora >= 1.0-0.beta3
 %if %{with va}
@@ -348,7 +349,7 @@ Requires:	libdc1394-devel >= 2
 Requires:	libgsm-devel
 Requires:	libiec61883-devel
 Requires:	libmodplug-devel
-%{?with_libmysofa:Requires:	libmysofa-devel}
+%{?with_libmysofa:Requires:	libmysofa-devel >= 0.7}
 %{?with_openmpt:Requires: libopenmpt-devel >= 0.2.6557}
 Requires:	libraw1394-devel >= 2
 %{?with_librsvg:Requires:	librsvg-devel >= 2}
