@@ -21,6 +21,7 @@
 %bcond_without	codec2		# codec2 support using libcodec2
 %bcond_without	chromaprint	# audio fingerprinting with chromaprint
 %bcond_with	cudasdk		# NVIDIA CUDA code using SDK [BR: cuda.h, non-free]
+%bcond_without	dav1d		# AV1 decoding via libdav1d
 %bcond_with	decklink	# Blackmagic DeskLink output support (requires nonfree)
 %bcond_with	fdk_aac		# AAC de/encoding via libfdk_aac (requires nonfree)
 %bcond_without	ffnvcodec	# NVIDIA codecs support using ffnvcodec headers (covered: cuda cuvid nvdec nvenc)
@@ -116,6 +117,7 @@ BuildRequires:	aom-devel >= 1.0.0
 BuildRequires:	bzip2-devel
 BuildRequires:	celt-devel >= 0.11.0
 %{?with_codec2:BuildRequires:	codec2-devel}
+%{?with_dav1d:BuildRequires:	dav1d-devel >= 0.2.1}
 %{?with_fdk_aac:BuildRequires:	fdk-aac-devel}
 %{?with_flite:BuildRequires:	flite-devel >= 1.4}
 BuildRequires:	fontconfig-devel
@@ -258,6 +260,7 @@ Group:		Libraries
 Requires:	SDL2 >= 2.0.1
 Requires:	aom >= 1.0.0
 Requires:	celt >= 0.11.0
+%{?with_dav1d:Requires:	dav1d >= 0.2.1}
 %{?with_flite:Requires:	flite >= 1.4}
 %if "%(rpm -q --qf '%{V}' gnutls-devel)" >= "3.0.20"
 # uses gnutls_certificate_set_x509_system_trust if >= 3.0.20
@@ -325,6 +328,7 @@ Requires:	aom-devel >= 1.0.0
 Requires:	bzip2-devel
 Requires:	celt-devel >= 0.11.0
 %{?with_codec2:Requires:	codec2-devel}
+%{?with_dav1d:Requires:	dav1d-devel >= 0.2.1}
 %{?with_fdk_aac:Requires:	fdk-aac-devel}
 %{?with_flite:Requires:	flite-devel >= 1.4}
 Requires:	fontconfig-devel
@@ -557,6 +561,7 @@ EOF
 	--enable-libcelt \
 	--enable-libcdio \
 	%{?with_codec2:--enable-libcodec2} \
+	%{?with_dav1d:--enable-libdav1d} \
 	--enable-libdc1394 \
 	%{?with_libdrm:--enable-libdrm} \
 	%{?with_flite:--enable-libflite} \
