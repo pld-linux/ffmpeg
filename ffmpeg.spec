@@ -147,7 +147,7 @@ BuildRequires:	libdc1394-devel >= 2
 BuildRequires:	libgsm-devel
 BuildRequires:	libiec61883-devel
 BuildRequires:	libmodplug-devel
-%{?with_libmysofa:BuildRequires:	libmysofa-devel >= 0.7}
+%{?with_libmysofa:BuildRequires:	libmysofa-devel >= 0.7-2.20190516.1}
 %{?with_openmpt:BuildRequires: libopenmpt-devel >= 0.2.6557}
 BuildRequires:	libraw1394-devel >= 2
 %{?with_librsvg:BuildRequires:	librsvg-devel >= 2}
@@ -264,7 +264,7 @@ Requires:	celt >= 0.11.0
 Requires:	gnutls-libs >= 3.0.20
 %endif
 %{?with_kvazaar:Requires:	kvazaar-libs >= 0.8.1}
-%{?with_libmysofa:Requires:	libmysofa >= 0.7}
+%{?with_libmysofa:Requires:	libmysofa >= 0.7-2.20190516.1}
 %{?with_openmpt:Requires: libopenmpt >= 0.2.6557}
 Requires:	libtheora >= 1.0-0.beta3
 %if %{with va}
@@ -349,7 +349,7 @@ Requires:	libdc1394-devel >= 2
 Requires:	libgsm-devel
 Requires:	libiec61883-devel
 Requires:	libmodplug-devel
-%{?with_libmysofa:Requires:	libmysofa-devel >= 0.7}
+%{?with_libmysofa:Requires:	libmysofa-devel >= 0.7-2.20190516.1}
 %{?with_openmpt:Requires: libopenmpt-devel >= 0.2.6557}
 Requires:	libraw1394-devel >= 2
 %{?with_librsvg:Requires:	librsvg-devel >= 2}
