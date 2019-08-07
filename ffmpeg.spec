@@ -1,9 +1,6 @@
 # TODO:
-# - libndi_newtek[nonfree, BR: Processing.NDI.Lib.h - probably https://www.newtek.com/ndi/sdk/]
-# - libdavs2 [pkgconfig(davs2) >= 1.5.115 davs2.h]
 # - libklvanc [-lklvanc libklvanc/vanc.h]
 # - libtensorflow [-ltensorflow tensorflow/c/c_api.h]
-# - libxavs2 [pkgconfig(xavs2) >= 1.2.77
 # - AMF >= 1.4.4.1 (available at https://github.com/GPUOpen-LibrariesAndSDKs/AMF, where is original source?)
 #
 # How to deal with ffmpeg/opencv/chromaprint checken-egg problem:
@@ -15,12 +12,14 @@
 #
 # Conditional build:
 %bcond_with	bootstrap	# disable features to able to build without installed ffmpeg
-%bcond_with	nonfree		# unblock non free options of package (currently: cuda_sdk, decklib, fdk_aac, libndi_newtek, npp, openssl, libressl/libtls)
+%bcond_with	nonfree		# unblock non free options of package (currently: cuda_nvcc, decklib, fdk_aac, npp, openssl, libressl/libtls)
+%bcond_without	aribb24		# ARIB text and caption decoding via libaribb24
+%bcond_without	avs2		# AVS2 de/encoding via libdavs2/libxavs2
 %bcond_without	bs2b		# BS2B audio filter support
 %bcond_without	caca		# textual display using libcaca
 %bcond_without	codec2		# codec2 support using libcodec2
 %bcond_without	chromaprint	# audio fingerprinting with chromaprint
-%bcond_with	cudasdk		# NVIDIA CUDA code using SDK [BR: cuda.h, non-free]
+%bcond_with	cudasdk		# NVIDIA CUDA code using nvcc from CUDA SDK [BR: cuda.h, non-free]
 %bcond_without	dav1d		# AV1 decoding via libdav1d
 %bcond_with	decklink	# Blackmagic DeskLink output support (requires nonfree)
 %bcond_with	fdk_aac		# AAC de/encoding via libfdk_aac (requires nonfree)
@@ -47,6 +46,7 @@
 %bcond_without	opengl		# OpenGL rendering support
 %bcond_with	openh264	# OpenH264 H.264 encoder
 %bcond_without	openmpt		# OpenMPT module decoder
+%bcond_with	pocketsphinx	# asr filter using PocketSphinx
 %bcond_without	pulseaudio	# PulseAudio input support
 %bcond_with	rkmpp		# Rockchip Media Process Platform code [implies libdrm]
 %bcond_without	rubberband	# rubberband filter
@@ -114,10 +114,12 @@ BuildRequires:	SDL2-devel >= 2.0.1
 BuildRequires:	SDL2-devel < 2.1.0
 BuildRequires:	alsa-lib-devel
 BuildRequires:	aom-devel >= 1.0.0
+%{?with_aribb24:BuildRequires:	aribb24-devel}
 BuildRequires:	bzip2-devel
 BuildRequires:	celt-devel >= 0.11.0
 %{?with_codec2:BuildRequires:	codec2-devel}
 %{?with_dav1d:BuildRequires:	dav1d-devel >= 0.2.1}
+%{?with_avs2:BuildRequires:	davs2-devel >= 1.6}
 %{?with_fdk_aac:BuildRequires:	fdk-aac-devel}
 %{?with_flite:BuildRequires:	flite-devel >= 1.4}
 BuildRequires:	fontconfig-devel
@@ -183,7 +185,7 @@ BuildRequires:	libxcb-devel >= 1.4
 BuildRequires:	nasm
 %endif
 %endif
-%{?with_ffnvcodec:BuildRequires:	nv-codec-headers >= 8.1.24.2}
+%{?with_ffnvcodec:BuildRequires:	nv-codec-headers >= 9.0.18.0}
 # amrnb,amrwb
 BuildRequires:	opencore-amr-devel
 %{?with_opencv:BuildRequires:	opencv-devel >= 2}
@@ -192,6 +194,7 @@ BuildRequires:	openjpeg2-devel >= 2.1
 BuildRequires:	opus-devel
 BuildRequires:	perl-Encode
 BuildRequires:	perl-tools-pod
+%{?with_pocketsphinx:BuildRequires:	pocketsphinx-devel > 0.8}
 BuildRequires:	pkgconfig
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
 %{?with_rkmpp:BuildRequires:	rockchip-mpp-devel >= 1.3.7}
@@ -214,6 +217,7 @@ BuildRequires:	vo-amrwbenc-devel
 %{?with_wavpack:BuildRequires:	wavpack-devel}
 %{?with_ilbc:BuildRequires:	webrtc-libilbc-devel}
 BuildRequires:	xavs-devel
+%{?with_avs2:BuildRequires:	xavs2-devel >= 1.3}
 BuildRequires:	xorg-lib-libX11-devel
 BuildRequires:	xorg-lib-libXext-devel
 BuildRequires:	xorg-lib-libXv-devel
@@ -261,6 +265,7 @@ Requires:	SDL2 >= 2.0.1
 Requires:	aom >= 1.0.0
 Requires:	celt >= 0.11.0
 %{?with_dav1d:Requires:	dav1d >= 0.2.1}
+%{?with_avs2:Requires:	davs2 >= 1.6}
 %{?with_flite:Requires:	flite >= 1.4}
 %if "%(rpm -q --qf '%{V}' gnutls-devel)" >= "3.0.20"
 # uses gnutls_certificate_set_x509_system_trust if >= 3.0.20
@@ -293,6 +298,7 @@ Requires:	twolame-libs >= 0.3.10
 %{?with_vapoursynth:Requires:	vapoursynth >= 42}
 %{?with_vidstab:Requires:	vid.stab >= 0.98}
 %{?with_vmaf:Requires:	vmaf-libs >= 1.3.9}
+%{?with_avs2:Requires:	xavs2 >= 1.3}
 Requires:	xvid >= 1:1.1.0
 %{?with_zimg:Requires:	zimg >= 2.7.0}
 %{?with_zvbi:Requires:	zvbi >= 0.2.28}
@@ -325,6 +331,8 @@ Requires:	%{name}-libs = %{version}-%{release}
 Requires:	SDL2-devel >= 2.0.1
 Requires:	alsa-lib-devel
 Requires:	aom-devel >= 1.0.0
+%{?with_aribb24:Requires:	aribb24-devel}
+%{?with_avs2:Requires:	davs2-devel >= 1.6}
 Requires:	bzip2-devel
 Requires:	celt-devel >= 0.11.0
 %{?with_codec2:Requires:	codec2-devel}
@@ -399,6 +407,7 @@ Requires:	vo-amrwbenc-devel
 %{?with_wavpack:Requires:	wavpack-devel}
 %{?with_ilbc:Requires:	webrtc-libilbc-devel}
 Requires:	xavs-devel
+%{?with_avs2:Requires:	xavs2-devel >= 1.3}
 Requires:	xorg-lib-libX11-devel
 Requires:	xorg-lib-libXext-devel
 Requires:	xorg-lib-libXv-devel
@@ -545,7 +554,7 @@ EOF
 	--enable-avfilter \
 	--enable-avresample \
 	%{?with_chromaprint:--enable-chromaprint} \
-	%{?with_cudasdk:--enable-cuda-sdk} \
+	%{?with_cudasdk:--enable-cuda-nvcc} \
 	%{?with_decklink:--enable-decklink} \
 	%{!?with_ffnvcodec:--disable-ffnvcodec} \
 	--enable-gnutls \
@@ -554,6 +563,7 @@ EOF
 	%{?with_frei0r:--enable-frei0r} \
 	%{?with_ladspa:--enable-ladspa} \
 	--enable-libaom \
+	%{?with_aribb24:--enable-libaribb24} \
 	--enable-libass \
 	--enable-libbluray \
 	%{?with_bs2b:--enable-libbs2b} \
@@ -562,6 +572,7 @@ EOF
 	--enable-libcdio \
 	%{?with_codec2:--enable-libcodec2} \
 	%{?with_dav1d:--enable-libdav1d} \
+	%{?with_avs2:--enable-libdavs2} \
 	--enable-libdc1394 \
 	%{?with_libdrm:--enable-libdrm} \
 	%{?with_flite:--enable-libflite} \
@@ -612,6 +623,7 @@ EOF
 	%{?with_x264:--enable-libx264} \
 	%{?with_x265:--enable-libx265} \
 	--enable-libxavs \
+	%{?with_avs2:--enable-libxavs2} \
 	--enable-libxcb \
 	--enable-libxvid \
 	%{?with_zimg:--enable-libzimg} \
@@ -622,6 +634,7 @@ EOF
 	%{?with_openal:--enable-openal} \
 	%{?with_opencl:--enable-opencl} \
 	%{?with_opengl:--enable-opengl} \
+	%{?with_pocketsphinx:--enable-pocketsphinx} \
 	--enable-postproc \
 	--enable-pthreads \
 	%{?with_rkmpp:--enable-rkmpp} \
