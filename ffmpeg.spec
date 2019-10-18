@@ -93,7 +93,7 @@ Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
 Version:	4.2.1
-Release:	1
+Release:	2
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
 # v3 (allows *GPLv3 or Apache-licensed libs): gmp lensfun opencore-amr vmaf vo-*enc rkmpp
@@ -152,7 +152,7 @@ BuildRequires:	libgsm-devel
 BuildRequires:	libiec61883-devel
 BuildRequires:	libmodplug-devel
 %{?with_libmysofa:BuildRequires:	libmysofa-devel >= 0.7}
-%{?with_openmpt:BuildRequires: libopenmpt-devel >= 0.2.6557}
+%{?with_openmpt:BuildRequires: libopenmpt-devel >= 0.4.5}
 BuildRequires:	libraw1394-devel >= 2
 %{?with_librsvg:BuildRequires:	librsvg-devel >= 2}
 BuildRequires:	librtmp-devel
@@ -273,7 +273,7 @@ Requires:	gnutls-libs >= 3.0.20
 %endif
 %{?with_kvazaar:Requires:	kvazaar-libs >= 0.8.1}
 %{?with_libmysofa:Requires:	libmysofa >= 0.7}
-%{?with_openmpt:Requires: libopenmpt >= 0.2.6557}
+%{?with_openmpt:Requires: libopenmpt >= 0.4.5}
 Requires:	libtheora >= 1.0-0.beta3
 %if %{with va}
 Requires:	libva >= 1.0.3
@@ -362,7 +362,7 @@ Requires:	libgsm-devel
 Requires:	libiec61883-devel
 Requires:	libmodplug-devel
 %{?with_libmysofa:Requires:	libmysofa-devel >= 0.7}
-%{?with_openmpt:Requires: libopenmpt-devel >= 0.2.6557}
+%{?with_openmpt:Requires: libopenmpt-devel >= 0.4.5}
 Requires:	libraw1394-devel >= 2
 %{?with_librsvg:Requires:	librsvg-devel >= 2}
 Requires:	librtmp-devel
