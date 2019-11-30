@@ -1,5 +1,4 @@
 # TODO:
-# - libklvanc [-lklvanc libklvanc/vanc.h]
 # - libtensorflow [-ltensorflow tensorflow/c/c_api.h]
 # - AMF >= 1.4.4.1 (available at https://github.com/GPUOpen-LibrariesAndSDKs/AMF, where is original source?)
 #
@@ -21,7 +20,7 @@
 %bcond_without	chromaprint	# audio fingerprinting with chromaprint
 %bcond_with	cudasdk		# NVIDIA CUDA code using nvcc from CUDA SDK [BR: cuda.h, non-free]
 %bcond_without	dav1d		# AV1 decoding via libdav1d
-%bcond_with	decklink	# Blackmagic DeskLink output support (requires nonfree)
+%bcond_with	decklink	# Blackmagic DeckLink I/O support (requires nonfree)
 %bcond_with	fdk_aac		# AAC de/encoding via libfdk_aac (requires nonfree)
 %bcond_without	ffnvcodec	# NVIDIA codecs support using ffnvcodec headers (covered: cuda cuvid nvdec nvenc)
 %bcond_without	flite		# flite voice synthesis support
@@ -33,6 +32,7 @@
 %bcond_without	ladspa		# LADSPA audio filtering
 %bcond_without	lensfun		# lensfun lens correction
 %bcond_with	libdrm		# Linux Direct Rendering Manager code
+%bcond_with	libklvanc	# Kernel Labs VANC processing (in decklink driver)
 %bcond_without	libmysofa	# sofalizer filter
 %bcond_with	librsvg		# SVG rasterization via librsvg
 %bcond_with	libxml2		# XML parsing using libxml2
@@ -150,6 +150,7 @@ BuildRequires:	libdc1394-devel >= 2
 %{?with_libdrm:BuildRequires:	libdrm-devel}
 BuildRequires:	libgsm-devel
 BuildRequires:	libiec61883-devel
+%{?with_libklvanc:BuildRequires:	libklvanc-devel}
 BuildRequires:	libmodplug-devel
 %{?with_libmysofa:BuildRequires:	libmysofa-devel >= 0.7}
 %{?with_openmpt:BuildRequires: libopenmpt-devel >= 0.4.5}
@@ -360,6 +361,7 @@ Requires:	libdc1394-devel >= 2
 %{?with_libdrm:Requires:	libdrm-devel}
 Requires:	libgsm-devel
 Requires:	libiec61883-devel
+%{?with_libklvanc:Requires:	libklvanc-devel}
 Requires:	libmodplug-devel
 %{?with_libmysofa:Requires:	libmysofa-devel >= 0.7}
 %{?with_openmpt:Requires: libopenmpt-devel >= 0.4.5}
@@ -585,6 +587,7 @@ EOF
 	%{?with_ilbc:--enable-libilbc} \
 	--enable-libjack \
 	%{?with_kvazaar:--enable-libkvazaar} \
+	%{?with_libklvanc:--enable-libklvanc} \
 	%{?with_lensfun:--enable-liblensfun} \
 	%{?with_mfx:--enable-libmfx} \
 	--enable-libmodplug \
