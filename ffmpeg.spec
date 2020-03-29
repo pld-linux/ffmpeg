@@ -234,6 +234,7 @@ BuildRequires:	zlib-devel
 BuildConflicts:	pdksh < 5.2.14-57
 Requires:	%{name}-libs = %{version}-%{release}
 Suggests:	fontconfig
+Suggests:	fonts-TTF-Roboto
 Obsoletes:	libpostproc
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
