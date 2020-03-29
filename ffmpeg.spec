@@ -233,6 +233,7 @@ BuildRequires:	zlib-devel
 # overflows maximum hash table size
 BuildConflicts:	pdksh < 5.2.14-57
 Requires:	%{name}-libs = %{version}-%{release}
+Suggests:	fontconfig
 Obsoletes:	libpostproc
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
