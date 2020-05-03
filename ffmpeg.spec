@@ -12,7 +12,9 @@
 # Conditional build:
 %bcond_with	bootstrap	# disable features to able to build without installed ffmpeg
 %bcond_with	nonfree		# unblock non free options of package (currently: cuda_nvcc, decklib, fdk_aac, npp, openssl, libressl/libtls)
+%bcond_without	amr		# AMR-NB/WB de/encoding via libopencore-amrnb/wb
 %bcond_without	aribb24		# ARIB text and caption decoding via libaribb24
+%bcond_without	avs		# AVS encoding via xavs
 %bcond_without	avs2		# AVS2 de/encoding via libdavs2/libxavs2
 %bcond_without	bs2b		# BS2B audio filter support
 %bcond_without	caca		# textual display using libcaca
@@ -20,6 +22,7 @@
 %bcond_without	chromaprint	# audio fingerprinting with chromaprint
 %bcond_with	cudasdk		# NVIDIA CUDA code using nvcc from CUDA SDK [BR: cuda.h, non-free]
 %bcond_without	dav1d		# AV1 decoding via libdav1d
+%bcond_without	dc1394		# IIDC-1394 grabbing using libdc1394
 %bcond_with	decklink	# Blackmagic DeckLink I/O support (requires nonfree)
 %bcond_with	fdk_aac		# AAC de/encoding via libfdk_aac (requires nonfree)
 %bcond_without	ffnvcodec	# NVIDIA codecs support using ffnvcodec headers (covered: cuda cuvid nvdec nvenc)
@@ -27,6 +30,8 @@
 %bcond_without	frei0r		# frei0r video filtering
 %bcond_without	fribidi		# fribidi support
 %bcond_without	gme		# Game Music Emu support
+%bcond_without	gsm		# GSM de/encoding via libgsm
+%bcond_without	iec61883	# ec61883 via libiec61883
 %bcond_without	ilbc		# iLBC de/encoding via WebRTC libilbc
 %bcond_without	kvazaar		# Kvazaar HEVC encoder support
 %bcond_without	ladspa		# LADSPA audio filtering
@@ -38,6 +43,7 @@
 %bcond_with	libxml2		# XML parsing using libxml2
 %bcond_without	lv2		# LV2 audio filtering
 %bcond_with	mfx		# MFX hardware acceleration support
+%bcond_without	modplug		# ModPlug via libmodplug
 %bcond_with	npp		# NVIDIA Performance Primitives-based code (requires nonfree) [BR: libnppc+libnppi, npp.h]
 %bcond_without	omx		# OpenMAX IL support
 %bcond_without	openal		# OpenAL 1.1 capture support
@@ -57,15 +63,18 @@
 %bcond_with	smb		# SMB support via libsmbclient
 %bcond_without	soxr		# SoX Resampler support
 %bcond_with	tesseract	# OCR filter based on Tesseract
+%bcond_without	theora		# Theora encoding via libtheora
 %bcond_without	vmaf		# VMAF filter support
 %bcond_without	x264		# H.264 x264 encoder
 %bcond_without	x265		# H.265/HEVC x265 encoder
 %bcond_without	va		# VAAPI (Video Acceleration API)
 %bcond_without	vapoursynth	# VapourSynth demuxer
 %bcond_without	vidstab		# vid.stab video stabilization support
+%bcond_without	voamrwbenc	# MR-WB encoding via libvo-amrwbenc
 %bcond_without	vpx		# VP8, a high-quality video codec
 %bcond_without	wavpack		# wavpack encoding support
 %bcond_without	webp		# WebP encoding support
+%bcond_without	xvid		# vid encoding via xvidcore
 %bcond_without	zimg		# zscale filter based on z.lib
 %bcond_without	zmq		# 0MQ message passing
 %bcond_without	zvbi		# teletext via libzvbi
@@ -88,6 +97,9 @@
 %endif
 %ifarch i386 i486
 %undefine	with_x265
+%endif
+%ifarch i686 pentium4 athlon %{x8664} x32
+%define		with_crystalhd	1
 %endif
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
@@ -139,27 +151,29 @@ BuildRequires:	jack-audio-connection-kit-devel
 BuildRequires:	lame-libs-devel >= 3.98.3
 %{?with_lensfun:BuildRequires:	lensfun-devel}
 BuildRequires:	libass-devel
-BuildRequires:	libavc1394-devel
+%{?with_iec61883:BuildRequires:	libavc1394-devel}
 %{?with_bs2b:BuildRequires:	libbs2b-devel}
 BuildRequires:	libbluray-devel
 %{?with_caca:BuildRequires:	libcaca-devel}
 BuildRequires:	libcdio-paranoia-devel >= 0.90-2
 %{?with_chromaprint:BuildRequires:	libchromaprint-devel}
-BuildRequires:	libcrystalhd-devel
-BuildRequires:	libdc1394-devel >= 2
+%{?with_crystalhd:BuildRequires:	libcrystalhd-devel}
+%{?with_dc1394:BuildRequires:	libdc1394-devel >= 2}
 %{?with_libdrm:BuildRequires:	libdrm-devel}
-BuildRequires:	libgsm-devel
-BuildRequires:	libiec61883-devel
+%{?with_gsm:BuildRequires:	libgsm-devel}
+%{?with_iec61883:BuildRequires:	libiec61883-devel}
 %{?with_libklvanc:BuildRequires:	libklvanc-devel}
-BuildRequires:	libmodplug-devel
+%{?with_modplug:BuildRequires:	libmodplug-devel}
 %{?with_libmysofa:BuildRequires:	libmysofa-devel >= 0.7}
 %{?with_openmpt:BuildRequires: libopenmpt-devel >= 0.4.5}
+%if %{with dc1394} || %{with iec61883}
 BuildRequires:	libraw1394-devel >= 2
+%endif
 %{?with_librsvg:BuildRequires:	librsvg-devel >= 2}
 BuildRequires:	librtmp-devel
 %{?with_ssh:BuildRequires:	libssh-devel}
 %{?with_smb:BuildRequires:	libsmbclient-devel}
-BuildRequires:	libtheora-devel >= 1.0-0.beta3
+%{?with_theora:BuildRequires:	libtheora-devel >= 1.0-0.beta3}
 BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	libv4l-devel
 %if %{with va}
@@ -188,7 +202,7 @@ BuildRequires:	nasm
 %endif
 %{?with_ffnvcodec:BuildRequires:	nv-codec-headers >= 9.0.18.0}
 # amrnb,amrwb
-BuildRequires:	opencore-amr-devel
+%{?with_amr:BuildRequires:	opencore-amr-devel}
 %{?with_opencv:BuildRequires:	opencv-devel >= 2}
 %{?with_openh264:BuildRequires:	openh264-devel >= 1.3}
 BuildRequires:	openjpeg2-devel >= 2.1
@@ -214,15 +228,15 @@ BuildRequires:	twolame-devel >= 0.3.10
 %{?with_vapoursynth:BuildRequires:	vapoursynth-devel >= 42}
 %{?with_vidstab:BuildRequires:	vid.stab-devel >= 0.98}
 %{?with_vmaf:BuildRequires:	vmaf-devel >= 1.3.9}
-BuildRequires:	vo-amrwbenc-devel
+%{?with_voamrwbenc:BuildRequires:	vo-amrwbenc-devel}
 %{?with_wavpack:BuildRequires:	wavpack-devel}
 %{?with_ilbc:BuildRequires:	webrtc-libilbc-devel}
-BuildRequires:	xavs-devel
+%{?with_avs:BuildRequires:	xavs-devel}
 %{?with_avs2:BuildRequires:	xavs2-devel >= 1.3}
 BuildRequires:	xorg-lib-libX11-devel
 BuildRequires:	xorg-lib-libXext-devel
 BuildRequires:	xorg-lib-libXv-devel
-BuildRequires:	xvid-devel >= 1:1.1.0
+%{?with_xvid:BuildRequires:	xvid-devel >= 1:1.1.0}
 BuildRequires:	xz-devel
 BuildRequires:	yasm
 %{?with_zmq:BuildRequires:	zeromq-devel}
@@ -277,7 +291,7 @@ Requires:	gnutls-libs >= 3.0.20
 %{?with_kvazaar:Requires:	kvazaar-libs >= 0.8.1}
 %{?with_libmysofa:Requires:	libmysofa >= 0.7}
 %{?with_openmpt:Requires: libopenmpt >= 0.4.5}
-Requires:	libtheora >= 1.0-0.beta3
+%{?with_theora:Requires:	libtheora >= 1.0-0.beta3}
 %if %{with va}
 Requires:	libva >= 1.0.3
 Requires:	libva-drm >= 1.0.3
@@ -302,7 +316,7 @@ Requires:	twolame-libs >= 0.3.10
 %{?with_vidstab:Requires:	vid.stab >= 0.98}
 %{?with_vmaf:Requires:	vmaf-libs >= 1.3.9}
 %{?with_avs2:Requires:	xavs2 >= 1.3}
-Requires:	xvid >= 1:1.1.0
+%{?with_xvid:Requires:	xvid >= 1:1.1.0}
 %{?with_zimg:Requires:	zimg >= 2.7.0}
 %{?with_zvbi:Requires:	zvbi >= 0.2.28}
 
@@ -352,28 +366,30 @@ Requires:	jack-audio-connection-kit-devel
 Requires:	lame-libs-devel >= 3.98.3
 %{?with_lensfun:Requires:	lensfun-devel}
 Requires:	libass-devel
-Requires:	libavc1394-devel
+%{?with_iec61883:Requires:	libavc1394-devel}
 Requires:	libbluray-devel
 %{?with_bs2b:Requires:	libbs2b-devel}
 %{?with_caca:Requires:	libcaca-devel}
 Requires:	libcdio-paranoia-devel >= 0.90-2
 %{?with_chromaprint:Requires:	libchromaprint-devel}
-Requires:	libcrystalhd-devel
-Requires:	libdc1394-devel >= 2
+%{?with_crystalhd:Requires:	libcrystalhd-devel}
+%{?with_dc1394:Requires:	libdc1394-devel >= 2}
 %{?with_libdrm:Requires:	libdrm-devel}
-Requires:	libgsm-devel
-Requires:	libiec61883-devel
+%{?with_gsm:Requires:	libgsm-devel}
+%{?with_iec61883:Requires:	libiec61883-devel}
 %{?with_libklvanc:Requires:	libklvanc-devel}
-Requires:	libmodplug-devel
+%{?with_modplug:Requires:	libmodplug-devel}
 %{?with_libmysofa:Requires:	libmysofa-devel >= 0.7}
 %{?with_openmpt:Requires: libopenmpt-devel >= 0.4.5}
+%if %{with dc1394} || %{with iec61883}
 Requires:	libraw1394-devel >= 2
+%endif
 %{?with_librsvg:Requires:	librsvg-devel >= 2}
 Requires:	librtmp-devel
 %{?with_smb:Requires:	libsmbclient-devel}
 %{?with_ssh:Requires:	libssh-devel}
 Requires:	libstdc++-devel
-Requires:	libtheora-devel >= 1.0-0.beta3
+%{?with_theora:Requires:	libtheora-devel >= 1.0-0.beta3}
 Requires:	libv4l-devel
 %{?with_va:Requires:	libva-devel >= 1.0.3}
 %{?with_va:Requires:	libva-drm-devel >= 1.0.3}
@@ -389,7 +405,7 @@ Requires:	libxcb-devel >= 1.4
 %{?with_libxml2:Requires:	libxml2-devel >= 2}
 %{?with_lv2:Requires:	lilv-devel}
 %{?with_mfx:Requires:	mfx_dispatch-devel}
-Requires:	opencore-amr-devel
+%{?with_amr:Requires:	opencore-amr-devel}
 %{?with_opencv:Requires:	opencv-devel >= 2}
 %{?with_openh264:Requires:	openh264-devel >= 1.3}
 Requires:	openjpeg2-devel >= 2.1
@@ -406,16 +422,16 @@ Requires:	speex-devel >= 1:1.2-rc1
 Requires:	twolame-devel >= 0.3.10
 %{?with_vapoursynth:Requires:	vapoursynth-devel >= 42}
 %{?with_vidstab:Requires:	vid.stab-devel >= 0.98}
-Requires:	vo-amrwbenc-devel
+%{?with_voamrwbenc:Requires:	vo-amrwbenc-devel}
 %{?with_vmaf:Requires:	vmaf-devel >= 1.3.9}
 %{?with_wavpack:Requires:	wavpack-devel}
 %{?with_ilbc:Requires:	webrtc-libilbc-devel}
-Requires:	xavs-devel
+%{?with_avs:Requires:	xavs-devel}
 %{?with_avs2:Requires:	xavs2-devel >= 1.3}
 Requires:	xorg-lib-libX11-devel
 Requires:	xorg-lib-libXext-devel
 Requires:	xorg-lib-libXv-devel
-Requires:	xvid-devel >= 1:1.1.0
+%{?with_xvid:Requires:	xvid-devel >= 1:1.1.0}
 Requires:	xz-devel
 %{?with_zmq:Requires:	zeromq-devel}
 %{?with_zimg:Requires:	zimg-devel >= 2.7.0}
@@ -577,26 +593,26 @@ EOF
 	%{?with_codec2:--enable-libcodec2} \
 	%{?with_dav1d:--enable-libdav1d} \
 	%{?with_avs2:--enable-libdavs2} \
-	--enable-libdc1394 \
+	%{?with_dc1394:--enable-libdc1394} \
 	%{?with_libdrm:--enable-libdrm} \
 	%{?with_flite:--enable-libflite} \
 	--enable-libfontconfig \
 	--enable-libfreetype \
 	%{?with_fribidi:--enable-libfribidi} \
 	%{?with_gme:--enable-libgme} \
-	--enable-libgsm \
-	--enable-libiec61883 \
+	%{?with_gsm:--enable-libgsm} \
+	%{?with_iec61883:--enable-libiec61883} \
 	%{?with_ilbc:--enable-libilbc} \
 	--enable-libjack \
 	%{?with_kvazaar:--enable-libkvazaar} \
 	%{?with_libklvanc:--enable-libklvanc} \
 	%{?with_lensfun:--enable-liblensfun} \
 	%{?with_mfx:--enable-libmfx} \
-	--enable-libmodplug \
+	%{?with_modplug:--enable-libmodplug} \
 	--enable-libmp3lame \
 	%{?with_libmysofa:--enable-libmysofa} \
-	--enable-libopencore-amrnb \
-	--enable-libopencore-amrwb \
+	%{?with_amr:--enable-libopencore-amrnb} \
+	%{?with_amr:--enable-libopencore-amrwb} \
 	%{?with_opencv:--enable-libopencv} \
 	%{?with_openh264:--enable-libopenh264} \
 	--enable-libopenjpeg \
@@ -615,22 +631,22 @@ EOF
 	--enable-libspeex \
 	%{?with_ssh:--enable-libssh} \
 	%{?with_tesseract:--enable-libtesseract} \
-	--enable-libtheora \
+	%{?with_theora:--enable-libtheora} \
 	--enable-libtwolame \
 	--enable-libv4l2 \
 	%{?with_vidstab:--enable-libvidstab} \
 	%{?with_vmaf:--enable-libvmaf} \
-	--enable-libvo-amrwbenc \
+	%{?with_voamrwbenc:--enable-libvo-amrwbenc} \
 	--enable-libvorbis \
 	%{?with_vpx:--enable-libvpx} \
 	%{?with_wavpack:--enable-libwavpack} \
 	%{?with_webp:--enable-libwebp} \
 	%{?with_x264:--enable-libx264} \
 	%{?with_x265:--enable-libx265} \
-	--enable-libxavs \
+	%{?with_avs:--enable-libxavs} \
 	%{?with_avs2:--enable-libxavs2} \
 	--enable-libxcb \
-	--enable-libxvid \
+	%{?with_xvid:--enable-libxvid} \
 	%{?with_zimg:--enable-libzimg} \
 	%{?with_zmq:--enable-libzmq} \
 	%{?with_zvbi:--enable-libzvbi} \
