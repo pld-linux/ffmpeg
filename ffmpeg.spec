@@ -115,6 +115,7 @@ Group:		Applications/Multimedia
 Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.xz
 # Source0-md5:	3adcf4f122fcc54624f5d509107d5625
 Patch0:		%{name}-omx-libnames.patch
+Patch1:		%{name}-atadenoise.patch
 URL:		http://www.ffmpeg.org/
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.9.5}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
@@ -490,6 +491,7 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 %prep
 %setup -q
 %patch0 -p1
+%patch1 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
