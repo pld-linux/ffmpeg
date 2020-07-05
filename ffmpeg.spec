@@ -1,6 +1,7 @@
 # TODO:
+# - rav1e >= 0.1.0
 # - libtensorflow [-ltensorflow tensorflow/c/c_api.h]
-# - AMF >= 1.4.4.1 (available at https://github.com/GPUOpen-LibrariesAndSDKs/AMF, where is original source?)
+# - AMF >= 1.4.9.0 (available at https://github.com/GPUOpen-LibrariesAndSDKs/AMF, where is original source?)
 #
 # How to deal with ffmpeg/opencv/chromaprint checken-egg problem:
 #	1. make-request -r --with bootstrap ffmpeg.spec
@@ -29,6 +30,7 @@
 %bcond_without	flite		# flite voice synthesis support
 %bcond_without	frei0r		# frei0r video filtering
 %bcond_without	fribidi		# fribidi support
+%bcond_without	glslang		# GLSL->SPIRV compilation via libglslang
 %bcond_without	gme		# Game Music Emu support
 %bcond_without	gsm		# GSM de/encoding via libgsm
 %bcond_without	iec61883	# ec61883 via libiec61883
@@ -54,6 +56,7 @@
 %bcond_without	openmpt		# OpenMPT module decoder
 %bcond_with	pocketsphinx	# asr filter using PocketSphinx
 %bcond_without	pulseaudio	# PulseAudio input support
+%bcond_without	rabbitmq	# RabbitMQ support
 %bcond_with	rkmpp		# Rockchip Media Process Platform code [implies libdrm]
 %bcond_without	rubberband	# rubberband filter
 %bcond_without	shine		# shine fixed-point MP3 encoder
@@ -72,6 +75,7 @@
 %bcond_without	vidstab		# vid.stab video stabilization support
 %bcond_without	voamrwbenc	# MR-WB encoding via libvo-amrwbenc
 %bcond_without	vpx		# VP8, a high-quality video codec
+%bcond_without	vulkan		# Vulkan code
 %bcond_without	wavpack		# wavpack encoding support
 %bcond_without	webp		# WebP encoding support
 %bcond_without	xvid		# vid encoding via xvidcore
@@ -125,13 +129,14 @@ URL:		http://www.ffmpeg.org/
 %{?with_omx:BuildRequires:	OpenMAX-IL-devel}
 BuildRequires:	SDL2-devel >= 2.0.1
 BuildRequires:	SDL2-devel < 2.1.0
+%{?with_vulkan:BuildRequires:	Vulkan-Loader-devel >= 1.1.97}
 BuildRequires:	alsa-lib-devel
 BuildRequires:	aom-devel >= 1.0.0
 %{?with_aribb24:BuildRequires:	aribb24-devel}
 BuildRequires:	bzip2-devel
 BuildRequires:	celt-devel >= 0.11.0
 %{?with_codec2:BuildRequires:	codec2-devel}
-%{?with_dav1d:BuildRequires:	dav1d-devel >= 0.2.1}
+%{?with_dav1d:BuildRequires:	dav1d-devel >= 0.4.0}
 %{?with_avs2:BuildRequires:	davs2-devel >= 1.6}
 %{?with_fdk_aac:BuildRequires:	fdk-aac-devel}
 %{?with_flite:BuildRequires:	flite-devel >= 1.4}
@@ -144,6 +149,7 @@ BuildRequires:	freetype-devel
 # require version with altivec support fixed
 BuildRequires:	gcc >= 5:3.3.2-3
 %endif
+%{?with_glslang:BuildRequires:	glslang-devel}
 BuildRequires:	gmp-devel
 BuildRequires:	gnutls-devel
 BuildRequires:	jack-audio-connection-kit-devel
@@ -182,26 +188,26 @@ BuildRequires:	libva-devel >= 1.0.3
 BuildRequires:	libva-drm-devel >= 1.0.3
 BuildRequires:	libva-x11-devel >= 1.0.3
 %endif
-BuildRequires:	libvdpau-devel >= 0.2
+BuildRequires:	libvdpau-devel >= 1.3
 BuildRequires:	libvorbis-devel
 %{?with_vpx:BuildRequires:	libvpx-devel >= 1.4.0}
 %{?with_webp:BuildRequires:	libwebp-devel >= 0.4.0}
 # X264_BUILD >= 118
 %{?with_x264:BuildRequires:	libx264-devel >= 0.1.3-1.20111212_2245}
-# X265_BUILD >= 68
-%{?with_x265:BuildRequires:	libx265-devel >= 1.8}
+# X265_BUILD >= 70
+%{?with_x265:BuildRequires:	libx265-devel >= 1.9}
 # libxcb xcb-shm xcb-xfixes xcb-shape
 BuildRequires:	libxcb-devel >= 1.4
 %{?with_libxml2:BuildRequires:	libxml2-devel >= 2}
 %{?with_lv2:BuildRequires:	lilv-devel}
 %{?with_lv2:BuildRequires:	lv2-devel}
-%{?with_mfx:BuildRequires:	mfx_dispatch-devel}
+%{?with_mfx:BuildRequires:	mfx_dispatch-devel >= 1.19}
 %ifarch %{ix86}
 %ifnarch i386 i486
 BuildRequires:	nasm
 %endif
 %endif
-%{?with_ffnvcodec:BuildRequires:	nv-codec-headers >= 9.0.18.0}
+%{?with_ffnvcodec:BuildRequires:	nv-codec-headers >= 9.1.23.1}
 # amrnb,amrwb
 %{?with_amr:BuildRequires:	opencore-amr-devel}
 %{?with_opencv:BuildRequires:	opencv-devel >= 2}
@@ -213,6 +219,7 @@ BuildRequires:	perl-tools-pod
 %{?with_pocketsphinx:BuildRequires:	pocketsphinx-devel > 0.8}
 BuildRequires:	pkgconfig
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
+%{?with_rabbitmq:BuildRequires:	rabbitmq-c-devel >= 0.7.1}
 %{?with_rkmpp:BuildRequires:	rockchip-mpp-devel >= 1.3.7}
 BuildRequires:	rpmbuild(macros) >= 1.470
 %{?with_rubberband:BuildRequires:	rubberband-devel >= 1.8.1}
@@ -220,6 +227,7 @@ BuildRequires:	rpmbuild(macros) >= 1.470
 %{?with_snappy:BuildRequires:	snappy-devel}
 %{?with_soxr:BuildRequires:	soxr-devel}
 BuildRequires:	speex-devel >= 1:1.2-rc1
+%{?with_glslang:BuildRequires:	spirv-tools-devel}
 %{?with_srt:BuildRequires:	srt-devel >= 1.3}
 %{?with_tesseract:BuildRequires:	tesseract-devel}
 %{?with_doc:BuildRequires:	tetex}
@@ -240,7 +248,7 @@ BuildRequires:	xorg-lib-libXv-devel
 %{?with_xvid:BuildRequires:	xvid-devel >= 1:1.1.0}
 BuildRequires:	xz-devel
 BuildRequires:	yasm
-%{?with_zmq:BuildRequires:	zeromq-devel}
+%{?with_zmq:BuildRequires:	zeromq-devel >= 4.2.1}
 %{?with_zimg:BuildRequires:	zimg-devel >= 2.7.0}
 BuildRequires:	zlib-devel
 %{?with_zvbi:BuildRequires:	zvbi-devel >= 0.2.28}
@@ -280,9 +288,10 @@ Summary:	ffmpeg libraries
 Summary(pl.UTF-8):	Biblioteki ffmpeg
 Group:		Libraries
 Requires:	SDL2 >= 2.0.1
+%{?with_vulkan:Requires:	Vulkan-Loader >= 1.1.97}
 Requires:	aom >= 1.0.0
 Requires:	celt >= 0.11.0
-%{?with_dav1d:Requires:	dav1d >= 0.2.1}
+%{?with_dav1d:Requires:	dav1d >= 0.4.0}
 %{?with_avs2:Requires:	davs2 >= 1.6}
 %{?with_flite:Requires:	flite >= 1.4}
 %if "%(rpm -q --qf '%{V}' gnutls-devel)" >= "3.0.20"
@@ -298,15 +307,17 @@ Requires:	libva >= 1.0.3
 Requires:	libva-drm >= 1.0.3
 Requires:	libva-x11 >= 1.0.3
 %endif
-Requires:	libvdpau >= 0.2
+Requires:	libvdpau >= 1.3
 %{?with_vpx:Requires:	libvpx >= 1.4.0}
 %{?with_webp:Requires:	libwebp >= 0.4.0}
 %{?with_x264:Requires:	libx264 >= 0.1.3-1.20111212_2245}
-%{?with_x265:Requires:	libx265 >= 1.8}
+%{?with_x265:Requires:	libx265 >= 1.9}
 Requires:	libxcb >= 1.4
 Requires:	lame-libs >= 3.98.3
+%{?with_mfx:Requires:	mfx_dispatch >= 1.19}
 %{?with_openh264:Requires:	openh264 >= 1.3}
 Requires:	openjpeg2 >= 2.1
+%{?with_rabbitmq:Requires:	rabbitmq-c >= 0.7.1}
 %{?with_rkmpp:Requires:	rockchip-mpp >= 1.3.7}
 %{?with_rubberband:Requires:	rubberband-libs >= 1.8.1}
 %{?with_shine:Requires:	shine >= 3.0.0}
@@ -318,6 +329,7 @@ Requires:	twolame-libs >= 0.3.10
 %{?with_vmaf:Requires:	vmaf-libs >= 1.3.9}
 %{?with_avs2:Requires:	xavs2 >= 1.3}
 %{?with_xvid:Requires:	xvid >= 1:1.1.0}
+%{?with_zmq:Requires:	zeromq >= 4.2.1}
 %{?with_zimg:Requires:	zimg >= 2.7.0}
 %{?with_zvbi:Requires:	zvbi >= 0.2.28}
 
@@ -346,6 +358,7 @@ Requires:	%{name}-libs = %{version}-%{release}
 %{?with_openal:Requires:	OpenAL-devel >= 1.1}
 %{?with_opencl:Requires:	OpenCL-devel >= 1.2}
 %{?with_opengl:Requires:	OpenGL-devel}
+%{?with_vulkan:Requires:	Vulkan-Loader-devel >= 1.1.97}
 Requires:	SDL2-devel >= 2.0.1
 Requires:	alsa-lib-devel
 Requires:	aom-devel >= 1.0.0
@@ -354,13 +367,14 @@ Requires:	aom-devel >= 1.0.0
 Requires:	bzip2-devel
 Requires:	celt-devel >= 0.11.0
 %{?with_codec2:Requires:	codec2-devel}
-%{?with_dav1d:Requires:	dav1d-devel >= 0.2.1}
+%{?with_dav1d:Requires:	dav1d-devel >= 0.4.0}
 %{?with_fdk_aac:Requires:	fdk-aac-devel}
 %{?with_flite:Requires:	flite-devel >= 1.4}
 Requires:	fontconfig-devel
 Requires:	freetype-devel
 %{?with_fribidi:Requires:	fribidi-devel}
 %{?with_gme:Requires:	game-music-emu-devel}
+%{?with_glslang:Requires:	glslang-devel}
 Requires:	gnutls-devel
 Requires:	jack-audio-connection-kit-devel
 %{?with_kvazaar:Requires:	kvazaar-devel >= 0.8.1}
@@ -395,29 +409,31 @@ Requires:	libv4l-devel
 %{?with_va:Requires:	libva-devel >= 1.0.3}
 %{?with_va:Requires:	libva-drm-devel >= 1.0.3}
 %{?with_va:Requires:	libva-x11-devel >= 1.0.3}
-Requires:	libvdpau-devel >= 0.2
+Requires:	libvdpau-devel >= 1.3
 Requires:	libvorbis-devel
 %{?with_vpx:Requires:	libvpx-devel >= 1.4.0}
 %{?with_webp:Requires:	libwebp-devel >= 0.4.0}
 %{?with_x264:Requires:	libx264-devel >= 0.1.3-1.20110625_2245}
-%{?with_x265:Requires:	libx265-devel >= 1.8}
+%{?with_x265:Requires:	libx265-devel >= 1.9}
 # libxcb xcb-shm xcb-xfixes xcb-shape
 Requires:	libxcb-devel >= 1.4
 %{?with_libxml2:Requires:	libxml2-devel >= 2}
 %{?with_lv2:Requires:	lilv-devel}
-%{?with_mfx:Requires:	mfx_dispatch-devel}
+%{?with_mfx:Requires:	mfx_dispatch-devel >= 1.19}
 %{?with_amr:Requires:	opencore-amr-devel}
 %{?with_opencv:Requires:	opencv-devel >= 2}
 %{?with_openh264:Requires:	openh264-devel >= 1.3}
 Requires:	openjpeg2-devel >= 2.1
 Requires:	opus-devel
 %{?with_pulseaudio:Requires:	pulseaudio-devel}
+%{?with_rabbitmq:Requires:	rabbitmq-c-devel >= 0.7.1}
 %{?with_rkmpp:Requires:	rockchip-mpp-devel >= 1.3.7}
 %{?with_rubberband:Requires:	rubberband-devel >= 1.8.1}
 %{?with_shine:Requires:	shine-devel >= 3.0.0}
 %{?with_snappy:Requires:	snappy-devel}
 %{?with_soxr:Requires:	soxr-devel}
 Requires:	speex-devel >= 1:1.2-rc1
+%{?with_glslang:Requires:	spirv-tools-devel}
 %{?with_srt:Requires:	srt-devel >= 1.3}
 %{?with_tesseract:Requires:	tesseract-devel}
 Requires:	twolame-devel >= 0.3.10
@@ -434,7 +450,7 @@ Requires:	xorg-lib-libXext-devel
 Requires:	xorg-lib-libXv-devel
 %{?with_xvid:Requires:	xvid-devel >= 1:1.1.0}
 Requires:	xz-devel
-%{?with_zmq:Requires:	zeromq-devel}
+%{?with_zmq:Requires:	zeromq-devel >= 4.2.1}
 %{?with_zimg:Requires:	zimg-devel >= 2.7.0}
 Requires:	zlib-devel
 %{?with_zvbi:Requires:	zvbi-devel >= 0.2.28}
@@ -601,6 +617,7 @@ EOF
 	--enable-libfontconfig \
 	--enable-libfreetype \
 	%{?with_fribidi:--enable-libfribidi} \
+	%{?with_glslang:--enable-libglslang} \
 	%{?with_gme:--enable-libgme} \
 	%{?with_gsm:--enable-libgsm} \
 	%{?with_iec61883:--enable-libiec61883} \
@@ -621,16 +638,16 @@ EOF
 	%{?with_openmpt:--enable-libopenmpt} \
 	--enable-libopus \
 	%{?with_pulseaudio:--enable-libpulse} \
+	%{?with_rabbitmq:--enable-librabbitmq} \
 	%{?with_librsvg:--enable-librsvg} \
 	--enable-librtmp \
-	%{?with_srt:--enable-libsrt} \
-	%{?with_libxml2:--enable-libxml2} \
 	%{?with_rubberband:--enable-librubberband} \
 	%{?with_shine:--enable-libshine} \
 	%{?with_smb:--enable-libsmbclient} \
 	%{?with_snappy:--enable-libsnappy} \
 	%{?with_soxr:--enable-libsoxr} \
 	--enable-libspeex \
+	%{?with_srt:--enable-libsrt} \
 	%{?with_ssh:--enable-libssh} \
 	%{?with_tesseract:--enable-libtesseract} \
 	%{?with_theora:--enable-libtheora} \
@@ -648,6 +665,7 @@ EOF
 	%{?with_avs:--enable-libxavs} \
 	%{?with_avs2:--enable-libxavs2} \
 	--enable-libxcb \
+	%{?with_libxml2:--enable-libxml2} \
 	%{?with_xvid:--enable-libxvid} \
 	%{?with_zimg:--enable-libzimg} \
 	%{?with_zmq:--enable-libzmq} \
@@ -665,6 +683,7 @@ EOF
 	--enable-swscale \
 	%{!?with_va:--disable-vaapi} \
 	%{?with_vapoursynth:--enable-vapoursynth} \
+	%{?with_vulkan:--enable-vulkan} \
 %ifnarch %{ix86} %{x8664}
 	--disable-mmx \
 %endif
