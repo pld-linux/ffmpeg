@@ -1,5 +1,4 @@
 # TODO:
-# - rav1e >= 0.1.0
 # - libtensorflow [-ltensorflow tensorflow/c/c_api.h]
 # - AMF >= 1.4.9.0 (available at https://github.com/GPUOpen-LibrariesAndSDKs/AMF, where is original source?)
 #
@@ -57,6 +56,7 @@
 %bcond_with	pocketsphinx	# asr filter using PocketSphinx
 %bcond_without	pulseaudio	# PulseAudio input support
 %bcond_without	rabbitmq	# RabbitMQ support
+%bcond_with	rav1e		# AV1 encoding using rav1e
 %bcond_with	rkmpp		# Rockchip Media Process Platform code [implies libdrm]
 %bcond_without	rubberband	# rubberband filter
 %bcond_without	shine		# shine fixed-point MP3 encoder
@@ -95,6 +95,9 @@
 
 %ifnarch %{ix86} %{x8664}
 %undefine	with_ffnvcodec
+%endif
+%ifnarch %{ix86} %{x8664} aarch64
+%undefine	with_rav1e
 %endif
 %ifnarch %{ix86} %{x8664} %{arm}
 %undefine	with_x265
@@ -220,6 +223,7 @@ BuildRequires:	perl-tools-pod
 BuildRequires:	pkgconfig
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
 %{?with_rabbitmq:BuildRequires:	rabbitmq-c-devel >= 0.7.1}
+%{?with_rav1e:BuildRequires:	rav1e-devel >= 0.1.0}
 %{?with_rkmpp:BuildRequires:	rockchip-mpp-devel >= 1.3.7}
 BuildRequires:	rpmbuild(macros) >= 1.470
 %{?with_rubberband:BuildRequires:	rubberband-devel >= 1.8.1}
@@ -318,6 +322,7 @@ Requires:	lame-libs >= 3.98.3
 %{?with_openh264:Requires:	openh264 >= 1.3}
 Requires:	openjpeg2 >= 2.1
 %{?with_rabbitmq:Requires:	rabbitmq-c >= 0.7.1}
+%{?with_rav1e:Requires:	rav1e-libs >= 0.1.0}
 %{?with_rkmpp:Requires:	rockchip-mpp >= 1.3.7}
 %{?with_rubberband:Requires:	rubberband-libs >= 1.8.1}
 %{?with_shine:Requires:	shine >= 3.0.0}
@@ -427,6 +432,7 @@ Requires:	openjpeg2-devel >= 2.1
 Requires:	opus-devel
 %{?with_pulseaudio:Requires:	pulseaudio-devel}
 %{?with_rabbitmq:Requires:	rabbitmq-c-devel >= 0.7.1}
+%{?with_rav1e:Requires:	rav1e-devel >= 0.1.0}
 %{?with_rkmpp:Requires:	rockchip-mpp-devel >= 1.3.7}
 %{?with_rubberband:Requires:	rubberband-devel >= 1.8.1}
 %{?with_shine:Requires:	shine-devel >= 3.0.0}
@@ -639,6 +645,7 @@ EOF
 	--enable-libopus \
 	%{?with_pulseaudio:--enable-libpulse} \
 	%{?with_rabbitmq:--enable-librabbitmq} \
+	%{?with_rav1e:--enable-librav1e} \
 	%{?with_librsvg:--enable-librsvg} \
 	--enable-librtmp \
 	%{?with_rubberband:--enable-librubberband} \
