@@ -112,7 +112,7 @@ Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
 Version:	4.3.1
-Release:	1.1
+Release:	2
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
 # v3 (allows *GPLv3 or Apache-licensed libs): gmp lensfun opencore-amr vmaf vo-*enc rkmpp
@@ -226,7 +226,7 @@ BuildRequires:	pkgconfig
 %{?with_rabbitmq:BuildRequires:	rabbitmq-c-devel >= 0.7.1}
 %{?with_rav1e:BuildRequires:	rav1e-devel >= 0.1.0}
 %{?with_rkmpp:BuildRequires:	rockchip-mpp-devel >= 1.3.7}
-BuildRequires:	rpmbuild(macros) >= 1.470
+BuildRequires:	rpmbuild(macros) >= 1.752
 %{?with_rubberband:BuildRequires:	rubberband-devel >= 1.8.1}
 %{?with_shine:BuildRequires:	shine-devel >= 3.0.0}
 %{?with_snappy:BuildRequires:	snappy-devel}
@@ -501,9 +501,7 @@ testowania różnych API FFmpeg.
 Summary:	FFmpeg documentation in HTML format
 Summary(pl.UTF-8):	Dokumentacja pakietu FFmpeg w formacie HTML
 Group:		Documentation
-%if "%{_rpmversion}" >= "5"
-BuildArch:	noarch
-%endif
+%{?noarchpackage}
 
 %description doc
 FFmpeg documentation in HTML format.
