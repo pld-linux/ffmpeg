@@ -119,7 +119,7 @@ Release:	1
 # GPLv3: smbclient
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
-Source0:	http://ffmpeg.org/releases/%{name}-%{version}.tar.xz
+Source0:	https://ffmpeg.org/releases/%{name}-%{version}.tar.xz
 # Source0-md5:	29529337d9b8f794a6142db10b717ec5
 Patch0:		%{name}-omx-libnames.patch
 Patch1:		%{name}-atadenoise.patch
