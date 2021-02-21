@@ -233,6 +233,7 @@ BuildRequires:	rpmbuild(macros) >= 1.752
 BuildRequires:	speex-devel >= 1:1.2-rc1
 %{?with_glslang:BuildRequires:	spirv-tools-devel}
 %{?with_srt:BuildRequires:	srt-devel >= 1.3}
+BuildRequires:	tar >= 1:1.22
 %{?with_tesseract:BuildRequires:	tesseract-devel}
 %{?with_doc:BuildRequires:	tetex}
 %{?with_doc:BuildRequires:	texi2html}
@@ -250,6 +251,7 @@ BuildRequires:	xorg-lib-libX11-devel
 BuildRequires:	xorg-lib-libXext-devel
 BuildRequires:	xorg-lib-libXv-devel
 %{?with_xvid:BuildRequires:	xvid-devel >= 1:1.1.0}
+BuildRequires:	xz
 BuildRequires:	xz-devel
 BuildRequires:	yasm
 %{?with_zmq:BuildRequires:	zeromq-devel >= 4.2.1}
