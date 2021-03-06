@@ -49,7 +49,7 @@
 %bcond_without	omx		# OpenMAX IL support
 %bcond_without	openal		# OpenAL 1.1 capture support
 %bcond_without	opencl		# OpenCL 1.2 code
-%bcond_without	opencv		# OpenCV video filtering
+%bcond_with	opencv		# OpenCV video filtering
 %bcond_without	opengl		# OpenGL rendering support
 %bcond_with	openh264	# OpenH264 H.264 encoder
 %bcond_without	openmpt		# OpenMPT module decoder
