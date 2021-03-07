@@ -502,7 +502,7 @@ testowania różnych API FFmpeg.
 Summary:	FFmpeg documentation in HTML format
 Summary(pl.UTF-8):	Dokumentacja pakietu FFmpeg w formacie HTML
 Group:		Documentation
-%{?noarchpackage}
+BuildArch:	noarch
 
 %description doc
 FFmpeg documentation in HTML format.
