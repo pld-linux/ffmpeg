@@ -49,7 +49,7 @@
 %bcond_without	omx		# OpenMAX IL support
 %bcond_without	openal		# OpenAL 1.1 capture support
 %bcond_without	opencl		# OpenCL 1.2 code
-%bcond_with	opencv		# OpenCV video filtering
+%bcond_without	opencv		# OpenCV video filtering
 %bcond_without	opengl		# OpenGL rendering support
 %bcond_with	openh264	# OpenH264 H.264 encoder
 %bcond_without	openmpt		# OpenMPT module decoder
@@ -123,6 +123,7 @@ Source0:	https://ffmpeg.org/releases/%{name}-%{version}.tar.xz
 # Source0-md5:	29529337d9b8f794a6142db10b717ec5
 Patch0:		%{name}-omx-libnames.patch
 Patch1:		%{name}-atadenoise.patch
+Patch2:		opencv4.patch
 URL:		http://www.ffmpeg.org/
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.9.5}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
@@ -514,6 +515,7 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 %setup -q
 %patch0 -p1
 %patch1 -p1
+%patch2 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
@@ -588,7 +590,8 @@ EOF
 	--libdir=%{_libdir} \
 	--shlibdir=%{_libdir} \
 	--mandir=%{_mandir} \
-	--extra-cflags="-D_GNU_SOURCE=1 %{rpmcppflags} %{rpmcflags}%{?with_decklink: -I/usr/include/decklink}" \
+	--extra-cflags="-D_GNU_SOURCE=1 %{rpmcppflags} %{rpmcflags}%{?with_decklink: -I/usr/include/decklink} -I/usr/include/opencv4" \
+	--extra-cxxflags="-D_GNU_SOURCE=1 %{rpmcppflags} %{rpmcxxflags}%{?with_decklink: -I/usr/include/decklink} -I/usr/include/opencv4" \
 	--extra-ldflags="%{rpmcflags} %{rpmldflags}" \
 	--cc="%{__cc}" \
 	--disable-debug \
