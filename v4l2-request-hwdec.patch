@@ -1,0 +1,1968 @@
+From 5e154b0357829007566930846f880b9f5fb404d9 Mon Sep 17 00:00:00 2001
+From: Jonas Karlman <jonas@kwiboo.se>
+Date: Mon, 3 Dec 2018 23:48:04 +0100
+Subject: [PATCH] avutil: add av_buffer_pool_flush()
+
+Used by V4L2 request API hwaccel
+
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+ libavutil/buffer.c | 13 +++++++++++++
+ libavutil/buffer.h |  5 +++++
+ 2 files changed, 18 insertions(+)
+
+diff --git a/libavutil/buffer.c b/libavutil/buffer.c
+index 38a554208a90..b0fedabc3e7d 100644
+--- a/libavutil/buffer.c
++++ b/libavutil/buffer.c
+@@ -273,6 +273,19 @@ static void buffer_pool_free(AVBufferPool *pool)
+     av_freep(&pool);
+ }
+ 
++void av_buffer_pool_flush(AVBufferPool *pool)
++{
++    ff_mutex_lock(&pool->mutex);
++    while (pool->pool) {
++        BufferPoolEntry *buf = pool->pool;
++        pool->pool = buf->next;
++
++        buf->free(buf->opaque, buf->data);
++        av_freep(&buf);
++    }
++    ff_mutex_unlock(&pool->mutex);
++}
++
+ void av_buffer_pool_uninit(AVBufferPool **ppool)
+ {
+     AVBufferPool *pool;
+diff --git a/libavutil/buffer.h b/libavutil/buffer.h
+index c0f3f6cc9abe..998beec9ac5b 100644
+--- a/libavutil/buffer.h
++++ b/libavutil/buffer.h
+@@ -267,6 +267,11 @@ AVBufferPool *av_buffer_pool_init2(int size, void *opaque,
+                                    AVBufferRef* (*alloc)(void *opaque, int size),
+                                    void (*pool_free)(void *opaque));
+ 
++/**
++ * Free all available buffers in a buffer pool.
++ */
++ void av_buffer_pool_flush(AVBufferPool *pool);
++
+ /**
+  * Mark the pool as being available for freeing. It will actually be freed only
+  * once all the allocated buffers associated with the pool are released. Thus it
+From 01319970d90ffd3c073b054a3d2e4784f6ebea0d Mon Sep 17 00:00:00 2001
+From: Jonas Karlman <jonas@kwiboo.se>
+Date: Sat, 15 Dec 2018 22:32:16 +0100
+Subject: [PATCH] Add common V4L2 request API code
+
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+ configure                 |  12 +
+ libavcodec/Makefile       |   1 +
+ libavcodec/hwconfig.h     |   2 +
+ libavcodec/v4l2_request.c | 984 ++++++++++++++++++++++++++++++++++++++
+ libavcodec/v4l2_request.h |  77 +++
+ 5 files changed, 1076 insertions(+)
+ create mode 100644 libavcodec/v4l2_request.c
+ create mode 100644 libavcodec/v4l2_request.h
+
+diff --git a/configure b/configure
+index 8569a60bf827..9f9909a23696 100755
+--- a/configure
++++ b/configure
+@@ -274,6 +274,7 @@ External library support:
+   --enable-libtls          enable LibreSSL (via libtls), needed for https support
+                            if openssl, gnutls or mbedtls is not used [no]
+   --enable-libtwolame      enable MP2 encoding via libtwolame [no]
++  --enable-libudev         enable libudev [no]
+   --enable-libv4l2         enable libv4l2/v4l-utils [no]
+   --enable-libvidstab      enable video stabilization using vid.stab [no]
+   --enable-libvmaf         enable vmaf filter via libvmaf [no]
+@@ -342,6 +343,7 @@ External library support:
+   --enable-omx-rpi         enable OpenMAX IL code for Raspberry Pi [no]
+   --enable-rkmpp           enable Rockchip Media Process Platform code [no]
+   --disable-v4l2-m2m       disable V4L2 mem2mem code [autodetect]
++  --enable-v4l2-request    enable V4L2 request API code [no]
+   --disable-vaapi          disable Video Acceleration API (mainly Unix/Intel) code [autodetect]
+   --disable-vdpau          disable Nvidia Video Decode and Presentation API for Unix code [autodetect]
+   --disable-videotoolbox   disable VideoToolbox code [autodetect]
+@@ -1807,6 +1809,7 @@ EXTERNAL_LIBRARY_LIST="
+     libtesseract
+     libtheora
+     libtwolame
++    libudev
+     libv4l2
+     libvorbis
+     libvpx
+@@ -1861,6 +1864,7 @@ HWACCEL_LIBRARY_LIST="
+     mmal
+     omx
+     opencl
++    v4l2_request
+     vulkan
+ "
+ 
+@@ -2903,6 +2907,7 @@ d3d11va_deps="dxva_h ID3D11VideoDecoder ID3D11VideoContext"
+ dxva2_deps="dxva2api_h DXVA2_ConfigPictureDecode ole32 user32"
+ ffnvcodec_deps_any="libdl LoadLibrary"
+ nvdec_deps="ffnvcodec"
++v4l2_request_deps="linux_videodev2_h linux_media_h v4l2_timeval_to_ns libdrm libudev"
+ vaapi_x11_deps="xlib"
+ videotoolbox_hwaccel_deps="videotoolbox pthreads"
+ videotoolbox_hwaccel_extralibs="-framework QuartzCore"
+@@ -6376,6 +6381,7 @@ enabled libtls            && require_pkg_config libtls libtls tls.h tls_configur
+ enabled libtwolame        && require libtwolame twolame.h twolame_init -ltwolame &&
+                              { check_lib libtwolame twolame.h twolame_encode_buffer_float32_interleaved -ltwolame ||
+                                die "ERROR: libtwolame must be installed and version must be >= 0.3.10"; }
++enabled libudev           && require_pkg_config libudev libudev libudev.h udev_new
+ enabled libv4l2           && require_pkg_config libv4l2 libv4l2 libv4l2.h v4l2_ioctl
+ enabled libvidstab        && require_pkg_config libvidstab "vidstab >= 0.98" vid.stab/libvidstab.h vsMotionDetectInit
+ enabled libvmaf           && require_pkg_config libvmaf "libvmaf >= 1.3.9" libvmaf.h compute_vmaf
+@@ -6475,6 +6481,10 @@ enabled rkmpp             && { require_pkg_config rkmpp rockchip_mpp  rockchip/r
+                                { enabled libdrm ||
+                                  die "ERROR: rkmpp requires --enable-libdrm"; }
+                              }
++enabled v4l2_request      && { enabled libdrm ||
++                               die "ERROR: v4l2-request requires --enable-libdrm"; } &&
++                             { enabled libudev ||
++                               die "ERROR: v4l2-request requires --enable-libudev"; }
+ enabled vapoursynth       && require_pkg_config vapoursynth "vapoursynth-script >= 42" VSScript.h vsscript_init
+ 
+ 
+@@ -6556,6 +6566,8 @@ if enabled v4l2_m2m; then
+     check_cc vp9_v4l2_m2m linux/videodev2.h "int i = V4L2_PIX_FMT_VP9;"
+ fi
+ 
++check_func_headers "linux/media.h linux/videodev2.h" v4l2_timeval_to_ns
++
+ check_headers sys/videoio.h
+ test_code cc sys/videoio.h "struct v4l2_frmsizeenum vfse; vfse.discrete.width = 0;" && enable_sanitized struct_v4l2_frmivalenum_discrete
+ 
+diff --git a/libavcodec/Makefile b/libavcodec/Makefile
+index 5a6ea59715af..d74220516826 100644
+--- a/libavcodec/Makefile
++++ b/libavcodec/Makefile
+@@ -153,6 +153,7 @@ OBJS-$(CONFIG_VP3DSP)                  += vp3dsp.o
+ OBJS-$(CONFIG_VP56DSP)                 += vp56dsp.o
+ OBJS-$(CONFIG_VP8DSP)                  += vp8dsp.o
+ OBJS-$(CONFIG_V4L2_M2M)                += v4l2_m2m.o v4l2_context.o v4l2_buffers.o v4l2_fmt.o
++OBJS-$(CONFIG_V4L2_REQUEST)            += v4l2_request.o
+ OBJS-$(CONFIG_WMA_FREQS)               += wma_freqs.o
+ OBJS-$(CONFIG_WMV2DSP)                 += wmv2dsp.o
+ 
+diff --git a/libavcodec/hwconfig.h b/libavcodec/hwconfig.h
+index f421dc909f44..ee78d8ab8e89 100644
+--- a/libavcodec/hwconfig.h
++++ b/libavcodec/hwconfig.h
+@@ -80,6 +80,8 @@ typedef struct AVCodecHWConfigInternal {
+     HW_CONFIG_HWACCEL(0, 0, 1, D3D11VA_VLD,  NONE,         ff_ ## codec ## _d3d11va_hwaccel)
+ #define HWACCEL_XVMC(codec) \
+     HW_CONFIG_HWACCEL(0, 0, 1, XVMC,         NONE,         ff_ ## codec ## _xvmc_hwaccel)
++#define HWACCEL_V4L2REQUEST(codec) \
++    HW_CONFIG_HWACCEL(1, 0, 0, DRM_PRIME,    DRM,          ff_ ## codec ## _v4l2request_hwaccel)
+ 
+ #define HW_CONFIG_ENCODER(device, frames, ad_hoc, format, device_type_) \
+     &(const AVCodecHWConfigInternal) { \
+diff --git a/libavcodec/v4l2_request.c b/libavcodec/v4l2_request.c
+new file mode 100644
+index 000000000000..5234b5049b0d
+--- /dev/null
++++ b/libavcodec/v4l2_request.c
+@@ -0,0 +1,984 @@
++/*
++ * This file is part of FFmpeg.
++ *
++ * FFmpeg is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * FFmpeg is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with FFmpeg; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
++ */
++
++#include <drm_fourcc.h>
++#include <linux/media.h>
++#include <sys/mman.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <fcntl.h>
++
++#include <sys/sysmacros.h>
++#include <libudev.h>
++
++#include "decode.h"
++#include "internal.h"
++#include "v4l2_request.h"
++
++uint64_t ff_v4l2_request_get_capture_timestamp(AVFrame *frame)
++{
++    V4L2RequestDescriptor *req = (V4L2RequestDescriptor*)frame->data[0];
++    return req ? v4l2_timeval_to_ns(&req->capture.buffer.timestamp) : 0;
++}
++
++int ff_v4l2_request_reset_frame(AVCodecContext *avctx, AVFrame *frame)
++{
++    V4L2RequestDescriptor *req = (V4L2RequestDescriptor*)frame->data[0];
++    memset(&req->drm, 0, sizeof(AVDRMFrameDescriptor));
++    req->output.used = 0;
++    return 0;
++}
++
++int ff_v4l2_request_append_output_buffer(AVCodecContext *avctx, AVFrame *frame, const uint8_t *data, uint32_t size)
++{
++    V4L2RequestDescriptor *req = (V4L2RequestDescriptor*)frame->data[0];
++    if (req->output.used + size + (AV_INPUT_BUFFER_PADDING_SIZE * 4) <= req->output.size) {
++        memcpy(req->output.addr + req->output.used, data, size);
++        req->output.used += size;
++    } else {
++        av_log(avctx, AV_LOG_ERROR, "%s: output.used=%u output.size=%u size=%u\n", __func__, req->output.used, req->output.size, size);
++    }
++    return 0;
++}
++
++static int v4l2_request_controls(V4L2RequestContext *ctx, int request_fd, unsigned long type, struct v4l2_ext_control *control, int count)
++{
++    struct v4l2_ext_controls controls = {
++        .controls = control,
++        .count = count,
++        .request_fd = request_fd,
++        .which = (request_fd >= 0) ? V4L2_CTRL_WHICH_REQUEST_VAL : 0,
++    };
++
++    if (!control || !count)
++        return 0;
++
++    return ioctl(ctx->video_fd, type, &controls);
++}
++
++static int v4l2_request_set_controls(V4L2RequestContext *ctx, int request_fd, struct v4l2_ext_control *control, int count)
++{
++    return v4l2_request_controls(ctx, request_fd, VIDIOC_S_EXT_CTRLS, control, count);
++}
++
++int ff_v4l2_request_set_controls(AVCodecContext *avctx, struct v4l2_ext_control *control, int count)
++{
++    V4L2RequestContext *ctx = avctx->internal->hwaccel_priv_data;
++    int ret;
++
++    ret = v4l2_request_controls(ctx, -1, VIDIOC_S_EXT_CTRLS, control, count);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: set controls failed, %s (%d)\n", __func__, strerror(errno), errno);
++        return AVERROR(EINVAL);
++    }
++
++    return ret;
++}
++
++int ff_v4l2_request_get_controls(AVCodecContext *avctx, struct v4l2_ext_control *control, int count)
++{
++    V4L2RequestContext *ctx = avctx->internal->hwaccel_priv_data;
++    int ret;
++
++    ret = v4l2_request_controls(ctx, -1, VIDIOC_G_EXT_CTRLS, control, count);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: get controls failed, %s (%d)\n", __func__, strerror(errno), errno);
++        return AVERROR(EINVAL);
++    }
++
++    return ret;
++}
++
++int ff_v4l2_request_query_control(AVCodecContext *avctx, struct v4l2_query_ext_ctrl *control)
++{
++    int ret;
++    V4L2RequestContext *ctx = avctx->internal->hwaccel_priv_data;
++
++    ret = ioctl(ctx->video_fd, VIDIOC_QUERY_EXT_CTRL, control);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: query control failed, %s (%d)\n", __func__, strerror(errno), errno);
++        return AVERROR(EINVAL);
++    }
++
++    return 0;
++}
++
++int ff_v4l2_request_query_control_default_value(AVCodecContext *avctx, uint32_t id)
++{
++    int ret;
++    V4L2RequestContext *ctx = avctx->internal->hwaccel_priv_data;
++    struct v4l2_queryctrl control = {
++        .id = id,
++    };
++
++    ret = ioctl(ctx->video_fd, VIDIOC_QUERYCTRL, &control);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: query control failed, %s (%d)\n", __func__, strerror(errno), errno);
++        return AVERROR(EINVAL);
++    }
++
++    return control.default_value;
++}
++
++static int v4l2_request_queue_buffer(V4L2RequestContext *ctx, int request_fd, V4L2RequestBuffer *buf, uint32_t flags)
++{
++    struct v4l2_plane planes[1] = {};
++    struct v4l2_buffer buffer = {
++        .type = buf->buffer.type,
++        .memory = buf->buffer.memory,
++        .index = buf->index,
++        .timestamp.tv_usec = ctx->timestamp,
++        .bytesused = buf->used,
++        .request_fd = request_fd,
++        .flags = ((request_fd >= 0) ? V4L2_BUF_FLAG_REQUEST_FD : 0) | flags,
++    };
++
++    buf->buffer.timestamp = buffer.timestamp;
++
++    if (V4L2_TYPE_IS_MULTIPLANAR(buf->buffer.type)) {
++        planes[0].bytesused = buf->used;
++        buffer.bytesused = 0;
++        buffer.length = 1;
++        buffer.m.planes = planes;
++    }
++
++    return ioctl(ctx->video_fd, VIDIOC_QBUF, &buffer);
++}
++
++static int v4l2_request_dequeue_buffer(V4L2RequestContext *ctx, V4L2RequestBuffer *buf)
++{
++    int ret;
++    struct v4l2_plane planes[1] = {};
++    struct v4l2_buffer buffer = {
++        .type = buf->buffer.type,
++        .memory = buf->buffer.memory,
++        .index = buf->index,
++    };
++
++    if (V4L2_TYPE_IS_MULTIPLANAR(buf->buffer.type)) {
++        buffer.length = 1;
++        buffer.m.planes = planes;
++    }
++
++    ret = ioctl(ctx->video_fd, VIDIOC_DQBUF, &buffer);
++    if (ret < 0)
++        return ret;
++
++    buf->buffer.timestamp = buffer.timestamp;
++    return 0;
++}
++
++const uint32_t v4l2_request_capture_pixelformats[] = {
++    V4L2_PIX_FMT_NV12,
++#ifdef DRM_FORMAT_MOD_ALLWINNER_TILED
++    V4L2_PIX_FMT_SUNXI_TILED_NV12,
++#endif
++};
++
++static int v4l2_request_set_drm_descriptor(V4L2RequestDescriptor *req, struct v4l2_format *format)
++{
++    AVDRMFrameDescriptor *desc = &req->drm;
++    AVDRMLayerDescriptor *layer = &desc->layers[0];
++    uint32_t pixelformat = V4L2_TYPE_IS_MULTIPLANAR(format->type) ? format->fmt.pix_mp.pixelformat : format->fmt.pix.pixelformat;
++
++    switch (pixelformat) {
++    case V4L2_PIX_FMT_NV12:
++        layer->format = DRM_FORMAT_NV12;
++        desc->objects[0].format_modifier = DRM_FORMAT_MOD_LINEAR;
++        break;
++#ifdef DRM_FORMAT_MOD_ALLWINNER_TILED
++    case V4L2_PIX_FMT_SUNXI_TILED_NV12:
++        layer->format = DRM_FORMAT_NV12;
++        desc->objects[0].format_modifier = DRM_FORMAT_MOD_ALLWINNER_TILED;
++        break;
++#endif
++    default:
++        return -1;
++    }
++
++    desc->nb_objects = 1;
++    desc->objects[0].fd = req->capture.fd;
++    desc->objects[0].size = req->capture.size;
++
++    desc->nb_layers = 1;
++    layer->nb_planes = 2;
++
++    layer->planes[0].object_index = 0;
++    layer->planes[0].offset = 0;
++    layer->planes[0].pitch = V4L2_TYPE_IS_MULTIPLANAR(format->type) ? format->fmt.pix_mp.plane_fmt[0].bytesperline : format->fmt.pix.bytesperline;
++
++    layer->planes[1].object_index = 0;
++    layer->planes[1].offset = layer->planes[0].pitch * (V4L2_TYPE_IS_MULTIPLANAR(format->type) ? format->fmt.pix_mp.height : format->fmt.pix.height);
++    layer->planes[1].pitch = layer->planes[0].pitch;
++
++    return 0;
++}
++
++static int v4l2_request_queue_decode(AVCodecContext *avctx, AVFrame *frame, struct v4l2_ext_control *control, int count, int first_slice, int last_slice)
++{
++    V4L2RequestContext *ctx = avctx->internal->hwaccel_priv_data;
++    V4L2RequestDescriptor *req = (V4L2RequestDescriptor*)frame->data[0];
++    struct timeval tv = { 2, 0 };
++    fd_set except_fds;
++    int ret;
++
++    av_log(avctx, AV_LOG_DEBUG, "%s: avctx=%p used=%u controls=%d index=%d fd=%d request_fd=%d first_slice=%d last_slice=%d\n", __func__, avctx, req->output.used, count, req->capture.index, req->capture.fd, req->request_fd, first_slice, last_slice);
++
++    if (first_slice)
++        ctx->timestamp++;
++
++    ret = v4l2_request_set_controls(ctx, req->request_fd, control, count);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: set controls failed for request %d, %s (%d)\n", __func__, req->request_fd, strerror(errno), errno);
++        return -1;
++    }
++
++    memset(req->output.addr + req->output.used, 0, AV_INPUT_BUFFER_PADDING_SIZE * 4);
++
++    ret = v4l2_request_queue_buffer(ctx, req->request_fd, &req->output, last_slice ? 0 : V4L2_BUF_FLAG_M2M_HOLD_CAPTURE_BUF);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: queue output buffer %d failed for request %d, %s (%d)\n", __func__, req->output.index, req->request_fd, strerror(errno), errno);
++        return -1;
++    }
++
++    if (first_slice) {
++        ret = v4l2_request_queue_buffer(ctx, -1, &req->capture, 0);
++        if (ret < 0) {
++            av_log(avctx, AV_LOG_ERROR, "%s: queue capture buffer %d failed for request %d, %s (%d)\n", __func__, req->capture.index, req->request_fd, strerror(errno), errno);
++            return -1;
++        }
++    }
++
++    // NOTE: do we need to dequeue when request fails/timeout?
++
++    // 4. queue request and wait
++    ret = ioctl(req->request_fd, MEDIA_REQUEST_IOC_QUEUE, NULL);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: queue request %d failed, %s (%d)\n", __func__, req->request_fd, strerror(errno), errno);
++        goto fail;
++    }
++
++    FD_ZERO(&except_fds);
++    FD_SET(req->request_fd, &except_fds);
++
++    ret = select(req->request_fd + 1, NULL, NULL, &except_fds, &tv);
++    if (ret == 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: request %d timeout\n", __func__, req->request_fd);
++        goto fail;
++    } else if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: select request %d failed, %s (%d)\n", __func__, req->request_fd, strerror(errno), errno);
++        goto fail;
++    }
++
++    ret = v4l2_request_dequeue_buffer(ctx, &req->output);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: dequeue output buffer %d failed for request %d, %s (%d)\n", __func__, req->output.index, req->request_fd, strerror(errno), errno);
++        return -1;
++    }
++
++    if (last_slice) {
++        ret = v4l2_request_dequeue_buffer(ctx, &req->capture);
++        if (ret < 0) {
++            av_log(avctx, AV_LOG_ERROR, "%s: dequeue capture buffer %d failed for request %d, %s (%d)\n", __func__, req->capture.index, req->request_fd, strerror(errno), errno);
++            return -1;
++        }
++    }
++
++    // TODO: check errors
++    // buffer.flags & V4L2_BUF_FLAG_ERROR
++
++    ret = ioctl(req->request_fd, MEDIA_REQUEST_IOC_REINIT, NULL);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: reinit request %d failed, %s (%d)\n", __func__, req->request_fd, strerror(errno), errno);
++        return -1;
++    }
++
++    if (last_slice)
++        return v4l2_request_set_drm_descriptor(req, &ctx->format);
++
++    return 0;
++
++fail:
++    ret = v4l2_request_dequeue_buffer(ctx, &req->output);
++    if (ret < 0)
++        av_log(avctx, AV_LOG_ERROR, "%s: dequeue output buffer %d failed for request %d, %s (%d)\n", __func__, req->output.index, req->request_fd, strerror(errno), errno);
++
++    ret = v4l2_request_dequeue_buffer(ctx, &req->capture);
++    if (ret < 0)
++        av_log(avctx, AV_LOG_ERROR, "%s: dequeue capture buffer %d failed for request %d, %s (%d)\n", __func__, req->capture.index, req->request_fd, strerror(errno), errno);
++
++    ret = ioctl(req->request_fd, MEDIA_REQUEST_IOC_REINIT, NULL);
++    if (ret < 0)
++        av_log(avctx, AV_LOG_ERROR, "%s: reinit request %d failed, %s (%d)\n", __func__, req->request_fd, strerror(errno), errno);
++
++    return -1;
++}
++
++int ff_v4l2_request_decode_slice(AVCodecContext *avctx, AVFrame *frame, struct v4l2_ext_control *control, int count, int first_slice, int last_slice)
++{
++    V4L2RequestDescriptor *req = (V4L2RequestDescriptor*)frame->data[0];
++
++    // fall back to queue each slice as a full frame
++    if ((req->output.capabilities & V4L2_BUF_CAP_SUPPORTS_M2M_HOLD_CAPTURE_BUF) != V4L2_BUF_CAP_SUPPORTS_M2M_HOLD_CAPTURE_BUF)
++        return v4l2_request_queue_decode(avctx, frame, control, count, 1, 1);
++
++    return v4l2_request_queue_decode(avctx, frame, control, count, first_slice, last_slice);
++}
++
++int ff_v4l2_request_decode_frame(AVCodecContext *avctx, AVFrame *frame, struct v4l2_ext_control *control, int count)
++{
++    return v4l2_request_queue_decode(avctx, frame, control, count, 1, 1);
++}
++
++static int v4l2_request_try_format(AVCodecContext *avctx, enum v4l2_buf_type type, uint32_t pixelformat)
++{
++    V4L2RequestContext *ctx = avctx->internal->hwaccel_priv_data;
++    struct v4l2_fmtdesc fmtdesc = {
++        .index = 0,
++        .type = type,
++    };
++
++    if (V4L2_TYPE_IS_OUTPUT(type)) {
++        struct v4l2_create_buffers buffers = {
++            .count = 0,
++            .memory = V4L2_MEMORY_MMAP,
++            .format.type = type,
++        };
++
++        if (ioctl(ctx->video_fd, VIDIOC_CREATE_BUFS, &buffers) < 0) {
++            av_log(avctx, AV_LOG_ERROR, "%s: create buffers failed for type %u, %s (%d)\n", __func__, type, strerror(errno), errno);
++            return -1;
++        }
++
++        if ((buffers.capabilities & V4L2_BUF_CAP_SUPPORTS_REQUESTS) != V4L2_BUF_CAP_SUPPORTS_REQUESTS) {
++            av_log(avctx, AV_LOG_INFO, "%s: output buffer type do not support requests, capabilities %u\n", __func__, buffers.capabilities);
++            return -1;
++        }
++    }
++
++    while (ioctl(ctx->video_fd, VIDIOC_ENUM_FMT, &fmtdesc) >= 0) {
++        if (fmtdesc.pixelformat == pixelformat)
++            return 0;
++
++        fmtdesc.index++;
++    }
++
++    av_log(avctx, AV_LOG_INFO, "%s: pixelformat %u not supported for type %u\n", __func__, pixelformat, type);
++    return -1;
++}
++
++static int v4l2_request_set_format(AVCodecContext *avctx, enum v4l2_buf_type type, uint32_t pixelformat, uint32_t buffersize)
++{
++    V4L2RequestContext *ctx = avctx->internal->hwaccel_priv_data;
++    struct v4l2_format format = {
++        .type = type,
++    };
++
++    if (V4L2_TYPE_IS_MULTIPLANAR(type)) {
++        format.fmt.pix_mp.width = avctx->coded_width;
++        format.fmt.pix_mp.height = avctx->coded_height;
++        format.fmt.pix_mp.pixelformat = pixelformat;
++        format.fmt.pix_mp.plane_fmt[0].sizeimage = buffersize;
++        format.fmt.pix_mp.num_planes = 1;
++    } else {
++        format.fmt.pix.width = avctx->coded_width;
++        format.fmt.pix.height = avctx->coded_height;
++        format.fmt.pix.pixelformat = pixelformat;
++        format.fmt.pix.sizeimage = buffersize;
++    }
++
++    return ioctl(ctx->video_fd, VIDIOC_S_FMT, &format);
++}
++
++static int v4l2_request_select_capture_format(AVCodecContext *avctx)
++{
++    V4L2RequestContext *ctx = avctx->internal->hwaccel_priv_data;
++    enum v4l2_buf_type type = ctx->format.type;
++
++#if 0
++    struct v4l2_format format = {
++        .type = type,
++    };
++    struct v4l2_fmtdesc fmtdesc = {
++        .index = 0,
++        .type = type,
++    };
++    uint32_t pixelformat;
++    int i;
++
++    if (ioctl(ctx->video_fd, VIDIOC_G_FMT, &format) < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: get capture format failed, %s (%d)\n", __func__, strerror(errno), errno);
++        return -1;
++    }
++
++    pixelformat = V4L2_TYPE_IS_MULTIPLANAR(type) ? format.fmt.pix_mp.pixelformat : format.fmt.pix.pixelformat;
++
++    for (i = 0; i < FF_ARRAY_ELEMS(v4l2_request_capture_pixelformats); i++) {
++        if (pixelformat == v4l2_request_capture_pixelformats[i])
++            return v4l2_request_set_format(avctx, type, pixelformat, 0);
++    }
++
++    while (ioctl(ctx->video_fd, VIDIOC_ENUM_FMT, &fmtdesc) >= 0) {
++        for (i = 0; i < FF_ARRAY_ELEMS(v4l2_request_capture_pixelformats); i++) {
++            if (fmtdesc.pixelformat == v4l2_request_capture_pixelformats[i])
++                return v4l2_request_set_format(avctx, type, fmtdesc.pixelformat, 0);
++        }
++
++        fmtdesc.index++;
++    }
++#else
++    for (int i = 0; i < FF_ARRAY_ELEMS(v4l2_request_capture_pixelformats); i++) {
++        uint32_t pixelformat = v4l2_request_capture_pixelformats[i];
++        if (!v4l2_request_try_format(avctx, type, pixelformat))
++            return v4l2_request_set_format(avctx, type, pixelformat, 0);
++    }
++#endif
++
++    return -1;
++}
++
++static int v4l2_request_probe_video_device(struct udev_device *device, AVCodecContext *avctx, uint32_t pixelformat, uint32_t buffersize, struct v4l2_ext_control *control, int count)
++{
++    V4L2RequestContext *ctx = avctx->internal->hwaccel_priv_data;
++    int ret = AVERROR(EINVAL);
++    struct v4l2_capability capability = {0};
++    unsigned int capabilities = 0;
++
++    const char *path = udev_device_get_devnode(device);
++    if (!path) {
++        av_log(avctx, AV_LOG_ERROR, "%s: get video device devnode failed\n", __func__);
++        ret = AVERROR(EINVAL);
++        goto fail;
++    }
++
++    ctx->video_fd = open(path, O_RDWR | O_NONBLOCK, 0);
++    if (ctx->video_fd < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: opening %s failed, %s (%d)\n", __func__, path, strerror(errno), errno);
++        ret = AVERROR(EINVAL);
++        goto fail;
++    }
++
++    ret = ioctl(ctx->video_fd, VIDIOC_QUERYCAP, &capability);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: get video capability failed, %s (%d)\n", __func__, strerror(errno), errno);
++        ret = AVERROR(EINVAL);
++        goto fail;
++    }
++
++    if (capability.capabilities & V4L2_CAP_DEVICE_CAPS)
++        capabilities = capability.device_caps;
++    else
++        capabilities = capability.capabilities;
++
++    av_log(avctx, AV_LOG_DEBUG, "%s: avctx=%p ctx=%p path=%s capabilities=%u\n", __func__, avctx, ctx, path, capabilities);
++
++    if ((capabilities & V4L2_CAP_STREAMING) != V4L2_CAP_STREAMING) {
++        av_log(avctx, AV_LOG_ERROR, "%s: missing required streaming capability\n", __func__);
++        ret = AVERROR(EINVAL);
++        goto fail;
++    }
++
++    if ((capabilities & V4L2_CAP_VIDEO_M2M_MPLANE) == V4L2_CAP_VIDEO_M2M_MPLANE) {
++        ctx->output_type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
++        ctx->format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
++    } else if ((capabilities & V4L2_CAP_VIDEO_M2M) == V4L2_CAP_VIDEO_M2M) {
++        ctx->output_type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
++        ctx->format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
++    } else {
++        av_log(avctx, AV_LOG_ERROR, "%s: missing required mem2mem capability\n", __func__);
++        ret = AVERROR(EINVAL);
++        goto fail;
++    }
++
++    ret = v4l2_request_try_format(avctx, ctx->output_type, pixelformat);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_WARNING, "%s: try output format failed\n", __func__);
++        ret = AVERROR(EINVAL);
++        goto fail;
++    }
++
++    ret = v4l2_request_set_format(avctx, ctx->output_type, pixelformat, buffersize);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: set output format failed, %s (%d)\n", __func__, strerror(errno), errno);
++        ret = AVERROR(EINVAL);
++        goto fail;
++    }
++
++    ret = v4l2_request_set_controls(ctx, -1, control, count);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: set controls failed, %s (%d)\n", __func__, strerror(errno), errno);
++        ret = AVERROR(EINVAL);
++        goto fail;
++    }
++
++    ret = v4l2_request_select_capture_format(avctx);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_WARNING, "%s: select capture format failed\n", __func__);
++        ret = AVERROR(EINVAL);
++        goto fail;
++    }
++
++    return 0;
++
++fail:
++    if (ctx->video_fd >= 0) {
++        close(ctx->video_fd);
++        ctx->video_fd = -1;
++    }
++    return ret;
++}
++
++static int v4l2_request_init_context(AVCodecContext *avctx)
++{
++    V4L2RequestContext *ctx = avctx->internal->hwaccel_priv_data;
++    int ret;
++
++    ret = ioctl(ctx->video_fd, VIDIOC_G_FMT, &ctx->format);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: get capture format failed, %s (%d)\n", __func__, strerror(errno), errno);
++        ret = AVERROR(EINVAL);
++        goto fail;
++    }
++
++    if (V4L2_TYPE_IS_MULTIPLANAR(ctx->format.type)) {
++        av_log(avctx, AV_LOG_DEBUG, "%s: pixelformat=%d width=%u height=%u bytesperline=%u sizeimage=%u num_planes=%u\n", __func__, ctx->format.fmt.pix_mp.pixelformat, ctx->format.fmt.pix_mp.width, ctx->format.fmt.pix_mp.height, ctx->format.fmt.pix_mp.plane_fmt[0].bytesperline, ctx->format.fmt.pix_mp.plane_fmt[0].sizeimage, ctx->format.fmt.pix_mp.num_planes);
++    } else {
++        av_log(avctx, AV_LOG_DEBUG, "%s: pixelformat=%d width=%u height=%u bytesperline=%u sizeimage=%u\n", __func__, ctx->format.fmt.pix.pixelformat, ctx->format.fmt.pix.width, ctx->format.fmt.pix.height, ctx->format.fmt.pix.bytesperline, ctx->format.fmt.pix.sizeimage);
++    }
++
++    ret = ff_decode_get_hw_frames_ctx(avctx, AV_HWDEVICE_TYPE_DRM);
++    if (ret < 0)
++        goto fail;
++
++    ret = ioctl(ctx->video_fd, VIDIOC_STREAMON, &ctx->output_type);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: output stream on failed, %s (%d)\n", __func__, strerror(errno), errno);
++        ret = AVERROR(EINVAL);
++        goto fail;
++    }
++
++    ret = ioctl(ctx->video_fd, VIDIOC_STREAMON, &ctx->format.type);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: capture stream on failed, %s (%d)\n", __func__, strerror(errno), errno);
++        ret = AVERROR(EINVAL);
++        goto fail;
++    }
++
++    return 0;
++
++fail:
++    ff_v4l2_request_uninit(avctx);
++    return ret;
++}
++
++static int v4l2_request_probe_media_device(struct udev_device *device, AVCodecContext *avctx, uint32_t pixelformat, uint32_t buffersize, struct v4l2_ext_control *control, int count)
++{
++    V4L2RequestContext *ctx = avctx->internal->hwaccel_priv_data;
++    int ret;
++    struct media_device_info device_info = {0};
++    struct media_v2_topology topology = {0};
++    struct media_v2_interface *interfaces = NULL;
++    struct udev *udev = udev_device_get_udev(device);
++    struct udev_device *video_device;
++    dev_t devnum;
++
++    const char *path = udev_device_get_devnode(device);
++    if (!path) {
++        av_log(avctx, AV_LOG_ERROR, "%s: get media device devnode failed\n", __func__);
++        ret = AVERROR(EINVAL);
++        goto fail;
++    }
++
++    ctx->media_fd = open(path, O_RDWR, 0);
++    if (ctx->media_fd < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: opening %s failed, %s (%d)\n", __func__, path, strerror(errno), errno);
++        ret = AVERROR(EINVAL);
++        goto fail;
++    }
++
++    ret = ioctl(ctx->media_fd, MEDIA_IOC_DEVICE_INFO, &device_info);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: get media device info failed, %s (%d)\n", __func__, strerror(errno), errno);
++        ret = AVERROR(EINVAL);
++        goto fail;
++    }
++
++    av_log(avctx, AV_LOG_DEBUG, "%s: avctx=%p ctx=%p path=%s driver=%s\n", __func__, avctx, ctx, path, device_info.driver);
++
++    ret = ioctl(ctx->media_fd, MEDIA_IOC_G_TOPOLOGY, &topology);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: get media topology failed, %s (%d)\n", __func__, strerror(errno), errno);
++        ret = AVERROR(EINVAL);
++        goto fail;
++    }
++
++    if (topology.num_interfaces <= 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: media device has no interfaces\n", __func__);
++        ret = AVERROR(EINVAL);
++        goto fail;
++    }
++
++    interfaces = av_mallocz(topology.num_interfaces * sizeof(struct media_v2_interface));
++    if (!interfaces) {
++        av_log(avctx, AV_LOG_ERROR, "%s: allocating media interface struct failed\n", __func__);
++        ret = AVERROR(ENOMEM);
++        goto fail;
++    }
++
++    topology.ptr_interfaces = (__u64)(uintptr_t)interfaces;
++    ret = ioctl(ctx->media_fd, MEDIA_IOC_G_TOPOLOGY, &topology);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: get media topology failed, %s (%d)\n", __func__, strerror(errno), errno);
++        ret = AVERROR(EINVAL);
++        goto fail;
++    }
++
++    ret = AVERROR(EINVAL);
++    for (int i = 0; i < topology.num_interfaces; i++) {
++        if (interfaces[i].intf_type != MEDIA_INTF_T_V4L_VIDEO)
++            continue;
++
++        devnum = makedev(interfaces[i].devnode.major, interfaces[i].devnode.minor);
++        video_device = udev_device_new_from_devnum(udev, 'c', devnum);
++        if (!video_device) {
++            av_log(avctx, AV_LOG_ERROR, "%s: video_device=%p\n", __func__, video_device);
++            continue;
++        }
++
++        ret = v4l2_request_probe_video_device(video_device, avctx, pixelformat, buffersize, control, count);
++        udev_device_unref(video_device);
++
++        if (!ret)
++            break;
++    }
++
++    av_freep(&interfaces);
++    return ret;
++
++fail:
++    av_freep(&interfaces);
++    if (ctx->media_fd >= 0) {
++        close(ctx->media_fd);
++        ctx->media_fd = -1;
++    }
++    return ret;
++}
++
++int ff_v4l2_request_init(AVCodecContext *avctx, uint32_t pixelformat, uint32_t buffersize, struct v4l2_ext_control *control, int count)
++{
++    V4L2RequestContext *ctx = avctx->internal->hwaccel_priv_data;
++    int ret = AVERROR(EINVAL);
++    struct udev *udev;
++    struct udev_enumerate *enumerate;
++    struct udev_list_entry *devices;
++    struct udev_list_entry *entry;
++    struct udev_device *device;
++
++    av_log(avctx, AV_LOG_DEBUG, "%s: avctx=%p hw_device_ctx=%p hw_frames_ctx=%p\n", __func__, avctx, avctx->hw_device_ctx, avctx->hw_frames_ctx);
++
++    ctx->media_fd = -1;
++    ctx->video_fd = -1;
++    ctx->timestamp = 0;
++
++    udev = udev_new();
++    if (!udev) {
++        av_log(avctx, AV_LOG_ERROR, "%s: allocating udev context failed\n", __func__);
++        ret = AVERROR(ENOMEM);
++        goto fail;
++    }
++
++    enumerate = udev_enumerate_new(udev);
++    if (!enumerate) {
++        av_log(avctx, AV_LOG_ERROR, "%s: allocating udev enumerator failed\n", __func__);
++        ret = AVERROR(ENOMEM);
++        goto fail;
++    }
++
++    udev_enumerate_add_match_subsystem(enumerate, "media");
++    udev_enumerate_scan_devices(enumerate);
++
++    devices = udev_enumerate_get_list_entry(enumerate);
++    udev_list_entry_foreach(entry, devices) {
++        const char *path = udev_list_entry_get_name(entry);
++        if (!path)
++            continue;
++
++        device = udev_device_new_from_syspath(udev, path);
++        if (!device)
++            continue;
++
++        ret = v4l2_request_probe_media_device(device, avctx, pixelformat, buffersize, control, count);
++        udev_device_unref(device);
++
++        if (!ret)
++            break;
++    }
++
++    udev_enumerate_unref(enumerate);
++
++    if (!ret)
++        ret = v4l2_request_init_context(avctx);
++
++fail:
++    udev_unref(udev);
++    return ret;
++}
++
++int ff_v4l2_request_uninit(AVCodecContext *avctx)
++{
++    V4L2RequestContext *ctx = avctx->internal->hwaccel_priv_data;
++    int ret;
++
++    av_log(avctx, AV_LOG_DEBUG, "%s: avctx=%p ctx=%p\n", __func__, avctx, ctx);
++
++    if (ctx->video_fd >= 0) {
++        ret = ioctl(ctx->video_fd, VIDIOC_STREAMOFF, &ctx->output_type);
++        if (ret < 0)
++            av_log(avctx, AV_LOG_ERROR, "%s: output stream off failed, %s (%d)\n", __func__, strerror(errno), errno);
++
++        ret = ioctl(ctx->video_fd, VIDIOC_STREAMOFF, &ctx->format.type);
++        if (ret < 0)
++            av_log(avctx, AV_LOG_ERROR, "%s: capture stream off failed, %s (%d)\n", __func__, strerror(errno), errno);
++    }
++
++    if (avctx->hw_frames_ctx) {
++        AVHWFramesContext *hwfc = (AVHWFramesContext*)avctx->hw_frames_ctx->data;
++        av_buffer_pool_flush(hwfc->pool);
++    }
++
++    if (ctx->video_fd >= 0)
++        close(ctx->video_fd);
++
++    if (ctx->media_fd >= 0)
++        close(ctx->media_fd);
++
++    return 0;
++}
++
++static int v4l2_request_buffer_alloc(AVCodecContext *avctx, V4L2RequestBuffer *buf, enum v4l2_buf_type type)
++{
++    V4L2RequestContext *ctx = avctx->internal->hwaccel_priv_data;
++    int ret;
++    struct v4l2_plane planes[1] = {};
++    struct v4l2_create_buffers buffers = {
++        .count = 1,
++        .memory = V4L2_MEMORY_MMAP,
++        .format.type = type,
++    };
++
++    av_log(avctx, AV_LOG_DEBUG, "%s: avctx=%p buf=%p type=%u\n", __func__, avctx, buf, type);
++
++    ret = ioctl(ctx->video_fd, VIDIOC_G_FMT, &buffers.format);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: get format failed for type %u, %s (%d)\n", __func__, type, strerror(errno), errno);
++        return ret;
++    }
++
++    if (V4L2_TYPE_IS_MULTIPLANAR(buffers.format.type)) {
++        av_log(avctx, AV_LOG_DEBUG, "%s: pixelformat=%d width=%u height=%u bytesperline=%u sizeimage=%u num_planes=%u\n", __func__, buffers.format.fmt.pix_mp.pixelformat, buffers.format.fmt.pix_mp.width, buffers.format.fmt.pix_mp.height, buffers.format.fmt.pix_mp.plane_fmt[0].bytesperline, buffers.format.fmt.pix_mp.plane_fmt[0].sizeimage, buffers.format.fmt.pix_mp.num_planes);
++    } else {
++        av_log(avctx, AV_LOG_DEBUG, "%s: pixelformat=%d width=%u height=%u bytesperline=%u sizeimage=%u\n", __func__, buffers.format.fmt.pix.pixelformat, buffers.format.fmt.pix.width, buffers.format.fmt.pix.height, buffers.format.fmt.pix.bytesperline, buffers.format.fmt.pix.sizeimage);
++    }
++
++    ret = ioctl(ctx->video_fd, VIDIOC_CREATE_BUFS, &buffers);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: create buffers failed for type %u, %s (%d)\n", __func__, type, strerror(errno), errno);
++        return ret;
++    }
++
++    if (V4L2_TYPE_IS_MULTIPLANAR(type)) {
++        buf->width = buffers.format.fmt.pix_mp.width;
++        buf->height = buffers.format.fmt.pix_mp.height;
++        buf->size = buffers.format.fmt.pix_mp.plane_fmt[0].sizeimage;
++        buf->buffer.length = 1;
++        buf->buffer.m.planes = planes;
++    } else {
++        buf->width = buffers.format.fmt.pix.width;
++        buf->height = buffers.format.fmt.pix.height;
++        buf->size = buffers.format.fmt.pix.sizeimage;
++    }
++
++    buf->index = buffers.index;
++    buf->capabilities = buffers.capabilities;
++    buf->used = 0;
++
++    buf->buffer.type = type;
++    buf->buffer.memory = V4L2_MEMORY_MMAP;
++    buf->buffer.index = buf->index;
++
++    ret = ioctl(ctx->video_fd, VIDIOC_QUERYBUF, &buf->buffer);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: query buffer %d failed, %s (%d)\n", __func__, buf->index, strerror(errno), errno);
++        return ret;
++    }
++
++    if (V4L2_TYPE_IS_OUTPUT(type)) {
++        void *addr = mmap(NULL, buf->size, PROT_READ | PROT_WRITE, MAP_SHARED, ctx->video_fd, V4L2_TYPE_IS_MULTIPLANAR(type) ? buf->buffer.m.planes[0].m.mem_offset : buf->buffer.m.offset);
++        if (addr == MAP_FAILED) {
++            av_log(avctx, AV_LOG_ERROR, "%s: mmap failed, %s (%d)\n", __func__, strerror(errno), errno);
++            return -1;
++        }
++
++        buf->addr = (uint8_t*)addr;
++    } else {
++        struct v4l2_exportbuffer exportbuffer = {
++            .type = type,
++            .index = buf->index,
++            .flags = O_RDONLY,
++        };
++
++        ret = ioctl(ctx->video_fd, VIDIOC_EXPBUF, &exportbuffer);
++        if (ret < 0) {
++            av_log(avctx, AV_LOG_ERROR, "%s: export buffer %d failed, %s (%d)\n", __func__, buf->index, strerror(errno), errno);
++            return ret;
++        }
++
++        buf->fd = exportbuffer.fd;
++    }
++
++    av_log(avctx, AV_LOG_DEBUG, "%s: buf=%p index=%d fd=%d addr=%p width=%u height=%u size=%u\n", __func__, buf, buf->index, buf->fd, buf->addr, buf->width, buf->height, buf->size);
++    return 0;
++}
++
++static void v4l2_request_buffer_free(V4L2RequestBuffer *buf)
++{
++    av_log(NULL, AV_LOG_DEBUG, "%s: buf=%p index=%d fd=%d addr=%p width=%u height=%u size=%u\n", __func__, buf, buf->index, buf->fd, buf->addr, buf->width, buf->height, buf->size);
++
++    if (buf->addr)
++        munmap(buf->addr, buf->size);
++
++    if (buf->fd >= 0)
++        close(buf->fd);
++}
++
++static void v4l2_request_frame_free(void *opaque, uint8_t *data)
++{
++    AVCodecContext *avctx = opaque;
++    V4L2RequestDescriptor *req = (V4L2RequestDescriptor*)data;
++
++    av_log(NULL, AV_LOG_DEBUG, "%s: avctx=%p data=%p request_fd=%d\n", __func__, avctx, data, req->request_fd);
++
++    if (req->request_fd >= 0)
++        close(req->request_fd);
++
++    v4l2_request_buffer_free(&req->capture);
++    v4l2_request_buffer_free(&req->output);
++
++    av_free(data);
++}
++
++static AVBufferRef *v4l2_request_frame_alloc(void *opaque, int size)
++{
++    AVCodecContext *avctx = opaque;
++    V4L2RequestContext *ctx = avctx->internal->hwaccel_priv_data;
++    V4L2RequestDescriptor *req;
++    AVBufferRef *ref;
++    uint8_t *data;
++    int ret;
++
++    data = av_mallocz(size);
++    if (!data)
++        return NULL;
++
++    av_log(avctx, AV_LOG_DEBUG, "%s: avctx=%p size=%d data=%p\n", __func__, avctx, size, data);
++
++    ref = av_buffer_create(data, size, v4l2_request_frame_free, avctx, 0);
++    if (!ref) {
++        av_freep(&data);
++        return NULL;
++    }
++
++    req = (V4L2RequestDescriptor*)data;
++    req->request_fd = -1;
++    req->output.fd = -1;
++    req->capture.fd = -1;
++
++    ret = v4l2_request_buffer_alloc(avctx, &req->output, ctx->output_type);
++    if (ret < 0) {
++        av_buffer_unref(&ref);
++        return NULL;
++    }
++
++    ret = v4l2_request_buffer_alloc(avctx, &req->capture, ctx->format.type);
++    if (ret < 0) {
++        av_buffer_unref(&ref);
++        return NULL;
++    }
++
++    ret = ioctl(ctx->media_fd, MEDIA_IOC_REQUEST_ALLOC, &req->request_fd);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "%s: request alloc failed, %s (%d)\n", __func__, strerror(errno), errno);
++        av_buffer_unref(&ref);
++        return NULL;
++    }
++
++    av_log(avctx, AV_LOG_DEBUG, "%s: avctx=%p size=%d data=%p request_fd=%d\n", __func__, avctx, size, data, req->request_fd);
++    return ref;
++}
++
++static void v4l2_request_pool_free(void *opaque)
++{
++    av_log(NULL, AV_LOG_DEBUG, "%s: opaque=%p\n", __func__, opaque);
++}
++
++static void v4l2_request_hwframe_ctx_free(AVHWFramesContext *hwfc)
++{
++    av_log(NULL, AV_LOG_DEBUG, "%s: hwfc=%p pool=%p\n", __func__, hwfc, hwfc->pool);
++
++    av_buffer_pool_flush(hwfc->pool);
++    av_buffer_pool_uninit(&hwfc->pool);
++}
++
++int ff_v4l2_request_frame_params(AVCodecContext *avctx, AVBufferRef *hw_frames_ctx)
++{
++    V4L2RequestContext *ctx = avctx->internal->hwaccel_priv_data;
++    AVHWFramesContext *hwfc = (AVHWFramesContext*)hw_frames_ctx->data;
++
++    hwfc->format = AV_PIX_FMT_DRM_PRIME;
++    hwfc->sw_format = AV_PIX_FMT_NV12;
++    if (V4L2_TYPE_IS_MULTIPLANAR(ctx->format.type)) {
++        hwfc->width = ctx->format.fmt.pix_mp.width;
++        hwfc->height = ctx->format.fmt.pix_mp.height;
++    } else {
++        hwfc->width = ctx->format.fmt.pix.width;
++        hwfc->height = ctx->format.fmt.pix.height;
++    }
++
++    hwfc->pool = av_buffer_pool_init2(sizeof(V4L2RequestDescriptor), avctx, v4l2_request_frame_alloc, v4l2_request_pool_free);
++    if (!hwfc->pool)
++        return AVERROR(ENOMEM);
++
++    hwfc->free = v4l2_request_hwframe_ctx_free;
++
++    hwfc->initial_pool_size = 1;
++
++    switch (avctx->codec_id) {
++    case AV_CODEC_ID_VP9:
++        hwfc->initial_pool_size += 8;
++        break;
++    case AV_CODEC_ID_VP8:
++        hwfc->initial_pool_size += 3;
++        break;
++    default:
++        hwfc->initial_pool_size += 2;
++    }
++
++    av_log(avctx, AV_LOG_DEBUG, "%s: avctx=%p ctx=%p hw_frames_ctx=%p hwfc=%p pool=%p width=%d height=%d initial_pool_size=%d\n", __func__, avctx, ctx, hw_frames_ctx, hwfc, hwfc->pool, hwfc->width, hwfc->height, hwfc->initial_pool_size);
++
++    return 0;
++}
+diff --git a/libavcodec/v4l2_request.h b/libavcodec/v4l2_request.h
+new file mode 100644
+index 000000000000..58d2aa70af80
+--- /dev/null
++++ b/libavcodec/v4l2_request.h
+@@ -0,0 +1,77 @@
++/*
++ * This file is part of FFmpeg.
++ *
++ * FFmpeg is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * FFmpeg is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with FFmpeg; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
++ */
++
++#ifndef AVCODEC_V4L2_REQUEST_H
++#define AVCODEC_V4L2_REQUEST_H
++
++#include <linux/videodev2.h>
++
++#include "libavutil/hwcontext_drm.h"
++
++typedef struct V4L2RequestContext {
++    int video_fd;
++    int media_fd;
++    enum v4l2_buf_type output_type;
++    struct v4l2_format format;
++    int timestamp;
++} V4L2RequestContext;
++
++typedef struct V4L2RequestBuffer {
++    int index;
++    int fd;
++    uint8_t *addr;
++    uint32_t width;
++    uint32_t height;
++    uint32_t size;
++    uint32_t used;
++    uint32_t capabilities;
++    struct v4l2_buffer buffer;
++} V4L2RequestBuffer;
++
++typedef struct V4L2RequestDescriptor {
++    AVDRMFrameDescriptor drm;
++    int request_fd;
++    V4L2RequestBuffer output;
++    V4L2RequestBuffer capture;
++} V4L2RequestDescriptor;
++
++uint64_t ff_v4l2_request_get_capture_timestamp(AVFrame *frame);
++
++int ff_v4l2_request_reset_frame(AVCodecContext *avctx, AVFrame *frame);
++
++int ff_v4l2_request_append_output_buffer(AVCodecContext *avctx, AVFrame *frame, const uint8_t *data, uint32_t size);
++
++int ff_v4l2_request_set_controls(AVCodecContext *avctx, struct v4l2_ext_control *control, int count);
++
++int ff_v4l2_request_get_controls(AVCodecContext *avctx, struct v4l2_ext_control *control, int count);
++
++int ff_v4l2_request_query_control(AVCodecContext *avctx, struct v4l2_query_ext_ctrl *control);
++
++int ff_v4l2_request_query_control_default_value(AVCodecContext *avctx, uint32_t id);
++
++int ff_v4l2_request_decode_slice(AVCodecContext *avctx, AVFrame *frame, struct v4l2_ext_control *control, int count, int first_slice, int last_slice);
++
++int ff_v4l2_request_decode_frame(AVCodecContext *avctx, AVFrame *frame, struct v4l2_ext_control *control, int count);
++
++int ff_v4l2_request_init(AVCodecContext *avctx, uint32_t pixelformat, uint32_t buffersize, struct v4l2_ext_control *control, int count);
++
++int ff_v4l2_request_uninit(AVCodecContext *avctx);
++
++int ff_v4l2_request_frame_params(AVCodecContext *avctx, AVBufferRef *hw_frames_ctx);
++
++#endif /* AVCODEC_V4L2_REQUEST_H */
+From a0a5b816593e3911aeedd201baa8057b64a89a39 Mon Sep 17 00:00:00 2001
+From: Ezequiel Garcia <ezequiel@collabora.com>
+Date: Wed, 20 Feb 2019 11:18:00 -0300
+Subject: [PATCH] h264dec: add idr_pic_id to slice context
+
+Used by V4L2 request API h264 hwaccel
+
+Signed-off-by: Ezequiel Garcia <ezequiel@collabora.com>
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+ libavcodec/h264_slice.c | 2 +-
+ libavcodec/h264dec.h    | 1 +
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/libavcodec/h264_slice.c b/libavcodec/h264_slice.c
+index db8363e4cc98..a19635a23d44 100644
+--- a/libavcodec/h264_slice.c
++++ b/libavcodec/h264_slice.c
+@@ -1818,7 +1818,7 @@ static int h264_slice_header_parse(const H264Context *h, H264SliceContext *sl,
+     }
+ 
+     if (nal->type == H264_NAL_IDR_SLICE)
+-        get_ue_golomb_long(&sl->gb); /* idr_pic_id */
++        sl->idr_pic_id = get_ue_golomb_long(&sl->gb);
+ 
+     if (sps->poc_type == 0) {
+         sl->poc_lsb = get_bits(&sl->gb, sps->log2_max_poc_lsb);
+diff --git a/libavcodec/h264dec.h b/libavcodec/h264dec.h
+index a419615124b2..316dc6a2c890 100644
+--- a/libavcodec/h264dec.h
++++ b/libavcodec/h264dec.h
+@@ -335,6 +335,7 @@ typedef struct H264SliceContext {
+     int delta_poc[2];
+     int curr_pic_num;
+     int max_pic_num;
++    int idr_pic_id;
+ } H264SliceContext;
+ 
+ /**
+From 6349ae1e10d1b68c47c3b883b27567f9678c6e0c Mon Sep 17 00:00:00 2001
+From: Boris Brezillon <boris.brezillon@collabora.com>
+Date: Wed, 22 May 2019 14:44:22 +0200
+Subject: [PATCH] h264dec: add ref_pic_marking and pic_order_cnt bit_size to
+ slice context
+
+Used by V4L2 request API h264 hwaccel
+
+Signed-off-by: Boris Brezillon <boris.brezillon@collabora.com>
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+ libavcodec/h264_slice.c | 6 +++++-
+ libavcodec/h264dec.h    | 2 ++
+ 2 files changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/libavcodec/h264_slice.c b/libavcodec/h264_slice.c
+index a19635a23d44..5a5ceb09352c 100644
+--- a/libavcodec/h264_slice.c
++++ b/libavcodec/h264_slice.c
+@@ -1736,7 +1736,7 @@ static int h264_slice_header_parse(const H264Context *h, H264SliceContext *sl,
+     unsigned int slice_type, tmp, i;
+     int field_pic_flag, bottom_field_flag;
+     int first_slice = sl == h->slice_ctx && !h->current_slice;
+-    int picture_structure;
++    int picture_structure, pos;
+ 
+     if (first_slice)
+         av_assert0(!h->setup_finished);
+@@ -1820,6 +1820,7 @@ static int h264_slice_header_parse(const H264Context *h, H264SliceContext *sl,
+     if (nal->type == H264_NAL_IDR_SLICE)
+         sl->idr_pic_id = get_ue_golomb_long(&sl->gb);
+ 
++    pos = sl->gb.index;
+     if (sps->poc_type == 0) {
+         sl->poc_lsb = get_bits(&sl->gb, sps->log2_max_poc_lsb);
+ 
+@@ -1833,6 +1834,7 @@ static int h264_slice_header_parse(const H264Context *h, H264SliceContext *sl,
+         if (pps->pic_order_present == 1 && picture_structure == PICT_FRAME)
+             sl->delta_poc[1] = get_se_golomb(&sl->gb);
+     }
++    sl->pic_order_cnt_bit_size = sl->gb.index - pos;
+ 
+     sl->redundant_pic_count = 0;
+     if (pps->redundant_pic_cnt_present)
+@@ -1872,9 +1874,11 @@ static int h264_slice_header_parse(const H264Context *h, H264SliceContext *sl,
+ 
+     sl->explicit_ref_marking = 0;
+     if (nal->ref_idc) {
++        pos = sl->gb.index;
+         ret = ff_h264_decode_ref_pic_marking(sl, &sl->gb, nal, h->avctx);
+         if (ret < 0 && (h->avctx->err_recognition & AV_EF_EXPLODE))
+             return AVERROR_INVALIDDATA;
++        sl->ref_pic_marking_bit_size = sl->gb.index - pos;
+     }
+ 
+     if (sl->slice_type_nos != AV_PICTURE_TYPE_I && pps->cabac) {
+diff --git a/libavcodec/h264dec.h b/libavcodec/h264dec.h
+index 316dc6a2c890..f2cabac468d0 100644
+--- a/libavcodec/h264dec.h
++++ b/libavcodec/h264dec.h
+@@ -328,6 +328,7 @@ typedef struct H264SliceContext {
+     MMCO mmco[MAX_MMCO_COUNT];
+     int  nb_mmco;
+     int explicit_ref_marking;
++    int ref_pic_marking_bit_size;
+ 
+     int frame_num;
+     int poc_lsb;
+@@ -336,6 +337,7 @@ typedef struct H264SliceContext {
+     int curr_pic_num;
+     int max_pic_num;
+     int idr_pic_id;
++    int pic_order_cnt_bit_size;
+ } H264SliceContext;
+ 
+ /**
+From 650875c24687c35290b2393ef39f77074ca49813 Mon Sep 17 00:00:00 2001
+From: Jernej Skrabec <jernej.skrabec@siol.net>
+Date: Sat, 15 Dec 2018 22:32:16 +0100
+Subject: [PATCH] Add V4L2 request API h264 hwaccel
+
+Signed-off-by: Jernej Skrabec <jernej.skrabec@siol.net>
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+ configure                      |   3 +
+ libavcodec/Makefile            |   1 +
+ libavcodec/h264_slice.c        |   4 +
+ libavcodec/h264dec.c           |   3 +
+ libavcodec/hwaccels.h          |   1 +
+ libavcodec/v4l2_request_h264.c | 456 +++++++++++++++++++++++++++++++++
+ 6 files changed, 468 insertions(+)
+ create mode 100644 libavcodec/v4l2_request_h264.c
+
+diff --git a/configure b/configure
+index 9f9909a23696..293d0447f683 100755
+--- a/configure
++++ b/configure
+@@ -2925,6 +2925,8 @@ h264_dxva2_hwaccel_deps="dxva2"
+ h264_dxva2_hwaccel_select="h264_decoder"
+ h264_nvdec_hwaccel_deps="nvdec"
+ h264_nvdec_hwaccel_select="h264_decoder"
++h264_v4l2request_hwaccel_deps="v4l2_request"
++h264_v4l2request_hwaccel_select="h264_decoder"
+ h264_vaapi_hwaccel_deps="vaapi"
+ h264_vaapi_hwaccel_select="h264_decoder"
+ h264_vdpau_hwaccel_deps="vdpau"
+@@ -6567,6 +6569,7 @@ if enabled v4l2_m2m; then
+ fi
+ 
+ check_func_headers "linux/media.h linux/videodev2.h" v4l2_timeval_to_ns
++check_cc h264_v4l2_request linux/videodev2.h "int i = V4L2_PIX_FMT_H264_SLICE;"
+ 
+ check_headers sys/videoio.h
+ test_code cc sys/videoio.h "struct v4l2_frmsizeenum vfse; vfse.discrete.width = 0;" && enable_sanitized struct_v4l2_frmivalenum_discrete
+diff --git a/libavcodec/Makefile b/libavcodec/Makefile
+index d74220516826..4f6e7fc2515c 100644
+--- a/libavcodec/Makefile
++++ b/libavcodec/Makefile
+@@ -903,6 +903,7 @@ OBJS-$(CONFIG_H264_D3D11VA_HWACCEL)       += dxva2_h264.o
+ OBJS-$(CONFIG_H264_DXVA2_HWACCEL)         += dxva2_h264.o
+ OBJS-$(CONFIG_H264_NVDEC_HWACCEL)         += nvdec_h264.o
+ OBJS-$(CONFIG_H264_QSV_HWACCEL)           += qsvdec_h2645.o
++OBJS-$(CONFIG_H264_V4L2REQUEST_HWACCEL)   += v4l2_request_h264.o
+ OBJS-$(CONFIG_H264_VAAPI_HWACCEL)         += vaapi_h264.o
+ OBJS-$(CONFIG_H264_VDPAU_HWACCEL)         += vdpau_h264.o
+ OBJS-$(CONFIG_H264_VIDEOTOOLBOX_HWACCEL)  += videotoolbox.o
+diff --git a/libavcodec/h264_slice.c b/libavcodec/h264_slice.c
+index 5a5ceb09352c..4ed267317184 100644
+--- a/libavcodec/h264_slice.c
++++ b/libavcodec/h264_slice.c
+@@ -759,6 +759,7 @@ static enum AVPixelFormat get_pixel_format(H264Context *h, int force_callback)
+ #define HWACCEL_MAX (CONFIG_H264_DXVA2_HWACCEL + \
+                      (CONFIG_H264_D3D11VA_HWACCEL * 2) + \
+                      CONFIG_H264_NVDEC_HWACCEL + \
++                     CONFIG_H264_V4L2REQUEST_HWACCEL + \
+                      CONFIG_H264_VAAPI_HWACCEL + \
+                      CONFIG_H264_VIDEOTOOLBOX_HWACCEL + \
+                      CONFIG_H264_VDPAU_HWACCEL)
+@@ -843,6 +844,9 @@ static enum AVPixelFormat get_pixel_format(H264Context *h, int force_callback)
+ #endif
+ #if CONFIG_H264_VIDEOTOOLBOX_HWACCEL
+             *fmt++ = AV_PIX_FMT_VIDEOTOOLBOX;
++#endif
++#if CONFIG_H264_V4L2REQUEST_HWACCEL
++            *fmt++ = AV_PIX_FMT_DRM_PRIME;
+ #endif
+             if (h->avctx->codec->pix_fmts)
+                 choices = h->avctx->codec->pix_fmts;
+diff --git a/libavcodec/h264dec.c b/libavcodec/h264dec.c
+index 5eedeb3c275d..a504c89565c7 100644
+--- a/libavcodec/h264dec.c
++++ b/libavcodec/h264dec.c
+@@ -1102,6 +1102,9 @@ AVCodec ff_h264_decoder = {
+ #endif
+ #if CONFIG_H264_VIDEOTOOLBOX_HWACCEL
+                                HWACCEL_VIDEOTOOLBOX(h264),
++#endif
++#if CONFIG_H264_V4L2REQUEST_HWACCEL
++                               HWACCEL_V4L2REQUEST(h264),
+ #endif
+                                NULL
+                            },
+diff --git a/libavcodec/hwaccels.h b/libavcodec/hwaccels.h
+index 6109c89bd63c..f758c34ddcf9 100644
+--- a/libavcodec/hwaccels.h
++++ b/libavcodec/hwaccels.h
+@@ -27,6 +27,7 @@ extern const AVHWAccel ff_h264_d3d11va_hwaccel;
+ extern const AVHWAccel ff_h264_d3d11va2_hwaccel;
+ extern const AVHWAccel ff_h264_dxva2_hwaccel;
+ extern const AVHWAccel ff_h264_nvdec_hwaccel;
++extern const AVHWAccel ff_h264_v4l2request_hwaccel;
+ extern const AVHWAccel ff_h264_vaapi_hwaccel;
+ extern const AVHWAccel ff_h264_vdpau_hwaccel;
+ extern const AVHWAccel ff_h264_videotoolbox_hwaccel;
+diff --git a/libavcodec/v4l2_request_h264.c b/libavcodec/v4l2_request_h264.c
+new file mode 100644
+index 000000000000..88da8f0a2db0
+--- /dev/null
++++ b/libavcodec/v4l2_request_h264.c
+@@ -0,0 +1,456 @@
++/*
++ * This file is part of FFmpeg.
++ *
++ * FFmpeg is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * FFmpeg is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with FFmpeg; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
++ */
++
++#include "h264dec.h"
++#include "hwconfig.h"
++#include "v4l2_request.h"
++
++typedef struct V4L2RequestControlsH264 {
++    struct v4l2_ctrl_h264_sps sps;
++    struct v4l2_ctrl_h264_pps pps;
++    struct v4l2_ctrl_h264_scaling_matrix scaling_matrix;
++    struct v4l2_ctrl_h264_decode_params decode_params;
++    struct v4l2_ctrl_h264_slice_params slice_params;
++    struct v4l2_ctrl_h264_pred_weights pred_weights;
++    int pred_weights_required;
++    int first_slice;
++    int num_slices;
++} V4L2RequestControlsH264;
++
++typedef struct V4L2RequestContextH264 {
++    V4L2RequestContext base;
++    int decode_mode;
++    int start_code;
++} V4L2RequestContextH264;
++
++static uint8_t nalu_slice_start_code[] = { 0x00, 0x00, 0x01 };
++
++static void fill_weight_factors(struct v4l2_h264_weight_factors *factors, int list, const H264SliceContext *sl)
++{
++    for (int i = 0; i < sl->ref_count[list]; i++) {
++        if (sl->pwt.luma_weight_flag[list]) {
++            factors->luma_weight[i] = sl->pwt.luma_weight[i][list][0];
++            factors->luma_offset[i] = sl->pwt.luma_weight[i][list][1];
++        } else {
++            factors->luma_weight[i] = 1 << sl->pwt.luma_log2_weight_denom;
++            factors->luma_offset[i] = 0;
++        }
++        for (int j = 0; j < 2; j++) {
++            if (sl->pwt.chroma_weight_flag[list]) {
++                factors->chroma_weight[i][j] = sl->pwt.chroma_weight[i][list][j][0];
++                factors->chroma_offset[i][j] = sl->pwt.chroma_weight[i][list][j][1];
++            } else {
++                factors->chroma_weight[i][j] = 1 << sl->pwt.chroma_log2_weight_denom;
++                factors->chroma_offset[i][j] = 0;
++            }
++        }
++    }
++}
++
++static void fill_dpb_entry(struct v4l2_h264_dpb_entry *entry, const H264Picture *pic)
++{
++    entry->reference_ts = ff_v4l2_request_get_capture_timestamp(pic->f);
++    entry->pic_num = pic->pic_id;
++    entry->frame_num = pic->frame_num;
++    entry->fields = pic->reference & V4L2_H264_FRAME_REF;
++    entry->flags = V4L2_H264_DPB_ENTRY_FLAG_VALID;
++    if (entry->fields)
++        entry->flags |= V4L2_H264_DPB_ENTRY_FLAG_ACTIVE;
++    if (pic->long_ref)
++        entry->flags |= V4L2_H264_DPB_ENTRY_FLAG_LONG_TERM;
++    if (pic->field_picture)
++        entry->flags |= V4L2_H264_DPB_ENTRY_FLAG_FIELD;
++    if (pic->field_poc[0] != INT_MAX)
++        entry->top_field_order_cnt = pic->field_poc[0];
++    if (pic->field_poc[1] != INT_MAX)
++        entry->bottom_field_order_cnt = pic->field_poc[1];
++}
++
++static void fill_dpb(struct v4l2_ctrl_h264_decode_params *decode, const H264Context *h)
++{
++    int entries = 0;
++
++    for (int i = 0; i < h->short_ref_count; i++) {
++        const H264Picture *pic = h->short_ref[i];
++        if (pic && (pic->field_poc[0] != INT_MAX || pic->field_poc[1] != INT_MAX))
++            fill_dpb_entry(&decode->dpb[entries++], pic);
++    }
++
++    if (!h->long_ref_count)
++        return;
++
++    for (int i = 0; i < FF_ARRAY_ELEMS(h->long_ref); i++) {
++        const H264Picture *pic = h->long_ref[i];
++        if (pic && (pic->field_poc[0] != INT_MAX || pic->field_poc[1] != INT_MAX))
++            fill_dpb_entry(&decode->dpb[entries++], pic);
++    }
++}
++
++static void fill_ref_list(struct v4l2_h264_reference *reference, struct v4l2_ctrl_h264_decode_params *decode, const H264Ref *ref)
++{
++    uint64_t timestamp;
++
++    if (!ref->parent)
++        return;
++
++    timestamp = ff_v4l2_request_get_capture_timestamp(ref->parent->f);
++
++    for (uint8_t i = 0; i < FF_ARRAY_ELEMS(decode->dpb); i++) {
++        struct v4l2_h264_dpb_entry *entry = &decode->dpb[i];
++        if ((entry->flags & V4L2_H264_DPB_ENTRY_FLAG_VALID) &&
++            entry->reference_ts == timestamp) {
++            reference->fields = ref->reference & V4L2_H264_FRAME_REF;
++            reference->index = i;
++            return;
++        }
++    }
++}
++
++static void fill_sps(struct v4l2_ctrl_h264_sps *ctrl, const H264Context *h)
++{
++    const SPS *sps = h->ps.sps;
++
++    *ctrl = (struct v4l2_ctrl_h264_sps) {
++        .profile_idc = sps->profile_idc,
++        .constraint_set_flags = sps->constraint_set_flags,
++        .level_idc = sps->level_idc,
++        .seq_parameter_set_id = sps->sps_id,
++        .chroma_format_idc = sps->chroma_format_idc,
++        .bit_depth_luma_minus8 = sps->bit_depth_luma - 8,
++        .bit_depth_chroma_minus8 = sps->bit_depth_chroma - 8,
++        .log2_max_frame_num_minus4 = sps->log2_max_frame_num - 4,
++        .pic_order_cnt_type = sps->poc_type,
++        .log2_max_pic_order_cnt_lsb_minus4 = sps->log2_max_poc_lsb - 4,
++        .max_num_ref_frames = sps->ref_frame_count,
++        .num_ref_frames_in_pic_order_cnt_cycle = sps->poc_cycle_length,
++        .offset_for_non_ref_pic = sps->offset_for_non_ref_pic,
++        .offset_for_top_to_bottom_field = sps->offset_for_top_to_bottom_field,
++        .pic_width_in_mbs_minus1 = h->mb_width - 1,
++        .pic_height_in_map_units_minus1 = sps->frame_mbs_only_flag ? h->mb_height - 1 : h->mb_height / 2 - 1,
++    };
++
++    if (sps->poc_cycle_length > 0 && sps->poc_cycle_length <= 255)
++        memcpy(ctrl->offset_for_ref_frame, sps->offset_for_ref_frame, sps->poc_cycle_length * sizeof(ctrl->offset_for_ref_frame[0]));
++
++    if (sps->residual_color_transform_flag)
++        ctrl->flags |= V4L2_H264_SPS_FLAG_SEPARATE_COLOUR_PLANE;
++    if (sps->transform_bypass)
++        ctrl->flags |= V4L2_H264_SPS_FLAG_QPPRIME_Y_ZERO_TRANSFORM_BYPASS;
++    if (sps->delta_pic_order_always_zero_flag)
++        ctrl->flags |= V4L2_H264_SPS_FLAG_DELTA_PIC_ORDER_ALWAYS_ZERO;
++    if (sps->gaps_in_frame_num_allowed_flag)
++        ctrl->flags |= V4L2_H264_SPS_FLAG_GAPS_IN_FRAME_NUM_VALUE_ALLOWED;
++    if (sps->frame_mbs_only_flag)
++        ctrl->flags |= V4L2_H264_SPS_FLAG_FRAME_MBS_ONLY;
++    if (sps->mb_aff)
++        ctrl->flags |= V4L2_H264_SPS_FLAG_MB_ADAPTIVE_FRAME_FIELD;
++    if (sps->direct_8x8_inference_flag)
++        ctrl->flags |= V4L2_H264_SPS_FLAG_DIRECT_8X8_INFERENCE;
++}
++
++static void fill_pps(struct v4l2_ctrl_h264_pps *ctrl, const H264Context *h)
++{
++    const SPS *sps = h->ps.sps;
++    const PPS *pps = h->ps.pps;
++    const H264SliceContext *sl = &h->slice_ctx[0];
++    int qp_bd_offset = 6 * (sps->bit_depth_luma - 8);
++
++    *ctrl = (struct v4l2_ctrl_h264_pps) {
++        .pic_parameter_set_id = sl->pps_id,
++        .seq_parameter_set_id = pps->sps_id,
++        .num_slice_groups_minus1 = pps->slice_group_count - 1,
++        .num_ref_idx_l0_default_active_minus1 = pps->ref_count[0] - 1,
++        .num_ref_idx_l1_default_active_minus1 = pps->ref_count[1] - 1,
++        .weighted_bipred_idc = pps->weighted_bipred_idc,
++        .pic_init_qp_minus26 = pps->init_qp - 26 - qp_bd_offset,
++        .pic_init_qs_minus26 = pps->init_qs - 26 - qp_bd_offset,
++        .chroma_qp_index_offset = pps->chroma_qp_index_offset[0],
++        .second_chroma_qp_index_offset = pps->chroma_qp_index_offset[1],
++    };
++
++    if (pps->cabac)
++        ctrl->flags |= V4L2_H264_PPS_FLAG_ENTROPY_CODING_MODE;
++    if (pps->pic_order_present)
++        ctrl->flags |= V4L2_H264_PPS_FLAG_BOTTOM_FIELD_PIC_ORDER_IN_FRAME_PRESENT;
++    if (pps->weighted_pred)
++        ctrl->flags |= V4L2_H264_PPS_FLAG_WEIGHTED_PRED;
++    if (pps->deblocking_filter_parameters_present)
++        ctrl->flags |= V4L2_H264_PPS_FLAG_DEBLOCKING_FILTER_CONTROL_PRESENT;
++    if (pps->constrained_intra_pred)
++        ctrl->flags |= V4L2_H264_PPS_FLAG_CONSTRAINED_INTRA_PRED;
++    if (pps->redundant_pic_cnt_present)
++        ctrl->flags |= V4L2_H264_PPS_FLAG_REDUNDANT_PIC_CNT_PRESENT;
++    if (pps->transform_8x8_mode)
++        ctrl->flags |= V4L2_H264_PPS_FLAG_TRANSFORM_8X8_MODE;
++
++    /* FFmpeg always provide a scaling matrix */
++    ctrl->flags |= V4L2_H264_PPS_FLAG_SCALING_MATRIX_PRESENT;
++}
++
++static int v4l2_request_h264_start_frame(AVCodecContext *avctx,
++                                         av_unused const uint8_t *buffer,
++                                         av_unused uint32_t size)
++{
++    const H264Context *h = avctx->priv_data;
++    const PPS *pps = h->ps.pps;
++    const SPS *sps = h->ps.sps;
++    const H264SliceContext *sl = &h->slice_ctx[0];
++    V4L2RequestControlsH264 *controls = h->cur_pic_ptr->hwaccel_picture_private;
++
++    fill_sps(&controls->sps, h);
++    fill_pps(&controls->pps, h);
++
++    memcpy(controls->scaling_matrix.scaling_list_4x4, pps->scaling_matrix4, sizeof(controls->scaling_matrix.scaling_list_4x4));
++    memcpy(controls->scaling_matrix.scaling_list_8x8[0], pps->scaling_matrix8[0], sizeof(controls->scaling_matrix.scaling_list_8x8[0]));
++    memcpy(controls->scaling_matrix.scaling_list_8x8[1], pps->scaling_matrix8[3], sizeof(controls->scaling_matrix.scaling_list_8x8[1]));
++
++    if (sps->chroma_format_idc == 3) {
++        memcpy(controls->scaling_matrix.scaling_list_8x8[2], pps->scaling_matrix8[1], sizeof(controls->scaling_matrix.scaling_list_8x8[2]));
++        memcpy(controls->scaling_matrix.scaling_list_8x8[3], pps->scaling_matrix8[4], sizeof(controls->scaling_matrix.scaling_list_8x8[3]));
++        memcpy(controls->scaling_matrix.scaling_list_8x8[4], pps->scaling_matrix8[2], sizeof(controls->scaling_matrix.scaling_list_8x8[4]));
++        memcpy(controls->scaling_matrix.scaling_list_8x8[5], pps->scaling_matrix8[5], sizeof(controls->scaling_matrix.scaling_list_8x8[5]));
++    }
++
++    controls->decode_params = (struct v4l2_ctrl_h264_decode_params) {
++        .nal_ref_idc = h->nal_ref_idc,
++        .frame_num = h->poc.frame_num,
++        .top_field_order_cnt = h->cur_pic_ptr->field_poc[0] != INT_MAX ? h->cur_pic_ptr->field_poc[0] : 0,
++        .bottom_field_order_cnt = h->cur_pic_ptr->field_poc[1] != INT_MAX ? h->cur_pic_ptr->field_poc[1] : 0,
++        .idr_pic_id = sl->idr_pic_id,
++        .pic_order_cnt_lsb = sl->poc_lsb,
++        .delta_pic_order_cnt_bottom = sl->delta_poc_bottom,
++        .delta_pic_order_cnt0 = sl->delta_poc[0],
++        .delta_pic_order_cnt1 = sl->delta_poc[1],
++        /* Size in bits of dec_ref_pic_marking() syntax element. */
++        .dec_ref_pic_marking_bit_size = sl->ref_pic_marking_bit_size,
++        /* Size in bits of pic order count syntax. */
++        .pic_order_cnt_bit_size = sl->pic_order_cnt_bit_size,
++        .slice_group_change_cycle = 0, /* slice group not supported by FFmpeg */
++    };
++
++    if (h->picture_idr)
++        controls->decode_params.flags |= V4L2_H264_DECODE_PARAM_FLAG_IDR_PIC;
++    if (FIELD_PICTURE(h))
++        controls->decode_params.flags |= V4L2_H264_DECODE_PARAM_FLAG_FIELD_PIC;
++    if (h->picture_structure == PICT_BOTTOM_FIELD)
++        controls->decode_params.flags |= V4L2_H264_DECODE_PARAM_FLAG_BOTTOM_FIELD;
++
++    fill_dpb(&controls->decode_params, h);
++
++    controls->first_slice = !FIELD_PICTURE(h) || h->first_field;
++    controls->num_slices = 0;
++
++    return ff_v4l2_request_reset_frame(avctx, h->cur_pic_ptr->f);
++}
++
++static int v4l2_request_h264_queue_decode(AVCodecContext *avctx, int last_slice)
++{
++    const H264Context *h = avctx->priv_data;
++    V4L2RequestControlsH264 *controls = h->cur_pic_ptr->hwaccel_picture_private;
++    V4L2RequestContextH264 *ctx = avctx->internal->hwaccel_priv_data;
++
++    struct v4l2_ext_control control[] = {
++        {
++            .id = V4L2_CID_STATELESS_H264_SPS,
++            .ptr = &controls->sps,
++            .size = sizeof(controls->sps),
++        },
++        {
++            .id = V4L2_CID_STATELESS_H264_PPS,
++            .ptr = &controls->pps,
++            .size = sizeof(controls->pps),
++        },
++        {
++            .id = V4L2_CID_STATELESS_H264_SCALING_MATRIX,
++            .ptr = &controls->scaling_matrix,
++            .size = sizeof(controls->scaling_matrix),
++        },
++        {
++            .id = V4L2_CID_STATELESS_H264_DECODE_PARAMS,
++            .ptr = &controls->decode_params,
++            .size = sizeof(controls->decode_params),
++        },
++        {
++            .id = V4L2_CID_STATELESS_H264_SLICE_PARAMS,
++            .ptr = &controls->slice_params,
++            .size = sizeof(controls->slice_params),
++        },
++        {
++            .id = V4L2_CID_STATELESS_H264_PRED_WEIGHTS,
++            .ptr = &controls->pred_weights,
++            .size = sizeof(controls->pred_weights),
++        },
++    };
++
++    if (ctx->decode_mode == V4L2_STATELESS_H264_DECODE_MODE_SLICE_BASED) {
++        int count = FF_ARRAY_ELEMS(control) - (controls->pred_weights_required ? 0 : 1);
++        return ff_v4l2_request_decode_slice(avctx, h->cur_pic_ptr->f, control, count, controls->first_slice, last_slice);
++    }
++
++    return ff_v4l2_request_decode_frame(avctx, h->cur_pic_ptr->f, control, FF_ARRAY_ELEMS(control) - 2);
++}
++
++static int v4l2_request_h264_decode_slice(AVCodecContext *avctx, const uint8_t *buffer, uint32_t size)
++{
++    const H264Context *h = avctx->priv_data;
++    const PPS *pps = h->ps.pps;
++    const H264SliceContext *sl = &h->slice_ctx[0];
++    V4L2RequestControlsH264 *controls = h->cur_pic_ptr->hwaccel_picture_private;
++    V4L2RequestContextH264 *ctx = avctx->internal->hwaccel_priv_data;
++    int i, ret, count;
++
++    if (ctx->decode_mode == V4L2_STATELESS_H264_DECODE_MODE_SLICE_BASED && controls->num_slices) {
++        ret = v4l2_request_h264_queue_decode(avctx, 0);
++        if (ret)
++            return ret;
++
++        ff_v4l2_request_reset_frame(avctx, h->cur_pic_ptr->f);
++        controls->first_slice = 0;
++    }
++
++    if (ctx->start_code == V4L2_STATELESS_H264_START_CODE_ANNEX_B) {
++        ret = ff_v4l2_request_append_output_buffer(avctx, h->cur_pic_ptr->f, nalu_slice_start_code, 3);
++        if (ret)
++            return ret;
++    }
++
++    ret = ff_v4l2_request_append_output_buffer(avctx, h->cur_pic_ptr->f, buffer, size);
++    if (ret)
++        return ret;
++
++    if (ctx->decode_mode != V4L2_STATELESS_H264_DECODE_MODE_SLICE_BASED)
++        return 0;
++
++    controls->slice_params = (struct v4l2_ctrl_h264_slice_params) {
++        /* Offset in bits to slice_data() from the beginning of this slice. */
++        .header_bit_size = get_bits_count(&sl->gb),
++
++        .first_mb_in_slice = sl->first_mb_addr,
++
++        .slice_type = ff_h264_get_slice_type(sl),
++        .colour_plane_id = 0, /* separate colour plane not supported by FFmpeg */
++        .redundant_pic_cnt = sl->redundant_pic_count,
++        .cabac_init_idc = sl->cabac_init_idc,
++        .slice_qp_delta = sl->qscale - pps->init_qp,
++        .slice_qs_delta = 0, /* not implemented by FFmpeg */
++        .disable_deblocking_filter_idc = sl->deblocking_filter < 2 ? !sl->deblocking_filter : sl->deblocking_filter,
++        .slice_alpha_c0_offset_div2 = sl->slice_alpha_c0_offset / 2,
++        .slice_beta_offset_div2 = sl->slice_beta_offset / 2,
++        .num_ref_idx_l0_active_minus1 = sl->list_count > 0 ? sl->ref_count[0] - 1 : 0,
++        .num_ref_idx_l1_active_minus1 = sl->list_count > 1 ? sl->ref_count[1] - 1 : 0,
++    };
++
++    if (sl->slice_type == AV_PICTURE_TYPE_B && sl->direct_spatial_mv_pred)
++        controls->slice_params.flags |= V4L2_H264_SLICE_FLAG_DIRECT_SPATIAL_MV_PRED;
++    /* V4L2_H264_SLICE_FLAG_SP_FOR_SWITCH: not implemented by FFmpeg */
++
++    controls->pred_weights_required = V4L2_H264_CTRL_PRED_WEIGHTS_REQUIRED(&controls->pps, &controls->slice_params);
++    if (controls->pred_weights_required) {
++        controls->pred_weights.chroma_log2_weight_denom = sl->pwt.chroma_log2_weight_denom;
++        controls->pred_weights.luma_log2_weight_denom = sl->pwt.luma_log2_weight_denom;
++    }
++
++    count = sl->list_count > 0 ? sl->ref_count[0] : 0;
++    for (i = 0; i < count; i++)
++        fill_ref_list(&controls->slice_params.ref_pic_list0[i], &controls->decode_params, &sl->ref_list[0][i]);
++    if (count && controls->pred_weights_required)
++        fill_weight_factors(&controls->pred_weights.weight_factors[0], 0, sl);
++
++    count = sl->list_count > 1 ? sl->ref_count[1] : 0;
++    for (i = 0; i < count; i++)
++        fill_ref_list(&controls->slice_params.ref_pic_list1[i], &controls->decode_params, &sl->ref_list[1][i]);
++    if (count && controls->pred_weights_required)
++        fill_weight_factors(&controls->pred_weights.weight_factors[1], 1, sl);
++
++    controls->num_slices++;
++    return 0;
++}
++
++static int v4l2_request_h264_end_frame(AVCodecContext *avctx)
++{
++    const H264Context *h = avctx->priv_data;
++    return v4l2_request_h264_queue_decode(avctx, !FIELD_PICTURE(h) || !h->first_field);
++}
++
++static int v4l2_request_h264_set_controls(AVCodecContext *avctx)
++{
++    V4L2RequestContextH264 *ctx = avctx->internal->hwaccel_priv_data;
++
++    struct v4l2_ext_control control[] = {
++        { .id = V4L2_CID_STATELESS_H264_DECODE_MODE, },
++        { .id = V4L2_CID_STATELESS_H264_START_CODE, },
++    };
++
++    ctx->decode_mode = ff_v4l2_request_query_control_default_value(avctx, V4L2_CID_STATELESS_H264_DECODE_MODE);
++    if (ctx->decode_mode != V4L2_STATELESS_H264_DECODE_MODE_SLICE_BASED &&
++        ctx->decode_mode != V4L2_STATELESS_H264_DECODE_MODE_FRAME_BASED) {
++        av_log(avctx, AV_LOG_ERROR, "%s: unsupported decode mode, %d\n", __func__, ctx->decode_mode);
++        return AVERROR(EINVAL);
++    }
++
++    ctx->start_code = ff_v4l2_request_query_control_default_value(avctx, V4L2_CID_STATELESS_H264_START_CODE);
++    if (ctx->start_code != V4L2_STATELESS_H264_START_CODE_NONE &&
++        ctx->start_code != V4L2_STATELESS_H264_START_CODE_ANNEX_B) {
++        av_log(avctx, AV_LOG_ERROR, "%s: unsupported start code, %d\n", __func__, ctx->start_code);
++        return AVERROR(EINVAL);
++    }
++
++    control[0].value = ctx->decode_mode;
++    control[1].value = ctx->start_code;
++
++    return ff_v4l2_request_set_controls(avctx, control, FF_ARRAY_ELEMS(control));
++}
++
++static int v4l2_request_h264_init(AVCodecContext *avctx)
++{
++    const H264Context *h = avctx->priv_data;
++    struct v4l2_ctrl_h264_sps sps;
++    int ret;
++
++    struct v4l2_ext_control control[] = {
++        {
++            .id = V4L2_CID_STATELESS_H264_SPS,
++            .ptr = &sps,
++            .size = sizeof(sps),
++        },
++    };
++
++    fill_sps(&sps, h);
++
++    ret = ff_v4l2_request_init(avctx, V4L2_PIX_FMT_H264_SLICE, 4 * 1024 * 1024, control, FF_ARRAY_ELEMS(control));
++    if (ret)
++        return ret;
++
++    return v4l2_request_h264_set_controls(avctx);
++}
++
++const AVHWAccel ff_h264_v4l2request_hwaccel = {
++    .name           = "h264_v4l2request",
++    .type           = AVMEDIA_TYPE_VIDEO,
++    .id             = AV_CODEC_ID_H264,
++    .pix_fmt        = AV_PIX_FMT_DRM_PRIME,
++    .start_frame    = v4l2_request_h264_start_frame,
++    .decode_slice   = v4l2_request_h264_decode_slice,
++    .end_frame      = v4l2_request_h264_end_frame,
++    .frame_priv_data_size = sizeof(V4L2RequestControlsH264),
++    .init           = v4l2_request_h264_init,
++    .uninit         = ff_v4l2_request_uninit,
++    .priv_data_size = sizeof(V4L2RequestContextH264),
++    .frame_params   = ff_v4l2_request_frame_params,
++    .caps_internal  = HWACCEL_CAP_ASYNC_SAFE,
++};
+From f9f4a89058a6fac25712cc385eab72f70e9ac4c8 Mon Sep 17 00:00:00 2001
+From: Jonas Karlman <jonas@kwiboo.se>
+Date: Mon, 29 Apr 2019 22:08:59 +0000
+Subject: [PATCH] HACK: hwcontext_drm: do not require drm device
+
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+ libavutil/hwcontext_drm.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/libavutil/hwcontext_drm.c b/libavutil/hwcontext_drm.c
+index 32cbde82ebfa..aa4794c5e665 100644
+--- a/libavutil/hwcontext_drm.c
++++ b/libavutil/hwcontext_drm.c
+@@ -43,6 +43,11 @@ static int drm_device_create(AVHWDeviceContext *hwdev, const char *device,
+     AVDRMDeviceContext *hwctx = hwdev->hwctx;
+     drmVersionPtr version;
+ 
++    if (device == NULL) {
++      hwctx->fd = -1;
++      return 0;
++    }
++
+     hwctx->fd = open(device, O_RDWR);
+     if (hwctx->fd < 0)
+         return AVERROR(errno);
+From fa7165e391287bf970569e36b0b19bff947b084f Mon Sep 17 00:00:00 2001
+From: Jonas Karlman <jonas@kwiboo.se>
+Date: Mon, 27 Jul 2020 23:15:45 +0000
+Subject: [PATCH] HACK: define drm NV15 and NV20 format
+
+---
+ libavcodec/v4l2_request.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/libavcodec/v4l2_request.c b/libavcodec/v4l2_request.c
+index 0b294feff2eb..a8f0ee79eeef 100644
+--- a/libavcodec/v4l2_request.c
++++ b/libavcodec/v4l2_request.c
+@@ -30,6 +30,14 @@
+ #include "internal.h"
+ #include "v4l2_request.h"
+ 
++#ifndef DRM_FORMAT_NV15
++#define DRM_FORMAT_NV15 fourcc_code('N', 'V', '1', '5')
++#endif
++
++#ifndef DRM_FORMAT_NV20
++#define DRM_FORMAT_NV20 fourcc_code('N', 'V', '2', '0')
++#endif
++
+ uint64_t ff_v4l2_request_get_capture_timestamp(AVFrame *frame)
+ {
+     V4L2RequestDescriptor *req = (V4L2RequestDescriptor*)frame->data[0];

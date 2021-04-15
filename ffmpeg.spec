@@ -70,6 +70,7 @@
 %bcond_without	vmaf		# VMAF filter support
 %bcond_without	x264		# H.264 x264 encoder
 %bcond_without	x265		# H.265/HEVC x265 encoder
+%bcond_with	v4l2_request	# V4L2 request API for stateless hw decoding
 %bcond_without	va		# VAAPI (Video Acceleration API)
 %bcond_without	vapoursynth	# VapourSynth demuxer
 %bcond_without	vidstab		# vid.stab video stabilization support
@@ -89,7 +90,7 @@
 %undefine	with_opencv
 %undefine	with_chromaprint
 %endif
-%if %{with rkmpp}
+%if %{with rkmpp} || %{with v4l2_request}
 %define		with_libdrm	1
 %endif
 
@@ -124,6 +125,7 @@ Source0:	https://ffmpeg.org/releases/%{name}-%{version}.tar.xz
 Patch0:		%{name}-omx-libnames.patch
 Patch1:		%{name}-atadenoise.patch
 Patch2:		opencv4.patch
+Patch3:		v4l2-request-hwdec.patch
 URL:		http://www.ffmpeg.org/
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.9.5}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
@@ -204,6 +206,7 @@ BuildRequires:	libvorbis-devel
 BuildRequires:	libxcb-devel >= 1.4
 %{?with_libxml2:BuildRequires:	libxml2-devel >= 2}
 %{?with_lv2:BuildRequires:	lilv-devel}
+%{?with_v4l2_request:BuildRequires:	linux-libc-headers >= 7:5.11.0}
 %{?with_lv2:BuildRequires:	lv2-devel}
 %{?with_mfx:BuildRequires:	mfx_dispatch-devel >= 1.19}
 %ifarch %{ix86}
@@ -240,6 +243,7 @@ BuildRequires:	tar >= 1:1.22
 %{?with_doc:BuildRequires:	texi2html}
 %{?with_doc:BuildRequires:	texinfo}
 BuildRequires:	twolame-devel >= 0.3.10
+%{?with_v4l2_request:BuildRequires:	udev-devel}
 %{?with_vapoursynth:BuildRequires:	vapoursynth-devel >= 42}
 %{?with_vidstab:BuildRequires:	vid.stab-devel >= 0.98}
 %{?with_vmaf:BuildRequires:	vmaf-devel >= 1.3.9}
@@ -516,6 +520,9 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
+%if %{with v4l2_request}
+%patch3 -p1
+%endif
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
@@ -694,6 +701,10 @@ EOF
 	%{!?with_va:--disable-vaapi} \
 	%{?with_vapoursynth:--enable-vapoursynth} \
 	%{?with_vulkan:--enable-vulkan} \
+%if %{with v4l2_request}
+	--enable-libudev \
+	--enable-v4l2-request \
+%endif
 %ifnarch %{ix86} %{x8664}
 	--disable-mmx \
 %endif
