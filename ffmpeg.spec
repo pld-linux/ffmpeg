@@ -1,4 +1,5 @@
 # TODO:
+# - libopenvino, librist >= 0.2, libsvtav1 (SvtAv1Enc) >= 0.8.4, libuavs3d >= 1.1.41
 # - libtensorflow [-ltensorflow tensorflow/c/c_api.h]
 # - AMF >= 1.4.9.0 (available at https://github.com/GPUOpen-LibrariesAndSDKs/AMF, where is original source?)
 #
@@ -36,7 +37,7 @@
 %bcond_without	ilbc		# iLBC de/encoding via WebRTC libilbc
 %bcond_without	kvazaar		# Kvazaar HEVC encoder support
 %bcond_without	ladspa		# LADSPA audio filtering
-%bcond_without	lensfun		# lensfun lens correction
+%bcond_with	lensfun		# lensfun lens correction
 %bcond_with	libdrm		# Linux Direct Rendering Manager code
 %bcond_with	libklvanc	# Kernel Labs VANC processing (in decklink driver)
 %bcond_without	libmysofa	# sofalizer filter
@@ -77,7 +78,6 @@
 %bcond_without	voamrwbenc	# MR-WB encoding via libvo-amrwbenc
 %bcond_without	vpx		# VP8, a high-quality video codec
 %bcond_without	vulkan		# Vulkan code
-%bcond_without	wavpack		# wavpack encoding support
 %bcond_without	webp		# WebP encoding support
 %bcond_without	xvid		# vid encoding via xvidcore
 %bcond_without	zimg		# zscale filter based on z.lib
@@ -112,8 +112,8 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	4.3.2
-Release:	4
+Version:	4.4
+Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
 # v3 (allows *GPLv3 or Apache-licensed libs): gmp lensfun opencore-amr vmaf vo-*enc rkmpp
@@ -121,13 +121,14 @@ Release:	4
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	https://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	29529337d9b8f794a6142db10b717ec5
+# Source0-md5:	7b9d5b652d20e8c5405304ad72636d4a
 Patch0:		%{name}-omx-libnames.patch
 Patch1:		%{name}-atadenoise.patch
 Patch2:		opencv4.patch
 Patch3:		v4l2-request-hwdec.patch
+Patch4:		%{name}-glslang.patch
 URL:		http://www.ffmpeg.org/
-%{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.9.5}
+%{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.10}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
 %{?with_opencl:BuildRequires:	OpenCL-devel >= 1.2}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
@@ -142,7 +143,7 @@ BuildRequires:	aom-devel >= 1.0.0
 BuildRequires:	bzip2-devel
 BuildRequires:	celt-devel >= 0.11.0
 %{?with_codec2:BuildRequires:	codec2-devel}
-%{?with_dav1d:BuildRequires:	dav1d-devel >= 0.4.0}
+%{?with_dav1d:BuildRequires:	dav1d-devel >= 0.5.0}
 %{?with_avs2:BuildRequires:	davs2-devel >= 1.6}
 %{?with_fdk_aac:BuildRequires:	fdk-aac-devel}
 %{?with_flite:BuildRequires:	flite-devel >= 1.4}
@@ -155,14 +156,14 @@ BuildRequires:	freetype-devel
 # require version with altivec support fixed
 BuildRequires:	gcc >= 5:3.3.2-3
 %endif
-%{?with_glslang:BuildRequires:	glslang-devel}
+%{?with_glslang:BuildRequires:	glslang-devel >= 11}
 BuildRequires:	gmp-devel
 BuildRequires:	gnutls-devel
 BuildRequires:	jack-audio-connection-kit-devel
 %{?with_kvazaar:BuildRequires:	kvazaar-devel >= 0.8.1}
 %{?with_ladspa:BuildRequires:	ladspa-devel}
 BuildRequires:	lame-libs-devel >= 3.98.3
-%{?with_lensfun:BuildRequires:	lensfun-devel}
+%{?with_lensfun:BuildRequires:	lensfun-devel >= 0.3.95}
 BuildRequires:	libass-devel
 %{?with_iec61883:BuildRequires:	libavc1394-devel}
 %{?with_bs2b:BuildRequires:	libbs2b-devel}
@@ -227,7 +228,7 @@ BuildRequires:	perl-tools-pod
 BuildRequires:	pkgconfig
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
 %{?with_rabbitmq:BuildRequires:	rabbitmq-c-devel >= 0.7.1}
-%{?with_rav1e:BuildRequires:	rav1e-devel >= 0.1.0}
+%{?with_rav1e:BuildRequires:	rav1e-devel >= 0.4.0}
 %{?with_rkmpp:BuildRequires:	rockchip-mpp-devel >= 1.3.7}
 BuildRequires:	rpmbuild(macros) >= 1.752
 %{?with_rubberband:BuildRequires:	rubberband-devel >= 1.8.1}
@@ -246,9 +247,8 @@ BuildRequires:	twolame-devel >= 0.3.10
 %{?with_v4l2_request:BuildRequires:	udev-devel}
 %{?with_vapoursynth:BuildRequires:	vapoursynth-devel >= 42}
 %{?with_vidstab:BuildRequires:	vid.stab-devel >= 0.98}
-%{?with_vmaf:BuildRequires:	vmaf-devel >= 1.3.9}
+%{?with_vmaf:BuildRequires:	vmaf-devel >= 1.5.2}
 %{?with_voamrwbenc:BuildRequires:	vo-amrwbenc-devel}
-%{?with_wavpack:BuildRequires:	wavpack-devel}
 %{?with_ilbc:BuildRequires:	webrtc-libilbc-devel}
 %{?with_avs:BuildRequires:	xavs-devel}
 %{?with_avs2:BuildRequires:	xavs2-devel >= 1.3}
@@ -302,7 +302,7 @@ Requires:	SDL2 >= 2.0.1
 %{?with_vulkan:Requires:	Vulkan-Loader >= 1.1.97}
 Requires:	aom >= 1.0.0
 Requires:	celt >= 0.11.0
-%{?with_dav1d:Requires:	dav1d >= 0.4.0}
+%{?with_dav1d:Requires:	dav1d >= 0.5.0}
 %{?with_avs2:Requires:	davs2 >= 1.6}
 %{?with_flite:Requires:	flite >= 1.4}
 %if "%(rpm -q --qf '%{V}' gnutls-devel)" >= "3.0.20"
@@ -329,7 +329,7 @@ Requires:	lame-libs >= 3.98.3
 %{?with_openh264:Requires:	openh264 >= 1.3}
 Requires:	openjpeg2 >= 2.1
 %{?with_rabbitmq:Requires:	rabbitmq-c >= 0.7.1}
-%{?with_rav1e:Requires:	rav1e-libs >= 0.1.0}
+%{?with_rav1e:Requires:	rav1e-libs >= 0.4.0}
 %{?with_rkmpp:Requires:	rockchip-mpp >= 1.3.7}
 %{?with_rubberband:Requires:	rubberband-libs >= 1.8.1}
 %{?with_shine:Requires:	shine >= 3.0.0}
@@ -338,7 +338,7 @@ Requires:	speex >= 1:1.2-rc1
 Requires:	twolame-libs >= 0.3.10
 %{?with_vapoursynth:Requires:	vapoursynth >= 42}
 %{?with_vidstab:Requires:	vid.stab >= 0.98}
-%{?with_vmaf:Requires:	vmaf-libs >= 1.3.9}
+%{?with_vmaf:Requires:	vmaf-libs >= 1.5.2}
 %{?with_avs2:Requires:	xavs2 >= 1.3}
 %{?with_xvid:Requires:	xvid >= 1:1.1.0}
 %{?with_zmq:Requires:	zeromq >= 4.2.1}
@@ -379,7 +379,7 @@ Requires:	aom-devel >= 1.0.0
 Requires:	bzip2-devel
 Requires:	celt-devel >= 0.11.0
 %{?with_codec2:Requires:	codec2-devel}
-%{?with_dav1d:Requires:	dav1d-devel >= 0.4.0}
+%{?with_dav1d:Requires:	dav1d-devel >= 0.5.0}
 %{?with_fdk_aac:Requires:	fdk-aac-devel}
 %{?with_flite:Requires:	flite-devel >= 1.4}
 Requires:	fontconfig-devel
@@ -391,7 +391,7 @@ Requires:	gnutls-devel
 Requires:	jack-audio-connection-kit-devel
 %{?with_kvazaar:Requires:	kvazaar-devel >= 0.8.1}
 Requires:	lame-libs-devel >= 3.98.3
-%{?with_lensfun:Requires:	lensfun-devel}
+%{?with_lensfun:Requires:	lensfun-devel >= 0.3.95}
 Requires:	libass-devel
 %{?with_iec61883:Requires:	libavc1394-devel}
 Requires:	libbluray-devel
@@ -439,7 +439,7 @@ Requires:	openjpeg2-devel >= 2.1
 Requires:	opus-devel
 %{?with_pulseaudio:Requires:	pulseaudio-devel}
 %{?with_rabbitmq:Requires:	rabbitmq-c-devel >= 0.7.1}
-%{?with_rav1e:Requires:	rav1e-devel >= 0.1.0}
+%{?with_rav1e:Requires:	rav1e-devel >= 0.4.0}
 %{?with_rkmpp:Requires:	rockchip-mpp-devel >= 1.3.7}
 %{?with_rubberband:Requires:	rubberband-devel >= 1.8.1}
 %{?with_shine:Requires:	shine-devel >= 3.0.0}
@@ -453,8 +453,7 @@ Requires:	twolame-devel >= 0.3.10
 %{?with_vapoursynth:Requires:	vapoursynth-devel >= 42}
 %{?with_vidstab:Requires:	vid.stab-devel >= 0.98}
 %{?with_voamrwbenc:Requires:	vo-amrwbenc-devel}
-%{?with_vmaf:Requires:	vmaf-devel >= 1.3.9}
-%{?with_wavpack:Requires:	wavpack-devel}
+%{?with_vmaf:Requires:	vmaf-devel >= 1.5.2}
 %{?with_ilbc:Requires:	webrtc-libilbc-devel}
 %{?with_avs:Requires:	xavs-devel}
 %{?with_avs2:Requires:	xavs2-devel >= 1.3}
@@ -523,6 +522,7 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 %if %{with v4l2_request}
 %patch3 -p1
 %endif
+%patch4 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
@@ -675,7 +675,6 @@ EOF
 	%{?with_voamrwbenc:--enable-libvo-amrwbenc} \
 	--enable-libvorbis \
 	%{?with_vpx:--enable-libvpx} \
-	%{?with_wavpack:--enable-libwavpack} \
 	%{?with_webp:--enable-libwebp} \
 	%{?with_x264:--enable-libx264} \
 	%{?with_x265:--enable-libx265} \
