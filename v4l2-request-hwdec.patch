@@ -40,7 +40,7 @@ index c0f3f6cc9abe..998beec9ac5b 100644
 --- a/libavutil/buffer.h
 +++ b/libavutil/buffer.h
 @@ -267,6 +267,11 @@ AVBufferPool *av_buffer_pool_init2(int size, void *opaque,
-                                    AVBufferRef* (*alloc)(void *opaque, int size),
+ #endif
                                     void (*pool_free)(void *opaque));
  
 +/**
@@ -76,9 +76,9 @@ index 8569a60bf827..9f9909a23696 100755
                             if openssl, gnutls or mbedtls is not used [no]
    --enable-libtwolame      enable MP2 encoding via libtwolame [no]
 +  --enable-libudev         enable libudev [no]
+   --enable-libuavs3d       enable AVS3 decoding via libuavs3d [no]
    --enable-libv4l2         enable libv4l2/v4l-utils [no]
    --enable-libvidstab      enable video stabilization using vid.stab [no]
-   --enable-libvmaf         enable vmaf filter via libvmaf [no]
 @@ -342,6 +343,7 @@ External library support:
    --enable-omx-rpi         enable OpenMAX IL code for Raspberry Pi [no]
    --enable-rkmpp           enable Rockchip Media Process Platform code [no]
@@ -92,9 +92,9 @@ index 8569a60bf827..9f9909a23696 100755
      libtheora
      libtwolame
 +    libudev
+     libuavs3d
      libv4l2
-     libvorbis
-     libvpx
+     libvmaf
 @@ -1861,6 +1864,7 @@ HWACCEL_LIBRARY_LIST="
      mmal
      omx
@@ -116,9 +116,9 @@ index 8569a60bf827..9f9909a23696 100755
                               { check_lib libtwolame twolame.h twolame_encode_buffer_float32_interleaved -ltwolame ||
                                 die "ERROR: libtwolame must be installed and version must be >= 0.3.10"; }
 +enabled libudev           && require_pkg_config libudev libudev libudev.h udev_new
+ enabled libuavs3d         && require_pkg_config libuavs3d "uavs3d >= 1.1.41" uavs3d.h uavs3d_decode
  enabled libv4l2           && require_pkg_config libv4l2 libv4l2 libv4l2.h v4l2_ioctl
  enabled libvidstab        && require_pkg_config libvidstab "vidstab >= 0.98" vid.stab/libvidstab.h vsMotionDetectInit
- enabled libvmaf           && require_pkg_config libvmaf "libvmaf >= 1.3.9" libvmaf.h compute_vmaf
 @@ -6475,6 +6481,10 @@ enabled rkmpp             && { require_pkg_config rkmpp rockchip_mpp  rockchip/r
                                 { enabled libdrm ||
                                   die "ERROR: rkmpp requires --enable-libdrm"; }
@@ -1397,7 +1397,7 @@ index d74220516826..4f6e7fc2515c 100644
 @@ -903,6 +903,7 @@ OBJS-$(CONFIG_H264_D3D11VA_HWACCEL)       += dxva2_h264.o
  OBJS-$(CONFIG_H264_DXVA2_HWACCEL)         += dxva2_h264.o
  OBJS-$(CONFIG_H264_NVDEC_HWACCEL)         += nvdec_h264.o
- OBJS-$(CONFIG_H264_QSV_HWACCEL)           += qsvdec_h2645.o
+ OBJS-$(CONFIG_H264_QSV_HWACCEL)           += qsvdec.o
 +OBJS-$(CONFIG_H264_V4L2REQUEST_HWACCEL)   += v4l2_request_h264.o
  OBJS-$(CONFIG_H264_VAAPI_HWACCEL)         += vaapi_h264.o
  OBJS-$(CONFIG_H264_VDPAU_HWACCEL)         += vdpau_h264.o
