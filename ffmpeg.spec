@@ -165,6 +165,9 @@ BuildRequires:	jack-audio-connection-kit-devel
 BuildRequires:	lame-libs-devel >= 3.98.3
 %{?with_lensfun:BuildRequires:	lensfun-devel >= 0.3.95}
 BuildRequires:	libass-devel
+%ifarch %{armv6}
+BuildRequires:	libatomic-devel
+%endif
 %{?with_iec61883:BuildRequires:	libavc1394-devel}
 %{?with_bs2b:BuildRequires:	libbs2b-devel}
 BuildRequires:	libbluray-devel
@@ -230,7 +233,7 @@ BuildRequires:	pkgconfig
 %{?with_rabbitmq:BuildRequires:	rabbitmq-c-devel >= 0.7.1}
 %{?with_rav1e:BuildRequires:	rav1e-devel >= 0.4.0}
 %{?with_rkmpp:BuildRequires:	rockchip-mpp-devel >= 1.3.7}
-BuildRequires:	rpmbuild(macros) >= 1.752
+BuildRequires:	rpmbuild(macros) >= 2.007
 %{?with_rubberband:BuildRequires:	rubberband-devel >= 1.8.1}
 %{?with_shine:BuildRequires:	shine-devel >= 3.0.0}
 %{?with_snappy:BuildRequires:	snappy-devel}
@@ -600,6 +603,9 @@ EOF
 	--extra-cflags="-D_GNU_SOURCE=1 %{rpmcppflags} %{rpmcflags}%{?with_decklink: -I/usr/include/decklink} -I/usr/include/opencv4" \
 	--extra-cxxflags="-D_GNU_SOURCE=1 %{rpmcppflags} %{rpmcxxflags}%{?with_decklink: -I/usr/include/decklink} -I/usr/include/opencv4" \
 	--extra-ldflags="%{rpmcflags} %{rpmldflags}" \
+%ifarch %{armv6}
+	--extra-libs="-latomic" \
+%endif
 	--cc="%{__cc}" \
 	--disable-debug \
 	--disable-optimizations \
