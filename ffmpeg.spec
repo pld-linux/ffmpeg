@@ -14,6 +14,7 @@
 %bcond_with	bootstrap	# disable features to able to build without installed ffmpeg
 %bcond_with	nonfree		# unblock non free options of package (currently: cuda_nvcc, decklib, fdk_aac, npp, openssl, libressl/libtls)
 %bcond_without	amr		# AMR-NB/WB de/encoding via libopencore-amrnb/wb
+%bcond_without	aom		# AV1 viden de/encoding via libaom
 %bcond_without	aribb24		# ARIB text and caption decoding via libaribb24
 %bcond_without	avs		# AVS encoding via xavs
 %bcond_without	avs2		# AVS2 de/encoding via libdavs2/libxavs2
@@ -141,7 +142,7 @@ BuildRequires:	SDL2-devel >= 2.0.1
 BuildRequires:	SDL2-devel < 2.1.0
 %{?with_vulkan:BuildRequires:	Vulkan-Loader-devel >= 1.1.97}
 BuildRequires:	alsa-lib-devel
-BuildRequires:	aom-devel >= 1.0.0
+%{?with_aom:BuildRequires:	aom-devel >= 1.0.0}
 %{?with_aribb24:BuildRequires:	aribb24-devel}
 BuildRequires:	bzip2-devel
 BuildRequires:	celt-devel >= 0.11.0
@@ -309,7 +310,7 @@ Summary(pl.UTF-8):	Biblioteki ffmpeg
 Group:		Libraries
 Requires:	SDL2 >= 2.0.1
 %{?with_vulkan:Requires:	Vulkan-Loader >= 1.1.97}
-Requires:	aom >= 1.0.0
+%{?with_aom:Requires:	aom >= 1.0.0}
 Requires:	celt >= 0.11.0
 %{?with_dav1d:Requires:	dav1d >= 0.5.0}
 %{?with_avs2:Requires:	davs2 >= 1.6}
@@ -385,7 +386,7 @@ Requires:	%{name}-libs = %{version}-%{release}
 %{?with_vulkan:Requires:	Vulkan-Loader-devel >= 1.1.97}
 Requires:	SDL2-devel >= 2.0.1
 Requires:	alsa-lib-devel
-Requires:	aom-devel >= 1.0.0
+%{?with_aom:Requires:	aom-devel >= 1.0.0}
 %{?with_aribb24:Requires:	aribb24-devel}
 %{?with_avs2:Requires:	davs2-devel >= 1.6}
 Requires:	bzip2-devel
@@ -634,7 +635,7 @@ EOF
 	--enable-version3 \
 	%{?with_frei0r:--enable-frei0r} \
 	%{?with_ladspa:--enable-ladspa} \
-	--enable-libaom \
+	%{?with_aom:--enable-libaom} \
 	%{?with_aribb24:--enable-libaribb24} \
 	--enable-libass \
 	--enable-libbluray \
