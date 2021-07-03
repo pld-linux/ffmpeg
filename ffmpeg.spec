@@ -1,5 +1,5 @@
 # TODO:
-# - libopenvino, librist >= 0.2, libsvtav1 (SvtAv1Enc) >= 0.8.4, libuavs3d >= 1.1.41
+# - libopenvino
 # - libtensorflow [-ltensorflow tensorflow/c/c_api.h]
 # - AMF >= 1.4.9.0 (available at https://github.com/GPUOpen-LibrariesAndSDKs/AMF, where is original source?)
 #
@@ -41,6 +41,7 @@
 %bcond_with	libdrm		# Linux Direct Rendering Manager code
 %bcond_with	libklvanc	# Kernel Labs VANC processing (in decklink driver)
 %bcond_without	libmysofa	# sofalizer filter
+%bcond_without	librist		# RIST support via librist
 %bcond_with	librsvg		# SVG rasterization via librsvg
 %bcond_with	libxml2		# XML parsing using libxml2
 %bcond_without	lv2		# LV2 audio filtering
@@ -61,24 +62,26 @@
 %bcond_with	rkmpp		# Rockchip Media Process Platform code [implies libdrm]
 %bcond_without	rubberband	# rubberband filter
 %bcond_without	shine		# shine fixed-point MP3 encoder
+%bcond_with	smb		# SMB support via libsmbclient
 %bcond_without	snappy		# Snappy compression support (needed for hap encoding)
+%bcond_without	soxr		# SoX Resampler support
 %bcond_without	srt		# Haivision SRT protocol support
 %bcond_without	ssh		# SFTP protocol support via libssh
-%bcond_with	smb		# SMB support via libsmbclient
-%bcond_without	soxr		# SoX Resampler support
+%bcond_with	svtav1		# AV1 encoding via SVT-AV1
 %bcond_with	tesseract	# OCR filter based on Tesseract
 %bcond_without	theora		# Theora encoding via libtheora
-%bcond_without	vmaf		# VMAF filter support
-%bcond_without	x264		# H.264 x264 encoder
-%bcond_without	x265		# H.265/HEVC x265 encoder
+%bcond_with	uavs3d		# AVS3 decoding via libuavs3d (TODO: enable when 1.1.41 released)
 %bcond_with	v4l2_request	# V4L2 request API for stateless hw decoding
 %bcond_without	va		# VAAPI (Video Acceleration API)
 %bcond_without	vapoursynth	# VapourSynth demuxer
 %bcond_without	vidstab		# vid.stab video stabilization support
+%bcond_without	vmaf		# VMAF filter support
 %bcond_without	voamrwbenc	# MR-WB encoding via libvo-amrwbenc
 %bcond_without	vpx		# VP8, a high-quality video codec
 %bcond_without	vulkan		# Vulkan code
 %bcond_without	webp		# WebP encoding support
+%bcond_without	x264		# H.264 x264 encoder
+%bcond_without	x265		# H.265/HEVC x265 encoder
 %bcond_without	xvid		# vid encoding via xvidcore
 %bcond_without	zimg		# zscale filter based on z.lib
 %bcond_without	zmq		# 0MQ message passing
@@ -186,6 +189,7 @@ BuildRequires:	libcdio-paranoia-devel >= 0.90-2
 %if %{with dc1394} || %{with iec61883}
 BuildRequires:	libraw1394-devel >= 2
 %endif
+%{?with_librist:BuildRequires:	librist-devel >= 0.2}
 %{?with_librsvg:BuildRequires:	librsvg-devel >= 2}
 BuildRequires:	librtmp-devel
 %{?with_ssh:BuildRequires:	libssh-devel}
@@ -241,12 +245,14 @@ BuildRequires:	rpmbuild(macros) >= 2.007
 BuildRequires:	speex-devel >= 1:1.2-rc1
 %{?with_glslang:BuildRequires:	spirv-tools-devel}
 %{?with_srt:BuildRequires:	srt-devel >= 1.3}
+%{?with_svtav1:BuildRequires:	svt-av1-devel >= 0.8.4}
 BuildRequires:	tar >= 1:1.22
 %{?with_tesseract:BuildRequires:	tesseract-devel}
 %{?with_doc:BuildRequires:	tetex}
 %{?with_doc:BuildRequires:	texi2html}
 %{?with_doc:BuildRequires:	texinfo}
 BuildRequires:	twolame-devel >= 0.3.10
+%{?with_uavs3d:BuildRequires:	uavs3d-devel >= 1.1.41}
 %{?with_v4l2_request:BuildRequires:	udev-devel}
 %{?with_vapoursynth:BuildRequires:	vapoursynth-devel >= 42}
 %{?with_vidstab:BuildRequires:	vid.stab-devel >= 0.98}
@@ -315,6 +321,7 @@ Requires:	gnutls-libs >= 3.0.20
 %{?with_kvazaar:Requires:	kvazaar-libs >= 0.8.1}
 %{?with_libmysofa:Requires:	libmysofa >= 0.7}
 %{?with_openmpt:Requires: libopenmpt >= 0.4.5}
+%{?with_librist:Requires:	librist >= 0.2}
 %{?with_theora:Requires:	libtheora >= 1.0-0.beta3}
 %if %{with va}
 Requires:	libva >= 1.0.3
@@ -338,7 +345,9 @@ Requires:	openjpeg2 >= 2.1
 %{?with_shine:Requires:	shine >= 3.0.0}
 Requires:	speex >= 1:1.2-rc1
 %{?with_srt:Requires:	srt >= 1.3}
+%{?with_svtav1:Requires:	svt-av1 >= 0.8.4}
 Requires:	twolame-libs >= 0.3.10
+%{?with_uavs3d:Requires:	uavs3d >= 1.1.41}
 %{?with_vapoursynth:Requires:	vapoursynth >= 42}
 %{?with_vidstab:Requires:	vid.stab >= 0.98}
 %{?with_vmaf:Requires:	vmaf-libs >= 1.5.2}
@@ -414,6 +423,7 @@ Requires:	libcdio-paranoia-devel >= 0.90-2
 %if %{with dc1394} || %{with iec61883}
 Requires:	libraw1394-devel >= 2
 %endif
+%{?with_librist:Requires:	librist-devel >= 0.2}
 %{?with_librsvg:Requires:	librsvg-devel >= 2}
 Requires:	librtmp-devel
 %{?with_smb:Requires:	libsmbclient-devel}
@@ -451,8 +461,10 @@ Requires:	opus-devel
 Requires:	speex-devel >= 1:1.2-rc1
 %{?with_glslang:Requires:	spirv-tools-devel}
 %{?with_srt:Requires:	srt-devel >= 1.3}
+%{?with_svtav1:Requires:	svt-av1-devel >= 0.8.4}
 %{?with_tesseract:Requires:	tesseract-devel}
 Requires:	twolame-devel >= 0.3.10
+%{?with_uavs3d:Requires:	uavs3d-devel >= 1.1.41}
 %{?with_vapoursynth:Requires:	vapoursynth-devel >= 42}
 %{?with_vidstab:Requires:	vid.stab-devel >= 0.98}
 %{?with_voamrwbenc:Requires:	vo-amrwbenc-devel}
@@ -662,6 +674,7 @@ EOF
 	%{?with_pulseaudio:--enable-libpulse} \
 	%{?with_rabbitmq:--enable-librabbitmq} \
 	%{?with_rav1e:--enable-librav1e} \
+	%{?with_librist:--enable-librist} \
 	%{?with_librsvg:--enable-librsvg} \
 	--enable-librtmp \
 	%{?with_rubberband:--enable-librubberband} \
@@ -672,9 +685,11 @@ EOF
 	--enable-libspeex \
 	%{?with_srt:--enable-libsrt} \
 	%{?with_ssh:--enable-libssh} \
+	%{?with_svtav1:--enable-libsvtav1} \
 	%{?with_tesseract:--enable-libtesseract} \
 	%{?with_theora:--enable-libtheora} \
 	--enable-libtwolame \
+	%{?with_uavs3d:--enable-libuavs3d} \
 	--enable-libv4l2 \
 	%{?with_vidstab:--enable-libvidstab} \
 	%{?with_vmaf:--enable-libvmaf} \
