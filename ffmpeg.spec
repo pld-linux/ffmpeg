@@ -23,7 +23,7 @@
 %bcond_without	codec2		# codec2 support using libcodec2
 %bcond_without	chromaprint	# audio fingerprinting with chromaprint
 %bcond_with	cudasdk		# NVIDIA CUDA code using nvcc from CUDA SDK [BR: cuda.h, non-free]
-%bcond_without	dav1d		# AV1 decoding via libdav1d
+%bcond_with	dav1d		# AV1 decoding via libdav1d
 %bcond_without	dc1394		# IIDC-1394 grabbing using libdc1394
 %bcond_with	decklink	# Blackmagic DeckLink I/O support (requires nonfree)
 %bcond_with	fdk_aac		# AAC de/encoding via libfdk_aac (requires nonfree)
