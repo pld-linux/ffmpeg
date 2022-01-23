@@ -31,7 +31,7 @@
 %bcond_without	flite		# flite voice synthesis support
 %bcond_without	frei0r		# frei0r video filtering
 %bcond_without	fribidi		# fribidi support
-%bcond_without	glslang		# GLSL->SPIRV compilation via libglslang
+%bcond_with	glslang		# GLSL->SPIRV compilation via libglslang
 %bcond_without	gme		# Game Music Emu support
 %bcond_without	gsm		# GSM de/encoding via libgsm
 %bcond_without	iec61883	# ec61883 via libiec61883
@@ -42,6 +42,7 @@
 %bcond_with	libdrm		# Linux Direct Rendering Manager code
 %bcond_with	libklvanc	# Kernel Labs VANC processing (in decklink driver)
 %bcond_without	libmysofa	# sofalizer filter
+%bcond_with	libplacebo	# libplacebo filters
 %bcond_without	librist		# RIST support via librist
 %bcond_with	librsvg		# SVG rasterization via librsvg
 %bcond_with	libxml2		# XML parsing using libxml2
@@ -62,6 +63,7 @@
 %bcond_with	rav1e		# AV1 encoding using rav1e
 %bcond_with	rkmpp		# Rockchip Media Process Platform code [implies libdrm]
 %bcond_without	rubberband	# rubberband filter
+%bcond_without	shaderc		# GLSL->SPIRV compilation via libshaderc
 %bcond_without	shine		# shine fixed-point MP3 encoder
 %bcond_with	smb		# SMB support via libsmbclient
 %bcond_without	snappy		# Snappy compression support (needed for hap encoding)
@@ -97,6 +99,9 @@
 %if %{with rkmpp} || %{with v4l2_request}
 %define		with_libdrm	1
 %endif
+%if %{with glslang}
+%undefine	with_shaderc
+%endif
 
 %ifnarch %{ix86} %{x8664}
 %undefine	with_ffnvcodec
@@ -116,7 +121,7 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	4.4.1
+Version:	5.0
 Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
@@ -125,14 +130,13 @@ Release:	1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	https://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	41a1ca8693acc56088e8eaf3899b91ea
+# Source0-md5:	be3a9c73f7b492cd98301ac2086f0862
 Patch0:		%{name}-omx-libnames.patch
 Patch1:		%{name}-atadenoise.patch
 Patch2:		opencv4.patch
 Patch3:		v4l2-request-hwdec.patch
-Patch4:		%{name}-glslang.patch
 URL:		http://www.ffmpeg.org/
-%{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.10}
+%{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.11}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
 %{?with_opencl:BuildRequires:	OpenCL-devel >= 1.2}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
@@ -140,7 +144,7 @@ URL:		http://www.ffmpeg.org/
 %{?with_omx:BuildRequires:	OpenMAX-IL-devel}
 BuildRequires:	SDL2-devel >= 2.0.1
 BuildRequires:	SDL2-devel < 2.1.0
-%{?with_vulkan:BuildRequires:	Vulkan-Loader-devel >= 1.1.97}
+%{?with_vulkan:BuildRequires:	Vulkan-Loader-devel >= 1.2.189}
 BuildRequires:	alsa-lib-devel
 %{?with_aom:BuildRequires:	aom-devel >= 1.0.0}
 %{?with_aribb24:BuildRequires:	aribb24-devel}
@@ -168,7 +172,7 @@ BuildRequires:	jack-audio-connection-kit-devel
 %{?with_ladspa:BuildRequires:	ladspa-devel}
 BuildRequires:	lame-libs-devel >= 3.98.3
 %{?with_lensfun:BuildRequires:	lensfun-devel >= 0.3.95}
-BuildRequires:	libass-devel
+BuildRequires:	libass-devel >= 0.11.0
 %ifarch %{armv6}
 BuildRequires:	libatomic-devel
 %endif
@@ -187,6 +191,7 @@ BuildRequires:	libcdio-paranoia-devel >= 0.90-2
 %{?with_modplug:BuildRequires:	libmodplug-devel}
 %{?with_libmysofa:BuildRequires:	libmysofa-devel >= 0.7}
 %{?with_openmpt:BuildRequires: libopenmpt-devel >= 0.4.5}
+%{?with_libplacebo:BuildRequires:	libplacebo-devel >= 4.192.0}
 %if %{with dc1394} || %{with iec61883}
 BuildRequires:	libraw1394-devel >= 2
 %endif
@@ -240,6 +245,7 @@ BuildRequires:	pkgconfig
 %{?with_rkmpp:BuildRequires:	rockchip-mpp-devel >= 1.3.7}
 BuildRequires:	rpmbuild(macros) >= 2.007
 %{?with_rubberband:BuildRequires:	rubberband-devel >= 1.8.1}
+%{?with_shaderc:BuildRequires:	shaderc-devel >= 2019.1}
 %{?with_shine:BuildRequires:	shine-devel >= 3.0.0}
 %{?with_snappy:BuildRequires:	snappy-devel}
 %{?with_soxr:BuildRequires:	soxr-devel}
@@ -308,7 +314,7 @@ Summary:	ffmpeg libraries
 Summary(pl.UTF-8):	Biblioteki ffmpeg
 Group:		Libraries
 Requires:	SDL2 >= 2.0.1
-%{?with_vulkan:Requires:	Vulkan-Loader >= 1.1.97}
+%{?with_vulkan:Requires:	Vulkan-Loader >= 1.2.189}
 %{?with_aom:Requires:	aom >= 1.0.0}
 Requires:	celt >= 0.11.0
 %{?with_dav1d:Requires:	dav1d >= 0.5.0}
@@ -319,8 +325,10 @@ Requires:	celt >= 0.11.0
 Requires:	gnutls-libs >= 3.0.20
 %endif
 %{?with_kvazaar:Requires:	kvazaar-libs >= 0.8.1}
+Requires:	libass >= 0.11.0
 %{?with_libmysofa:Requires:	libmysofa >= 0.7}
 %{?with_openmpt:Requires: libopenmpt >= 0.4.5}
+%{?with_libplacebo:BuildRequires:	libplacebo >= 4.192.0}
 %{?with_librist:Requires:	librist >= 0.2}
 %{?with_theora:Requires:	libtheora >= 1.0-0.beta3}
 %if %{with va}
@@ -382,7 +390,7 @@ Requires:	%{name}-libs = %{version}-%{release}
 %{?with_openal:Requires:	OpenAL-devel >= 1.1}
 %{?with_opencl:Requires:	OpenCL-devel >= 1.2}
 %{?with_opengl:Requires:	OpenGL-devel}
-%{?with_vulkan:Requires:	Vulkan-Loader-devel >= 1.1.97}
+%{?with_vulkan:Requires:	Vulkan-Loader-devel >= 1.2.189}
 Requires:	SDL2-devel >= 2.0.1
 Requires:	alsa-lib-devel
 %{?with_aom:Requires:	aom-devel >= 1.0.0}
@@ -404,7 +412,7 @@ Requires:	jack-audio-connection-kit-devel
 %{?with_kvazaar:Requires:	kvazaar-devel >= 0.8.1}
 Requires:	lame-libs-devel >= 3.98.3
 %{?with_lensfun:Requires:	lensfun-devel >= 0.3.95}
-Requires:	libass-devel
+Requires:	libass-devel >= 0.11.0
 %{?with_iec61883:Requires:	libavc1394-devel}
 Requires:	libbluray-devel
 %{?with_bs2b:Requires:	libbs2b-devel}
@@ -537,7 +545,6 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 %if %{with v4l2_request}
 %patch3 -p1
 %endif
-%patch4 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
@@ -624,7 +631,6 @@ EOF
 	--disable-stripping \
 	%{!?with_doc:--disable-doc} \
 	--enable-avfilter \
-	--enable-avresample \
 	%{?with_chromaprint:--enable-chromaprint} \
 	%{?with_cudasdk:--enable-cuda-nvcc} \
 	%{?with_decklink:--enable-decklink} \
@@ -678,6 +684,7 @@ EOF
 	%{?with_librsvg:--enable-librsvg} \
 	--enable-librtmp \
 	%{?with_rubberband:--enable-librubberband} \
+	%{?with_shaderc:--enable-libshaderc} \
 	%{?with_shine:--enable-libshine} \
 	%{?with_smb:--enable-libsmbclient} \
 	%{?with_snappy:--enable-libsnappy} \
@@ -720,7 +727,7 @@ EOF
 	--enable-swscale \
 	%{!?with_va:--disable-vaapi} \
 	%{?with_vapoursynth:--enable-vapoursynth} \
-	%{?with_vulkan:--enable-vulkan} \
+	%{!?with_vulkan:--disable-vulkan} \
 %if %{with v4l2_request}
 	--enable-libudev \
 	--enable-v4l2-request \
@@ -814,23 +821,21 @@ rm -rf $RPM_BUILD_ROOT
 %files libs
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libavcodec.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavcodec.so.58
+%attr(755,root,root) %ghost %{_libdir}/libavcodec.so.59
 %attr(755,root,root) %{_libdir}/libavdevice.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavdevice.so.58
+%attr(755,root,root) %ghost %{_libdir}/libavdevice.so.59
 %attr(755,root,root) %{_libdir}/libavfilter.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavfilter.so.7
+%attr(755,root,root) %ghost %{_libdir}/libavfilter.so.8
 %attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavformat.so.58
-%attr(755,root,root) %{_libdir}/libavresample.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavresample.so.4
+%attr(755,root,root) %ghost %{_libdir}/libavformat.so.59
 %attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavutil.so.56
+%attr(755,root,root) %ghost %{_libdir}/libavutil.so.57
 %attr(755,root,root) %{_libdir}/libpostproc.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libpostproc.so.55
+%attr(755,root,root) %ghost %{_libdir}/libpostproc.so.56
 %attr(755,root,root) %{_libdir}/libswresample.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libswresample.so.3
+%attr(755,root,root) %ghost %{_libdir}/libswresample.so.4
 %attr(755,root,root) %{_libdir}/libswscale.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libswscale.so.5
+%attr(755,root,root) %ghost %{_libdir}/libswscale.so.6
 
 %files devel
 %defattr(644,root,root,755)
@@ -840,7 +845,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/libavdevice.so
 %attr(755,root,root) %{_libdir}/libavfilter.so
 %attr(755,root,root) %{_libdir}/libavformat.so
-%attr(755,root,root) %{_libdir}/libavresample.so
 %attr(755,root,root) %{_libdir}/libavutil.so
 %attr(755,root,root) %{_libdir}/libpostproc.so
 %attr(755,root,root) %{_libdir}/libswresample.so
@@ -850,7 +854,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/libavdevice
 %{_includedir}/libavfilter
 %{_includedir}/libavformat
-%{_includedir}/libavresample
 %{_includedir}/libavutil
 %{_includedir}/libpostproc
 %{_includedir}/libswresample
@@ -859,7 +862,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_pkgconfigdir}/libavdevice.pc
 %{_pkgconfigdir}/libavfilter.pc
 %{_pkgconfigdir}/libavformat.pc
-%{_pkgconfigdir}/libavresample.pc
 %{_pkgconfigdir}/libavutil.pc
 %{_pkgconfigdir}/libpostproc.pc
 %{_pkgconfigdir}/libswresample.pc
@@ -881,7 +883,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libavdevice.a
 %{_libdir}/libavfilter.a
 %{_libdir}/libavformat.a
-%{_libdir}/libavresample.a
 %{_libdir}/libavutil.a
 %{_libdir}/libpostproc.a
 %{_libdir}/libswresample.a
