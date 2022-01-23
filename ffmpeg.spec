@@ -268,7 +268,6 @@ BuildRequires:	xorg-lib-libXv-devel
 %{?with_xvid:BuildRequires:	xvid-devel >= 1:1.1.0}
 BuildRequires:	xz
 BuildRequires:	xz-devel
-BuildRequires:	yasm
 %{?with_zmq:BuildRequires:	zeromq-devel >= 4.2.1}
 %{?with_zimg:BuildRequires:	zimg-devel >= 2.7.0}
 BuildRequires:	zlib-devel
