@@ -117,7 +117,7 @@ Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
 Version:	4.4.2
-Release:	1
+Release:	1.1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
 # v3 (allows *GPLv3 or Apache-licensed libs): gmp lensfun opencore-amr vmaf vo-*enc rkmpp
@@ -278,7 +278,7 @@ BuildConflicts:	pdksh < 5.2.14-57
 Requires:	%{name}-libs = %{version}-%{release}
 Suggests:	fontconfig
 Suggests:	fonts-TTF-Roboto
-Obsoletes:	libpostproc
+Obsoletes:	libpostproc < 0.4.9-1
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		specflags	-fno-strict-aliasing
@@ -481,7 +481,7 @@ Requires:	xz-devel
 %{?with_zimg:Requires:	zimg-devel >= 2.7.0}
 Requires:	zlib-devel
 %{?with_zvbi:Requires:	zvbi-devel >= 0.2.28}
-Obsoletes:	libpostproc-devel
+Obsoletes:	libpostproc-devel < 0.4.9-1
 
 %description devel
 ffmpeg header files.
