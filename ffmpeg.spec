@@ -240,6 +240,7 @@ BuildRequires:	pkgconfig
 %{?with_rabbitmq:BuildRequires:	rabbitmq-c-devel >= 0.7.1}
 %{?with_rav1e:BuildRequires:	rav1e-devel >= 0.4.0}
 %{?with_rkmpp:BuildRequires:	rockchip-mpp-devel >= 1.3.7}
+BuildRequires:	rpm-build >= 4.6
 BuildRequires:	rpmbuild(macros) >= 2.007
 %{?with_rubberband:BuildRequires:	rubberband-devel >= 1.8.1}
 %{?with_shine:BuildRequires:	shine-devel >= 3.0.0}
