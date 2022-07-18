@@ -72,6 +72,7 @@
 %bcond_with	tesseract	# OCR filter based on Tesseract
 %bcond_without	theora		# Theora encoding via libtheora
 %bcond_with	uavs3d		# AVS3 decoding via libuavs3d (TODO: enable when 1.1.41 released)
+%bcond_with	v4l2_drmprime	# Zero-copy v4l2 decoding
 %bcond_with	v4l2_request	# V4L2 request API for stateless hw decoding
 %bcond_without	va		# VAAPI (Video Acceleration API)
 %bcond_without	vapoursynth	# VapourSynth demuxer
@@ -94,7 +95,7 @@
 %undefine	with_opencv
 %undefine	with_chromaprint
 %endif
-%if %{with rkmpp} || %{with v4l2_request}
+%if %{with rkmpp} || %{with v4l2_request} || %{with v4l2_drmprime}
 %define		with_libdrm	1
 %endif
 
@@ -131,6 +132,7 @@ Patch1:		%{name}-atadenoise.patch
 Patch2:		opencv4.patch
 Patch3:		v4l2-request-hwdec.patch
 Patch4:		%{name}-glslang.patch
+Patch5:		v4l2-drmprime.patch
 URL:		http://www.ffmpeg.org/
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.10}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
@@ -538,6 +540,9 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 %patch3 -p1
 %endif
 %patch4 -p1
+%if %{with v4l2_drmprime}
+%patch5 -p1
+%endif
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
