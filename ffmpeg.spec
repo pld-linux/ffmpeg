@@ -286,14 +286,13 @@ Suggests:	fonts-TTF-Roboto
 Obsoletes:	libpostproc < 2:1.0-1
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
-%define		specflags	-fno-strict-aliasing
+%define		specflags	-fno-strict-aliasing -fPIC
 
 # -fomit-frame-pointer is always needed on x86 due to lack of registers (-fPIC takes one)
 %define		specflags_ia32	-fomit-frame-pointer
 # -mmmx is needed to enable <mmintrin.h> code.
 %define		specflags_i586	-mmmx
 %define		specflags_i686	-mmmx
-%define		specflags_ppc	-fPIC
 
 %description
 FFmpeg is a complete solution to record, convert and stream audio and
