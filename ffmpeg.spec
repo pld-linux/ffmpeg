@@ -16,6 +16,7 @@
 %bcond_without	amr		# AMR-NB/WB de/encoding via libopencore-amrnb/wb
 %bcond_without	aom		# AV1 viden de/encoding via libaom
 %bcond_without	aribb24		# ARIB text and caption decoding via libaribb24
+%bcond_without	avresample	# Don' build deprecated libavresample library
 %bcond_without	avs		# AVS encoding via xavs
 %bcond_without	avs2		# AVS2 de/encoding via libdavs2/libxavs2
 %bcond_without	bs2b		# BS2B audio filter support
@@ -626,7 +627,7 @@ EOF
 	--disable-stripping \
 	%{!?with_doc:--disable-doc} \
 	--enable-avfilter \
-	--enable-avresample \
+	%{?with_avresample:--enable-avresample} \
 	%{?with_chromaprint:--enable-chromaprint} \
 	%{?with_cudasdk:--enable-cuda-nvcc} \
 	%{?with_decklink:--enable-decklink} \
@@ -823,8 +824,10 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %ghost %{_libdir}/libavfilter.so.7
 %attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libavformat.so.58
+%if %{with avresample}
 %attr(755,root,root) %{_libdir}/libavresample.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libavresample.so.4
+%endif
 %attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libavutil.so.56
 %attr(755,root,root) %{_libdir}/libpostproc.so.*.*.*
@@ -842,7 +845,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/libavdevice.so
 %attr(755,root,root) %{_libdir}/libavfilter.so
 %attr(755,root,root) %{_libdir}/libavformat.so
-%attr(755,root,root) %{_libdir}/libavresample.so
+%{?with_avresample:%attr(755,root,root) %{_libdir}/libavresample.so}
 %attr(755,root,root) %{_libdir}/libavutil.so
 %attr(755,root,root) %{_libdir}/libpostproc.so
 %attr(755,root,root) %{_libdir}/libswresample.so
@@ -852,7 +855,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/libavdevice
 %{_includedir}/libavfilter
 %{_includedir}/libavformat
-%{_includedir}/libavresample
+%{?with_avresample:%{_includedir}/libavresample}
 %{_includedir}/libavutil
 %{_includedir}/libpostproc
 %{_includedir}/libswresample
@@ -861,7 +864,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_pkgconfigdir}/libavdevice.pc
 %{_pkgconfigdir}/libavfilter.pc
 %{_pkgconfigdir}/libavformat.pc
-%{_pkgconfigdir}/libavresample.pc
+%{?with_avresample:%{_pkgconfigdir}/libavresample.pc}
 %{_pkgconfigdir}/libavutil.pc
 %{_pkgconfigdir}/libpostproc.pc
 %{_pkgconfigdir}/libswresample.pc
@@ -883,7 +886,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libavdevice.a
 %{_libdir}/libavfilter.a
 %{_libdir}/libavformat.a
-%{_libdir}/libavresample.a
+%{?with_avresample:%{_libdir}/libavresample.a}
 %{_libdir}/libavutil.a
 %{_libdir}/libpostproc.a
 %{_libdir}/libswresample.a
