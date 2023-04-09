@@ -276,13 +276,12 @@ BuildRequires:	xz-devel
 %{?with_zimg:BuildRequires:	zimg-devel >= 2.7.0}
 BuildRequires:	zlib-devel
 %{?with_zvbi:BuildRequires:	zvbi-devel >= 0.2.28}
-%{?with_autoreqdep:BuildConflicts:	libpostproc}
 # overflows maximum hash table size
 BuildConflicts:	pdksh < 5.2.14-57
 Requires:	%{name}-libs = %{version}-%{release}
 Suggests:	fontconfig
 Suggests:	fonts-TTF-Roboto
-Obsoletes:	libpostproc < 0.4.9-1
+Obsoletes:	libpostproc < 2:1.0-1
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		specflags	-fno-strict-aliasing -fPIC
@@ -484,7 +483,7 @@ Requires:	xz-devel
 %{?with_zimg:Requires:	zimg-devel >= 2.7.0}
 Requires:	zlib-devel
 %{?with_zvbi:Requires:	zvbi-devel >= 0.2.28}
-Obsoletes:	libpostproc-devel < 0.4.9-1
+Obsoletes:	libpostproc-devel < 2:1.0-1
 
 %description devel
 ffmpeg header files.
