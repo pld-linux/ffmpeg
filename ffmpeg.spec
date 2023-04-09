@@ -121,7 +121,7 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	5.0.1
+Version:	5.0.3
 Release:	0.1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
@@ -130,7 +130,7 @@ Release:	0.1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	https://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	c9541d321f08021d28503d89956e80dd
+# Source0-md5:	bb4cf51942a93becd35bbeaff054de46
 Patch0:		%{name}-omx-libnames.patch
 Patch1:		%{name}-atadenoise.patch
 Patch2:		opencv4.patch
@@ -143,7 +143,7 @@ URL:		http://www.ffmpeg.org/
 # libomxil-bellagio-devel or limoi-core-devel (just headers, library is dlopened at runtime)
 %{?with_omx:BuildRequires:	OpenMAX-IL-devel}
 BuildRequires:	SDL2-devel >= 2.0.1
-BuildRequires:	SDL2-devel < 2.1.0
+BuildRequires:	SDL2-devel < 3.0.0
 %{?with_vulkan:BuildRequires:	Vulkan-Loader-devel >= 1.2.189}
 BuildRequires:	alsa-lib-devel
 %{?with_aom:BuildRequires:	aom-devel >= 1.0.0}
