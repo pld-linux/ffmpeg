@@ -163,7 +163,7 @@ BuildRequires:	freetype-devel
 # require version with altivec support fixed
 BuildRequires:	gcc >= 5:3.3.2-3
 %endif
-%{?with_glslang:BuildRequires:	glslang-devel >= 11}
+%{?with_glslang:BuildRequires:	glslang-devel >= 12}
 BuildRequires:	gmp-devel
 BuildRequires:	gnutls-devel
 BuildRequires:	jack-audio-connection-kit-devel
@@ -400,7 +400,7 @@ Requires:	fontconfig-devel
 Requires:	freetype-devel
 %{?with_fribidi:Requires:	fribidi-devel}
 %{?with_gme:Requires:	game-music-emu-devel}
-%{?with_glslang:Requires:	glslang-devel}
+%{?with_glslang:Requires:	glslang-devel >= 12}
 Requires:	gnutls-devel
 Requires:	jack-audio-connection-kit-devel
 %{?with_kvazaar:Requires:	kvazaar-devel >= 0.8.1}
