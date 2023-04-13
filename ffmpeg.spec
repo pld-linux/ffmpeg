@@ -1,4 +1,5 @@
 # TODO:
+# - avisynth+ >= 3.7.1 https://github.com/AviSynth/AviSynthPlus
 # - libopenvino
 # - libtensorflow [-ltensorflow tensorflow/c/c_api.h]
 # - AMF >= 1.4.9.0 (available at https://github.com/GPUOpen-LibrariesAndSDKs/AMF, where is original source?)
@@ -38,8 +39,10 @@
 %bcond_without	ilbc		# iLBC de/encoding via WebRTC libilbc
 %bcond_without	kvazaar		# Kvazaar HEVC encoder support
 %bcond_without	ladspa		# LADSPA audio filtering
+%bcond_without	lcms		# ICC profile support via lcms2
 %bcond_with	lensfun		# lensfun lens correction
 %bcond_with	libdrm		# Linux Direct Rendering Manager code
+%bcond_without	libjxl		# JPEG XL de/encoding via libjxl
 %bcond_with	libklvanc	# Kernel Labs VANC processing (in decklink driver)
 %bcond_without	libmysofa	# sofalizer filter
 %bcond_with	libplacebo	# libplacebo filters
@@ -121,7 +124,7 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	5.0.3
+Version:	5.1.3
 Release:	0.1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
@@ -130,7 +133,7 @@ Release:	0.1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	https://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	bb4cf51942a93becd35bbeaff054de46
+# Source0-md5:	a2a4d7209c2d7627b0e18afe996c8e9b
 Patch0:		%{name}-omx-libnames.patch
 Patch1:		%{name}-atadenoise.patch
 Patch2:		opencv4.patch
@@ -171,6 +174,7 @@ BuildRequires:	jack-audio-connection-kit-devel
 %{?with_kvazaar:BuildRequires:	kvazaar-devel >= 0.8.1}
 %{?with_ladspa:BuildRequires:	ladspa-devel}
 BuildRequires:	lame-libs-devel >= 3.98.3
+%{?with_lcms:BuildRequires:	lcms2-devel >= 2.13}
 %{?with_lensfun:BuildRequires:	lensfun-devel >= 0.3.95}
 BuildRequires:	libass-devel >= 0.11.0
 %ifarch %{armv6}
@@ -187,6 +191,7 @@ BuildRequires:	libcdio-paranoia-devel >= 0.90-2
 %{?with_libdrm:BuildRequires:	libdrm-devel}
 %{?with_gsm:BuildRequires:	libgsm-devel}
 %{?with_iec61883:BuildRequires:	libiec61883-devel}
+%{?with_libjxl:BuildRequires:	libjxl-devel >= 0.7.0}
 %{?with_libklvanc:BuildRequires:	libklvanc-devel}
 %{?with_modplug:BuildRequires:	libmodplug-devel}
 %{?with_libmysofa:BuildRequires:	libmysofa-devel >= 0.7}
@@ -195,7 +200,7 @@ BuildRequires:	libcdio-paranoia-devel >= 0.90-2
 %if %{with dc1394} || %{with iec61883}
 BuildRequires:	libraw1394-devel >= 2
 %endif
-%{?with_librist:BuildRequires:	librist-devel >= 0.2}
+%{?with_librist:BuildRequires:	librist-devel >= 0.2.7}
 %{?with_librsvg:BuildRequires:	librsvg-devel >= 2}
 BuildRequires:	librtmp-devel
 %{?with_ssh:BuildRequires:	libssh-devel}
@@ -222,7 +227,7 @@ BuildRequires:	libxcb-devel >= 1.4
 %{?with_lv2:BuildRequires:	lilv-devel}
 %{?with_v4l2_request:BuildRequires:	linux-libc-headers >= 7:5.11.0}
 %{?with_lv2:BuildRequires:	lv2-devel}
-%{?with_mfx:BuildRequires:	mfx_dispatch-devel >= 1.19}
+%{?with_mfx:BuildRequires:	mfx_dispatch-devel >= 1.28}
 %ifarch %{ix86}
 %ifnarch i386 i486
 BuildRequires:	nasm
@@ -252,7 +257,7 @@ BuildRequires:	rpmbuild(macros) >= 2.007
 BuildRequires:	speex-devel >= 1:1.2-rc1
 %{?with_glslang:BuildRequires:	spirv-tools-devel}
 %{?with_srt:BuildRequires:	srt-devel >= 1.3}
-%{?with_svtav1:BuildRequires:	svt-av1-devel >= 0.8.4}
+%{?with_svtav1:BuildRequires:	svt-av1-devel >= 0.9.0}
 BuildRequires:	tar >= 1:1.22
 %{?with_tesseract:BuildRequires:	tesseract-devel}
 %{?with_doc:BuildRequires:	tetex}
@@ -263,7 +268,7 @@ BuildRequires:	twolame-devel >= 0.3.10
 %{?with_v4l2_request:BuildRequires:	udev-devel}
 %{?with_vapoursynth:BuildRequires:	vapoursynth-devel >= 42}
 %{?with_vidstab:BuildRequires:	vid.stab-devel >= 0.98}
-%{?with_vmaf:BuildRequires:	vmaf-devel >= 1.5.2}
+%{?with_vmaf:BuildRequires:	vmaf-devel >= 2.0.0}
 %{?with_voamrwbenc:BuildRequires:	vo-amrwbenc-devel}
 %{?with_ilbc:BuildRequires:	webrtc-libilbc-devel}
 %{?with_avs:BuildRequires:	xavs-devel}
@@ -324,10 +329,11 @@ Requires:	gnutls-libs >= 3.0.20
 %endif
 %{?with_kvazaar:Requires:	kvazaar-libs >= 0.8.1}
 Requires:	libass >= 0.11.0
+%{?with_libjxl:Requires:	libjxl >= 0.7.0}
 %{?with_libmysofa:Requires:	libmysofa >= 0.7}
 %{?with_openmpt:Requires: libopenmpt >= 0.4.5}
 %{?with_libplacebo:Requires:	libplacebo >= 4.192.0}
-%{?with_librist:Requires:	librist >= 0.2}
+%{?with_librist:Requires:	librist >= 0.2.7}
 %{?with_theora:Requires:	libtheora >= 1.0-0.beta3}
 %if %{with va}
 Requires:	libva >= 1.0.3
@@ -341,7 +347,8 @@ Requires:	libvdpau >= 1.3
 %{?with_x265:Requires:	libx265 >= 1.9}
 Requires:	libxcb >= 1.4
 Requires:	lame-libs >= 3.98.3
-%{?with_mfx:Requires:	mfx_dispatch >= 1.19}
+%{?with_lcms:Requires:	lcms2 >= 2.13}
+%{?with_mfx:Requires:	mfx_dispatch >= 1.28}
 %{?with_openh264:Requires:	openh264 >= 1.3}
 Requires:	openjpeg2 >= 2.1
 %{?with_rabbitmq:Requires:	rabbitmq-c >= 0.7.1}
@@ -351,12 +358,12 @@ Requires:	openjpeg2 >= 2.1
 %{?with_shine:Requires:	shine >= 3.0.0}
 Requires:	speex >= 1:1.2-rc1
 %{?with_srt:Requires:	srt >= 1.3}
-%{?with_svtav1:Requires:	svt-av1 >= 0.8.4}
+%{?with_svtav1:Requires:	svt-av1 >= 0.9.0}
 Requires:	twolame-libs >= 0.3.10
 %{?with_uavs3d:Requires:	uavs3d >= 1.1.41}
 %{?with_vapoursynth:Requires:	vapoursynth >= 42}
 %{?with_vidstab:Requires:	vid.stab >= 0.98}
-%{?with_vmaf:Requires:	vmaf-libs >= 1.5.2}
+%{?with_vmaf:Requires:	vmaf-libs >= 2.0.0}
 %{?with_avs2:Requires:	xavs2 >= 1.3}
 %{?with_xvid:Requires:	xvid >= 1:1.1.0}
 %{?with_zmq:Requires:	zeromq >= 4.2.1}
@@ -409,6 +416,7 @@ Requires:	gnutls-devel
 Requires:	jack-audio-connection-kit-devel
 %{?with_kvazaar:Requires:	kvazaar-devel >= 0.8.1}
 Requires:	lame-libs-devel >= 3.98.3
+%{?with_lcms:Requires:	lcms2-devel >= 2.13}
 %{?with_lensfun:Requires:	lensfun-devel >= 0.3.95}
 Requires:	libass-devel >= 0.11.0
 %{?with_iec61883:Requires:	libavc1394-devel}
@@ -422,6 +430,7 @@ Requires:	libcdio-paranoia-devel >= 0.90-2
 %{?with_libdrm:Requires:	libdrm-devel}
 %{?with_gsm:Requires:	libgsm-devel}
 %{?with_iec61883:Requires:	libiec61883-devel}
+%{?with_libjxl:Requires:	libjxl-devel >= 0.7.0}
 %{?with_libklvanc:Requires:	libklvanc-devel}
 %{?with_modplug:Requires:	libmodplug-devel}
 %{?with_libmysofa:Requires:	libmysofa-devel >= 0.7}
@@ -429,7 +438,7 @@ Requires:	libcdio-paranoia-devel >= 0.90-2
 %if %{with dc1394} || %{with iec61883}
 Requires:	libraw1394-devel >= 2
 %endif
-%{?with_librist:Requires:	librist-devel >= 0.2}
+%{?with_librist:Requires:	librist-devel >= 0.2.7}
 %{?with_librsvg:Requires:	librsvg-devel >= 2}
 Requires:	librtmp-devel
 %{?with_smb:Requires:	libsmbclient-devel}
@@ -450,7 +459,7 @@ Requires:	libvorbis-devel
 Requires:	libxcb-devel >= 1.4
 %{?with_libxml2:Requires:	libxml2-devel >= 2}
 %{?with_lv2:Requires:	lilv-devel}
-%{?with_mfx:Requires:	mfx_dispatch-devel >= 1.19}
+%{?with_mfx:Requires:	mfx_dispatch-devel >= 1.28}
 %{?with_amr:Requires:	opencore-amr-devel}
 %{?with_opencv:Requires:	opencv-devel >= 2}
 %{?with_openh264:Requires:	openh264-devel >= 1.3}
@@ -468,14 +477,14 @@ Requires:	opus-devel
 Requires:	speex-devel >= 1:1.2-rc1
 %{?with_glslang:Requires:	spirv-tools-devel}
 %{?with_srt:Requires:	srt-devel >= 1.3}
-%{?with_svtav1:Requires:	svt-av1-devel >= 0.8.4}
+%{?with_svtav1:Requires:	svt-av1-devel >= 0.9.0}
 %{?with_tesseract:Requires:	tesseract-devel}
 Requires:	twolame-devel >= 0.3.10
 %{?with_uavs3d:Requires:	uavs3d-devel >= 1.1.41}
 %{?with_vapoursynth:Requires:	vapoursynth-devel >= 42}
 %{?with_vidstab:Requires:	vid.stab-devel >= 0.98}
 %{?with_voamrwbenc:Requires:	vo-amrwbenc-devel}
-%{?with_vmaf:Requires:	vmaf-devel >= 1.5.2}
+%{?with_vmaf:Requires:	vmaf-devel >= 2.0.0}
 %{?with_ilbc:Requires:	webrtc-libilbc-devel}
 %{?with_avs:Requires:	xavs-devel}
 %{?with_avs2:Requires:	xavs2-devel >= 1.3}
@@ -639,6 +648,7 @@ EOF
 	--enable-version3 \
 	%{?with_frei0r:--enable-frei0r} \
 	%{?with_ladspa:--enable-ladspa} \
+	%{?with_lcms:--enable-lcms2} \
 	%{?with_aom:--enable-libaom} \
 	%{?with_aribb24:--enable-libaribb24} \
 	--enable-libass \
@@ -662,6 +672,7 @@ EOF
 	%{?with_iec61883:--enable-libiec61883} \
 	%{?with_ilbc:--enable-libilbc} \
 	--enable-libjack \
+	%{?with_libjxl:--enable-libjxl} \
 	%{?with_kvazaar:--enable-libkvazaar} \
 	%{?with_libklvanc:--enable-libklvanc} \
 	%{?with_lensfun:--enable-liblensfun} \
@@ -676,6 +687,7 @@ EOF
 	--enable-libopenjpeg \
 	%{?with_openmpt:--enable-libopenmpt} \
 	--enable-libopus \
+	%{?with_libplacebo:--enable-libplacebo} \
 	%{?with_pulseaudio:--enable-libpulse} \
 	%{?with_rabbitmq:--enable-librabbitmq} \
 	%{?with_rav1e:--enable-librav1e} \
@@ -780,7 +792,7 @@ install -p ffmpeg-avconfig $RPM_BUILD_ROOT%{_bindir}/ffmpeg-avconfig
 
 # packaged as %doc in -doc
 %if %{with doc}
-%{__rm} $RPM_BUILD_ROOT%{_docdir}/ffmpeg/*.html
+%{__rm} $RPM_BUILD_ROOT%{_docdir}/ffmpeg/*.{css,html}
 %endif
 
 install -d $RPM_BUILD_ROOT%{_examplesdir}
@@ -898,5 +910,5 @@ rm -rf $RPM_BUILD_ROOT
 %if %{with doc}
 %files doc
 %defattr(644,root,root,755)
-%doc doc/*.html
+%doc doc/*.{css,html}
 %endif
