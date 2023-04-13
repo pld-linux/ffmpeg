@@ -89,7 +89,7 @@
 %bcond_without	zimg		# zscale filter based on z.lib
 %bcond_without	zmq		# 0MQ message passing
 %bcond_without	zvbi		# teletext via libzvbi
-%bcond_without	doc		# don't build docs
+%bcond_without	doc		# HTML documentation
 %bcond_with	tests		# "make check" (some tests fail as of 2.5)
 
 %if %{with bootstrap}
@@ -326,7 +326,7 @@ Requires:	gnutls-libs >= 3.0.20
 Requires:	libass >= 0.11.0
 %{?with_libmysofa:Requires:	libmysofa >= 0.7}
 %{?with_openmpt:Requires: libopenmpt >= 0.4.5}
-%{?with_libplacebo:BuildRequires:	libplacebo >= 4.192.0}
+%{?with_libplacebo:Requires:	libplacebo >= 4.192.0}
 %{?with_librist:Requires:	librist >= 0.2}
 %{?with_theora:Requires:	libtheora >= 1.0-0.beta3}
 %if %{with va}
@@ -388,16 +388,16 @@ Requires:	%{name}-libs = %{version}-%{release}
 %{?with_openal:Requires:	OpenAL-devel >= 1.1}
 %{?with_opencl:Requires:	OpenCL-devel >= 1.2}
 %{?with_opengl:Requires:	OpenGL-devel}
-%{?with_vulkan:Requires:	Vulkan-Loader-devel >= 1.2.189}
 Requires:	SDL2-devel >= 2.0.1
+%{?with_vulkan:Requires:	Vulkan-Loader-devel >= 1.2.189}
 Requires:	alsa-lib-devel
 %{?with_aom:Requires:	aom-devel >= 1.0.0}
 %{?with_aribb24:Requires:	aribb24-devel}
-%{?with_avs2:Requires:	davs2-devel >= 1.6}
 Requires:	bzip2-devel
 Requires:	celt-devel >= 0.11.0
 %{?with_codec2:Requires:	codec2-devel}
 %{?with_dav1d:Requires:	dav1d-devel >= 0.5.0}
+%{?with_avs2:Requires:	davs2-devel >= 1.6}
 %{?with_fdk_aac:Requires:	fdk-aac-devel}
 %{?with_flite:Requires:	flite-devel >= 1.4}
 Requires:	fontconfig-devel
@@ -461,6 +461,7 @@ Requires:	opus-devel
 %{?with_rav1e:Requires:	rav1e-devel >= 0.4.0}
 %{?with_rkmpp:Requires:	rockchip-mpp-devel >= 1.3.7}
 %{?with_rubberband:Requires:	rubberband-devel >= 1.8.1}
+%{?with_shaderc:Requires:	shaderc-devel >= 2019.1}
 %{?with_shine:Requires:	shine-devel >= 3.0.0}
 %{?with_snappy:Requires:	snappy-devel}
 %{?with_soxr:Requires:	soxr-devel}
