@@ -2,7 +2,7 @@
 # - avisynth+ >= 3.7.1 https://github.com/AviSynth/AviSynthPlus
 # - libopenvino
 # - libtensorflow [-ltensorflow tensorflow/c/c_api.h]
-# - AMF >= 1.4.9.0 (available at https://github.com/GPUOpen-LibrariesAndSDKs/AMF, where is original source?)
+# - AMF >= 1.4.28.0 (available at https://github.com/GPUOpen-LibrariesAndSDKs/AMF, where is original source?)
 #
 # How to deal with ffmpeg/opencv/chromaprint checken-egg problem:
 #	1. make-request -r --with bootstrap ffmpeg.spec
@@ -83,6 +83,7 @@
 %bcond_without	vidstab		# vid.stab video stabilization support
 %bcond_without	vmaf		# VMAF filter support
 %bcond_without	voamrwbenc	# MR-WB encoding via libvo-amrwbenc
+%bcond_with	vpl		# oneVPL instead of MFX
 %bcond_without	vpx		# VP8, a high-quality video codec
 %bcond_without	vulkan		# Vulkan code
 %bcond_without	webp		# WebP encoding support
@@ -105,6 +106,9 @@
 %if %{with glslang}
 %undefine	with_shaderc
 %endif
+%if %{with vpl}
+%undefine	with_mfx
+%endif
 
 %ifnarch %{ix86} %{x8664}
 %undefine	with_ffnvcodec
@@ -124,7 +128,7 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	5.1.3
+Version:	6.0
 Release:	0.1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
@@ -133,7 +137,7 @@ Release:	0.1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	https://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	a2a4d7209c2d7627b0e18afe996c8e9b
+# Source0-md5:	47b6c5d930937413c3e308e2fdb3dfb5
 Patch0:		%{name}-omx-libnames.patch
 Patch1:		%{name}-atadenoise.patch
 Patch2:		opencv4.patch
@@ -217,10 +221,10 @@ BuildRequires:	libvdpau-devel >= 1.3
 BuildRequires:	libvorbis-devel
 %{?with_vpx:BuildRequires:	libvpx-devel >= 1.4.0}
 %{?with_webp:BuildRequires:	libwebp-devel >= 0.4.0}
-# X264_BUILD >= 118
-%{?with_x264:BuildRequires:	libx264-devel >= 0.1.3-1.20111212_2245}
-# X265_BUILD >= 70
-%{?with_x265:BuildRequires:	libx265-devel >= 1.9}
+# X264_BUILD >= 122
+%{?with_x264:BuildRequires:	libx264-devel >= 0.1.3-1.20130827_2245}
+# X265_BUILD >= 89
+%{?with_x265:BuildRequires:	libx265-devel >= 2.0}
 # libxcb xcb-shm xcb-xfixes xcb-shape
 BuildRequires:	libxcb-devel >= 1.4
 %{?with_libxml2:BuildRequires:	libxml2-devel >= 2}
@@ -233,7 +237,8 @@ BuildRequires:	libxcb-devel >= 1.4
 BuildRequires:	nasm
 %endif
 %endif
-%{?with_ffnvcodec:BuildRequires:	nv-codec-headers >= 9.1.23.1}
+%{?with_ffnvcodec:BuildRequires:	nv-codec-headers >= 12.0.16.0}
+%{?with_vpl:BuildRequires:	oneVPL-devel >= 2.6}
 # amrnb,amrwb
 %{?with_amr:BuildRequires:	opencore-amr-devel}
 %{?with_opencv:BuildRequires:	opencv-devel >= 2}
@@ -246,7 +251,7 @@ BuildRequires:	perl-tools-pod
 BuildRequires:	pkgconfig
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
 %{?with_rabbitmq:BuildRequires:	rabbitmq-c-devel >= 0.7.1}
-%{?with_rav1e:BuildRequires:	rav1e-devel >= 0.4.0}
+%{?with_rav1e:BuildRequires:	rav1e-devel >= 0.5.0}
 %{?with_rkmpp:BuildRequires:	rockchip-mpp-devel >= 1.3.7}
 BuildRequires:	rpmbuild(macros) >= 2.007
 %{?with_rubberband:BuildRequires:	rubberband-devel >= 1.8.1}
@@ -343,16 +348,17 @@ Requires:	libva-x11 >= 1.0.3
 Requires:	libvdpau >= 1.3
 %{?with_vpx:Requires:	libvpx >= 1.4.0}
 %{?with_webp:Requires:	libwebp >= 0.4.0}
-%{?with_x264:Requires:	libx264 >= 0.1.3-1.20111212_2245}
-%{?with_x265:Requires:	libx265 >= 1.9}
+%{?with_x264:Requires:	libx264 >= 0.1.3-1.20130827_2245}
+%{?with_x265:Requires:	libx265 >= 2.0}
 Requires:	libxcb >= 1.4
 Requires:	lame-libs >= 3.98.3
 %{?with_lcms:Requires:	lcms2 >= 2.13}
 %{?with_mfx:Requires:	mfx_dispatch >= 1.28}
+%{?with_vpl:Requires:	oneVPL >= 2.6}
 %{?with_openh264:Requires:	openh264 >= 1.3}
 Requires:	openjpeg2 >= 2.1
 %{?with_rabbitmq:Requires:	rabbitmq-c >= 0.7.1}
-%{?with_rav1e:Requires:	rav1e-libs >= 0.4.0}
+%{?with_rav1e:Requires:	rav1e-libs >= 0.5.0}
 %{?with_rkmpp:Requires:	rockchip-mpp >= 1.3.7}
 %{?with_rubberband:Requires:	rubberband-libs >= 1.8.1}
 %{?with_shine:Requires:	shine >= 3.0.0}
@@ -453,13 +459,14 @@ Requires:	libvdpau-devel >= 1.3
 Requires:	libvorbis-devel
 %{?with_vpx:Requires:	libvpx-devel >= 1.4.0}
 %{?with_webp:Requires:	libwebp-devel >= 0.4.0}
-%{?with_x264:Requires:	libx264-devel >= 0.1.3-1.20110625_2245}
-%{?with_x265:Requires:	libx265-devel >= 1.9}
+%{?with_x264:Requires:	libx264-devel >= 0.1.3-1.20130827_2245}
+%{?with_x265:Requires:	libx265-devel >= 2.0}
 # libxcb xcb-shm xcb-xfixes xcb-shape
 Requires:	libxcb-devel >= 1.4
 %{?with_libxml2:Requires:	libxml2-devel >= 2}
 %{?with_lv2:Requires:	lilv-devel}
 %{?with_mfx:Requires:	mfx_dispatch-devel >= 1.28}
+%{?with_vpl:Requires:	oneVPL-devel >= 2.6}
 %{?with_amr:Requires:	opencore-amr-devel}
 %{?with_opencv:Requires:	opencv-devel >= 2}
 %{?with_openh264:Requires:	openh264-devel >= 1.3}
@@ -467,7 +474,7 @@ Requires:	openjpeg2-devel >= 2.1
 Requires:	opus-devel
 %{?with_pulseaudio:Requires:	pulseaudio-devel}
 %{?with_rabbitmq:Requires:	rabbitmq-c-devel >= 0.7.1}
-%{?with_rav1e:Requires:	rav1e-devel >= 0.4.0}
+%{?with_rav1e:Requires:	rav1e-devel >= 0.5.0}
 %{?with_rkmpp:Requires:	rockchip-mpp-devel >= 1.3.7}
 %{?with_rubberband:Requires:	rubberband-devel >= 1.8.1}
 %{?with_shaderc:Requires:	shaderc-devel >= 2019.1}
@@ -832,21 +839,21 @@ rm -rf $RPM_BUILD_ROOT
 %files libs
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libavcodec.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavcodec.so.59
+%attr(755,root,root) %ghost %{_libdir}/libavcodec.so.60
 %attr(755,root,root) %{_libdir}/libavdevice.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavdevice.so.59
+%attr(755,root,root) %ghost %{_libdir}/libavdevice.so.60
 %attr(755,root,root) %{_libdir}/libavfilter.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavfilter.so.8
+%attr(755,root,root) %ghost %{_libdir}/libavfilter.so.9
 %attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavformat.so.59
+%attr(755,root,root) %ghost %{_libdir}/libavformat.so.60
 %attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavutil.so.57
+%attr(755,root,root) %ghost %{_libdir}/libavutil.so.58
 %attr(755,root,root) %{_libdir}/libpostproc.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libpostproc.so.56
+%attr(755,root,root) %ghost %{_libdir}/libpostproc.so.57
 %attr(755,root,root) %{_libdir}/libswresample.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libswresample.so.4
 %attr(755,root,root) %{_libdir}/libswscale.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libswscale.so.6
+%attr(755,root,root) %ghost %{_libdir}/libswscale.so.7
 
 %files devel
 %defattr(644,root,root,755)
