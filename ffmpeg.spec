@@ -218,7 +218,7 @@ BuildRequires:	libvorbis-devel
 BuildRequires:	libxcb-devel >= 1.4
 %{?with_libxml2:BuildRequires:	libxml2-devel >= 2}
 %{?with_lv2:BuildRequires:	lilv-devel}
-%{?with_v4l2_request:BuildRequires:	linux-libc-headers >= 7:5.11.0}
+%{?with_v4l2_request:BuildRequires:	linux-libc-headers >= 7:6.0.0}
 %{?with_lv2:BuildRequires:	lv2-devel}
 %{?with_mfx:BuildRequires:	mfx_dispatch-devel >= 1.19}
 %ifarch %{ix86}
