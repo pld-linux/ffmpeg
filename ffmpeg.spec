@@ -634,8 +634,8 @@ EOF
 	--libdir=%{_libdir} \
 	--shlibdir=%{_libdir} \
 	--mandir=%{_mandir} \
-	--extra-cflags="-D_GNU_SOURCE=1 %{rpmcppflags} %{rpmcflags}%{?with_decklink: -I/usr/include/decklink} -I/usr/include/opencv4" \
-	--extra-cxxflags="-D_GNU_SOURCE=1 %{rpmcppflags} %{rpmcxxflags}%{?with_decklink: -I/usr/include/decklink} -I/usr/include/opencv4" \
+	--extra-cflags="-D_GNU_SOURCE=1 %{rpmcppflags} %{rpmcflags}%{?with_decklink: -I/usr/include/decklink}%{?with_opencv: -I/usr/include/opencv4}" \
+	--extra-cxxflags="-D_GNU_SOURCE=1 %{rpmcppflags} %{rpmcxxflags}%{?with_decklink: -I/usr/include/decklink}%{?with_opencv: -I/usr/include/opencv4}" \
 	--extra-ldflags="%{rpmcflags} %{rpmldflags}" \
 %ifarch %{armv6}
 	--extra-libs="-latomic" \
