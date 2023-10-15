@@ -56,7 +56,7 @@
 %bcond_without	omx		# OpenMAX IL support
 %bcond_without	openal		# OpenAL 1.1 capture support
 %bcond_without	opencl		# OpenCL 1.2 code
-%bcond_without	opencv		# OpenCV video filtering
+%bcond_with	opencv		# OpenCV video filtering
 %bcond_without	opengl		# OpenGL rendering support
 %bcond_with	openh264	# OpenH264 H.264 encoder
 %bcond_without	openmpt		# OpenMPT module decoder
@@ -129,7 +129,7 @@ Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
 Version:	6.0
-Release:	0.1
+Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
 # v3 (allows *GPLv3 or Apache-licensed libs): gmp lensfun opencore-amr vmaf vo-*enc rkmpp
