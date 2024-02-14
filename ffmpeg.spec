@@ -128,7 +128,7 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	6.0
+Version:	6.0.1
 Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
@@ -137,12 +137,11 @@ Release:	1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	https://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	47b6c5d930937413c3e308e2fdb3dfb5
+# Source0-md5:	ce0e7f8abc6b72bb345d1b854760236d
 Patch0:		%{name}-omx-libnames.patch
 Patch1:		%{name}-atadenoise.patch
 Patch2:		opencv4.patch
 Patch3:		v4l2-request-hwdec.patch
-Patch4:		binutils2.41.patch
 URL:		http://www.ffmpeg.org/
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.11}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
@@ -561,7 +560,6 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 %if %{with v4l2_request}
 %patch3 -p1
 %endif
-%patch4 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
