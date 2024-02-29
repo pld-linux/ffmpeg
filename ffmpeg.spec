@@ -1,8 +1,8 @@
 # TODO:
-# - avisynth+ >= 3.7.1 https://github.com/AviSynth/AviSynthPlus
+# - avisynth+ >= 3.7.3 https://github.com/AviSynth/AviSynthPlus
 # - libopenvino
 # - libtensorflow [-ltensorflow tensorflow/c/c_api.h]
-# - AMF >= 1.4.28.0 (available at https://github.com/GPUOpen-LibrariesAndSDKs/AMF, where is original source?)
+# - AMF >= 1.4.29.0 (available at https://github.com/GPUOpen-LibrariesAndSDKs/AMF, where is original source?)
 #
 # How to deal with ffmpeg/opencv/chromaprint checken-egg problem:
 #	1. make-request -r --with bootstrap ffmpeg.spec
@@ -31,7 +31,7 @@
 %bcond_without	ffnvcodec	# NVIDIA codecs support using ffnvcodec headers (covered: cuda cuvid nvdec nvenc)
 %bcond_without	flite		# flite voice synthesis support
 %bcond_without	frei0r		# frei0r video filtering
-%bcond_without	fribidi		# fribidi support
+%bcond_without	fribidi		# fribidi support in drawtext filter
 %bcond_with	glslang		# GLSL->SPIRV compilation via libglslang
 %bcond_without	gme		# Game Music Emu support
 %bcond_without	gsm		# GSM de/encoding via libgsm
@@ -41,6 +41,7 @@
 %bcond_without	ladspa		# LADSPA audio filtering
 %bcond_without	lcms		# ICC profile support via lcms2
 %bcond_with	lensfun		# lensfun lens correction
+%bcond_with	libaribcaption	# ARIB text and caption decoding via libaribcaption
 %bcond_with	libdrm		# Linux Direct Rendering Manager code
 %bcond_without	libjxl		# JPEG XL de/encoding via libjxl
 %bcond_with	libklvanc	# Kernel Labs VANC processing (in decklink driver)
@@ -128,8 +129,8 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	6.0.1
-Release:	1
+Version:	6.1.1
+Release:	0.1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
 # v3 (allows *GPLv3 or Apache-licensed libs): gmp lensfun opencore-amr vmaf vo-*enc rkmpp
@@ -137,7 +138,7 @@ Release:	1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	https://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	ce0e7f8abc6b72bb345d1b854760236d
+# Source0-md5:	341d719415b7f95bb59f5016f2864ac6
 Patch0:		%{name}-omx-libnames.patch
 Patch1:		%{name}-atadenoise.patch
 Patch2:		opencv4.patch
@@ -151,7 +152,7 @@ URL:		http://www.ffmpeg.org/
 %{?with_omx:BuildRequires:	OpenMAX-IL-devel}
 BuildRequires:	SDL2-devel >= 2.0.1
 BuildRequires:	SDL2-devel < 3.0.0
-%{?with_vulkan:BuildRequires:	Vulkan-Loader-devel >= 1.2.189}
+%{?with_vulkan:BuildRequires:	Vulkan-Loader-devel >= 1.3.255}
 BuildRequires:	alsa-lib-devel
 %{?with_aom:BuildRequires:	aom-devel >= 1.0.0}
 %{?with_aribb24:BuildRequires:	aribb24-devel}
@@ -167,6 +168,7 @@ BuildRequires:	freetype-devel
 %{?with_frei0r:BuildRequires:	frei0r-devel}
 %{?with_fribidi:BuildRequires:	fribidi-devel}
 %{?with_gme:BuildRequires:	game-music-emu-devel}
+BuildRequires:	harfbuzz-devel
 %ifarch ppc
 # require version with altivec support fixed
 BuildRequires:	gcc >= 5:3.3.2-3
@@ -175,11 +177,12 @@ BuildRequires:	gcc >= 5:3.3.2-3
 BuildRequires:	gmp-devel
 BuildRequires:	gnutls-devel
 BuildRequires:	jack-audio-connection-kit-devel
-%{?with_kvazaar:BuildRequires:	kvazaar-devel >= 0.8.1}
+%{?with_kvazaar:BuildRequires:	kvazaar-devel >= 2.0.0}
 %{?with_ladspa:BuildRequires:	ladspa-devel}
 BuildRequires:	lame-libs-devel >= 3.98.3
 %{?with_lcms:BuildRequires:	lcms2-devel >= 2.13}
 %{?with_lensfun:BuildRequires:	lensfun-devel >= 0.3.95}
+%{?with_aribcaption:BuildRequires:	libaribcaption-devel}
 BuildRequires:	libass-devel >= 0.11.0
 %ifarch %{armv6}
 BuildRequires:	libatomic-devel
@@ -207,7 +210,7 @@ BuildRequires:	libraw1394-devel >= 2
 %{?with_librist:BuildRequires:	librist-devel >= 0.2.7}
 %{?with_librsvg:BuildRequires:	librsvg-devel >= 2}
 BuildRequires:	librtmp-devel
-%{?with_ssh:BuildRequires:	libssh-devel}
+%{?with_ssh:BuildRequires:	libssh-devel >= 0.6.0}
 %{?with_smb:BuildRequires:	libsmbclient-devel}
 %{?with_theora:BuildRequires:	libtheora-devel >= 1.0-0.beta3}
 BuildRequires:	libtool >= 2:1.4d-3
@@ -237,7 +240,7 @@ BuildRequires:	libxcb-devel >= 1.4
 BuildRequires:	nasm
 %endif
 %endif
-%{?with_ffnvcodec:BuildRequires:	nv-codec-headers >= 12.0.16.0}
+%{?with_ffnvcodec:BuildRequires:	nv-codec-headers >= 12.1.14.0}
 %{?with_vpl:BuildRequires:	oneVPL-devel >= 2.6}
 # amrnb,amrwb
 %{?with_amr:BuildRequires:	opencore-amr-devel}
@@ -322,7 +325,7 @@ Summary:	ffmpeg libraries
 Summary(pl.UTF-8):	Biblioteki ffmpeg
 Group:		Libraries
 Requires:	SDL2 >= 2.0.1
-%{?with_vulkan:Requires:	Vulkan-Loader >= 1.2.189}
+%{?with_vulkan:Requires:	Vulkan-Loader >= 1.3.255}
 %{?with_aom:Requires:	aom >= 1.0.0}
 Requires:	celt >= 0.11.0
 %{?with_dav1d:Requires:	dav1d >= 0.5.0}
@@ -332,13 +335,14 @@ Requires:	celt >= 0.11.0
 # uses gnutls_certificate_set_x509_system_trust if >= 3.0.20
 Requires:	gnutls-libs >= 3.0.20
 %endif
-%{?with_kvazaar:Requires:	kvazaar-libs >= 0.8.1}
+%{?with_kvazaar:Requires:	kvazaar-libs >= 2.0.0}
 Requires:	libass >= 0.11.0
 %{?with_libjxl:Requires:	libjxl >= 0.7.0}
 %{?with_libmysofa:Requires:	libmysofa >= 0.7}
 %{?with_openmpt:Requires: libopenmpt >= 0.4.5}
 %{?with_libplacebo:Requires:	libplacebo >= 4.192.0}
 %{?with_librist:Requires:	librist >= 0.2.7}
+%{?with_ssh:Requires:	libssh >= 0.6.0}
 %{?with_theora:Requires:	libtheora >= 1.0-0.beta3}
 %if %{with va}
 Requires:	libva >= 1.0.3
@@ -402,7 +406,7 @@ Requires:	%{name}-libs = %{version}-%{release}
 %{?with_opencl:Requires:	OpenCL-devel >= 1.2}
 %{?with_opengl:Requires:	OpenGL-devel}
 Requires:	SDL2-devel >= 2.0.1
-%{?with_vulkan:Requires:	Vulkan-Loader-devel >= 1.2.189}
+%{?with_vulkan:Requires:	Vulkan-Loader-devel >= 1.3.255}
 Requires:	alsa-lib-devel
 %{?with_aom:Requires:	aom-devel >= 1.0.0}
 %{?with_aribb24:Requires:	aribb24-devel}
@@ -419,11 +423,13 @@ Requires:	freetype-devel
 %{?with_gme:Requires:	game-music-emu-devel}
 %{?with_glslang:Requires:	glslang-devel}
 Requires:	gnutls-devel
+Requires:	harfbuzz-devel
 Requires:	jack-audio-connection-kit-devel
-%{?with_kvazaar:Requires:	kvazaar-devel >= 0.8.1}
+%{?with_kvazaar:Requires:	kvazaar-devel >= 2.0.0}
 Requires:	lame-libs-devel >= 3.98.3
 %{?with_lcms:Requires:	lcms2-devel >= 2.13}
 %{?with_lensfun:Requires:	lensfun-devel >= 0.3.95}
+%{?with_libaribcaption:Requires:	libaribcaption-devel}
 Requires:	libass-devel >= 0.11.0
 %{?with_iec61883:Requires:	libavc1394-devel}
 Requires:	libbluray-devel
@@ -448,7 +454,7 @@ Requires:	libraw1394-devel >= 2
 %{?with_librsvg:Requires:	librsvg-devel >= 2}
 Requires:	librtmp-devel
 %{?with_smb:Requires:	libsmbclient-devel}
-%{?with_ssh:Requires:	libssh-devel}
+%{?with_ssh:Requires:	libssh-devel >= 0.6.0}
 Requires:	libstdc++-devel
 %{?with_theora:Requires:	libtheora-devel >= 1.0-0.beta3}
 Requires:	libv4l-devel
@@ -658,6 +664,7 @@ EOF
 	%{?with_lcms:--enable-lcms2} \
 	%{?with_aom:--enable-libaom} \
 	%{?with_aribb24:--enable-libaribb24} \
+	%{?with_libaribcaption:--enable-libaribcaption} \
 	--enable-libass \
 	--enable-libbluray \
 	%{?with_bs2b:--enable-libbs2b} \
@@ -676,6 +683,7 @@ EOF
 	%{?with_glslang:--enable-libglslang} \
 	%{?with_gme:--enable-libgme} \
 	%{?with_gsm:--enable-libgsm} \
+	--enable-libharfbuzz \
 	%{?with_iec61883:--enable-libiec61883} \
 	%{?with_ilbc:--enable-libilbc} \
 	--enable-libjack \
