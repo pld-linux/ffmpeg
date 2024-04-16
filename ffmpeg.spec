@@ -95,6 +95,7 @@
 %bcond_without	zmq		# 0MQ message passing
 %bcond_without	zvbi		# teletext via libzvbi
 %bcond_without	doc		# HTML documentation
+%bcond_without	static_libs	# static libraries
 %bcond_with	tests		# "make check" (some tests fail as of 2.5)
 
 %if %{with bootstrap}
@@ -753,6 +754,7 @@ EOF
 	--enable-pthreads \
 	%{?with_rkmpp:--enable-rkmpp} \
 	--enable-shared \
+	%{!?with_static_libs:--disable-static} \
 	--enable-swscale \
 	%{!?with_va:--disable-vaapi} \
 	%{?with_vapoursynth:--enable-vapoursynth} \
@@ -906,6 +908,7 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 %{_examplesdir}/%{name}-%{version}
 
+%if %{with static_libs}
 %files static
 %defattr(644,root,root,755)
 %{_libdir}/libavcodec.a
@@ -916,6 +919,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libpostproc.a
 %{_libdir}/libswresample.a
 %{_libdir}/libswscale.a
+%endif
 
 %files ffplay
 %defattr(644,root,root,755)
