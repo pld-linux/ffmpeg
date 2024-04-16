@@ -130,9 +130,6 @@
 %ifarch i386 i486
 %undefine	with_x265
 %endif
-%ifarch i686 pentium4 athlon %{x8664} x32
-%define		with_crystalhd	1
-%endif
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
@@ -201,7 +198,6 @@ BuildRequires:	libbluray-devel
 %{?with_caca:BuildRequires:	libcaca-devel}
 BuildRequires:	libcdio-paranoia-devel >= 0.90-2
 %{?with_chromaprint:BuildRequires:	libchromaprint-devel}
-%{?with_crystalhd:BuildRequires:	libcrystalhd-devel}
 %{?with_dc1394:BuildRequires:	libdc1394-devel >= 2}
 %{?with_libdrm:BuildRequires:	libdrm-devel}
 %{?with_dvd:BuildRequires:	libdvdnav-devel >= 6.1.1}
@@ -457,7 +453,6 @@ Requires:	libbluray-devel
 %{?with_caca:Requires:	libcaca-devel}
 Requires:	libcdio-paranoia-devel >= 0.90-2
 %{?with_chromaprint:Requires:	libchromaprint-devel}
-%{?with_crystalhd:Requires:	libcrystalhd-devel}
 %{?with_dc1394:Requires:	libdc1394-devel >= 2}
 %{?with_libdrm:Requires:	libdrm-devel}
 %{?with_dvd:Requires:	libdvdnav-devel >= 6.1.1}
