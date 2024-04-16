@@ -187,7 +187,7 @@ BuildRequires:	lame-libs-devel >= 3.98.3
 %{?with_lensfun:BuildRequires:	lensfun-devel >= 0.3.95}
 %{?with_aribcaption:BuildRequires:	libaribcaption-devel}
 BuildRequires:	libass-devel >= 0.11.0
-%ifarch %{armv6}
+%ifnarch %arch_with_atomics64
 BuildRequires:	libatomic-devel
 %endif
 %{?with_iec61883:BuildRequires:	libavc1394-devel}
@@ -259,7 +259,7 @@ BuildRequires:	pkgconfig
 %{?with_rabbitmq:BuildRequires:	rabbitmq-c-devel >= 0.7.1}
 %{?with_rav1e:BuildRequires:	rav1e-devel >= 0.5.0}
 %{?with_rkmpp:BuildRequires:	rockchip-mpp-devel >= 1.3.7}
-BuildRequires:	rpmbuild(macros) >= 2.007
+BuildRequires:	rpmbuild(macros) >= 2.025
 %{?with_rubberband:BuildRequires:	rubberband-devel >= 1.8.1}
 %{?with_shaderc:BuildRequires:	shaderc-devel >= 2019.1}
 %{?with_shine:BuildRequires:	shine-devel >= 3.0.0}
@@ -647,9 +647,6 @@ EOF
 	--extra-cflags="-D_GNU_SOURCE=1 %{rpmcppflags} %{rpmcflags}%{?with_decklink: -I/usr/include/decklink}%{?with_opencv: -I/usr/include/opencv4}" \
 	--extra-cxxflags="-D_GNU_SOURCE=1 %{rpmcppflags} %{rpmcxxflags}%{?with_decklink: -I/usr/include/decklink}%{?with_opencv: -I/usr/include/opencv4}" \
 	--extra-ldflags="%{rpmcflags} %{rpmldflags}" \
-%ifarch %{armv6}
-	--extra-libs="-latomic" \
-%endif
 	--cc="%{__cc}" \
 	--disable-debug \
 	--disable-optimizations \
