@@ -129,6 +129,7 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
+# NOTE: 7.0 prepared on DEVEL-7 branch, but other software is not ready (e.g. xine-lib 1.2.13, gstreamer-libav 1.24.2)
 Version:	6.1.1
 Release:	3
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
@@ -143,7 +144,8 @@ Patch0:		%{name}-omx-libnames.patch
 Patch1:		%{name}-atadenoise.patch
 Patch2:		opencv4.patch
 Patch3:		v4l2-request-hwdec.patch
-URL:		http://www.ffmpeg.org/
+Patch4:		%{name}-vulkan1.3.280.patch
+URL:		https://ffmpeg.org/
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.11}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
 %{?with_opencl:BuildRequires:	OpenCL-devel >= 1.2}
@@ -152,7 +154,7 @@ URL:		http://www.ffmpeg.org/
 %{?with_omx:BuildRequires:	OpenMAX-IL-devel}
 BuildRequires:	SDL2-devel >= 2.0.1
 BuildRequires:	SDL2-devel < 3.0.0
-%{?with_vulkan:BuildRequires:	Vulkan-Loader-devel >= 1.3.255}
+%{?with_vulkan:BuildRequires:	Vulkan-Loader-devel >= 1.3.277}
 BuildRequires:	alsa-lib-devel
 %{?with_aom:BuildRequires:	aom-devel >= 1.0.0}
 %{?with_aribb24:BuildRequires:	aribb24-devel}
@@ -325,7 +327,7 @@ Summary:	ffmpeg libraries
 Summary(pl.UTF-8):	Biblioteki ffmpeg
 Group:		Libraries
 Requires:	SDL2 >= 2.0.1
-%{?with_vulkan:Requires:	Vulkan-Loader >= 1.3.255}
+%{?with_vulkan:Requires:	Vulkan-Loader >= 1.3.277}
 %{?with_aom:Requires:	aom >= 1.0.0}
 Requires:	celt >= 0.11.0
 %{?with_dav1d:Requires:	dav1d >= 0.5.0}
@@ -406,7 +408,7 @@ Requires:	%{name}-libs = %{version}-%{release}
 %{?with_opencl:Requires:	OpenCL-devel >= 1.2}
 %{?with_opengl:Requires:	OpenGL-devel}
 Requires:	SDL2-devel >= 2.0.1
-%{?with_vulkan:Requires:	Vulkan-Loader-devel >= 1.3.255}
+%{?with_vulkan:Requires:	Vulkan-Loader-devel >= 1.3.277}
 Requires:	alsa-lib-devel
 %{?with_aom:Requires:	aom-devel >= 1.0.0}
 %{?with_aribb24:Requires:	aribb24-devel}
@@ -566,6 +568,7 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 %if %{with v4l2_request}
 %patch3 -p1
 %endif
+%patch4 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
