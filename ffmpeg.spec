@@ -84,7 +84,7 @@
 %bcond_without	vidstab		# vid.stab video stabilization support
 %bcond_without	vmaf		# VMAF filter support
 %bcond_without	voamrwbenc	# MR-WB encoding via libvo-amrwbenc
-%bcond_with	vpl		# oneVPL instead of MFX
+%bcond_with	vpl		# libvpl instead of MFX
 %bcond_without	vpx		# VP8, a high-quality video codec
 %bcond_without	vulkan		# Vulkan code
 %bcond_without	webp		# WebP encoding support
@@ -225,6 +225,7 @@ BuildRequires:	libva-x11-devel >= 1.0.3
 %endif
 BuildRequires:	libvdpau-devel >= 1.3
 BuildRequires:	libvorbis-devel
+%{?with_vpl:BuildRequires:	libvpl-devel >= 2.6}
 %{?with_vpx:BuildRequires:	libvpx-devel >= 1.4.0}
 %{?with_webp:BuildRequires:	libwebp-devel >= 0.4.0}
 # X264_BUILD >= 122
@@ -244,7 +245,6 @@ BuildRequires:	nasm
 %endif
 %endif
 %{?with_ffnvcodec:BuildRequires:	nv-codec-headers >= 12.1.14.0}
-%{?with_vpl:BuildRequires:	oneVPL-devel >= 2.6}
 # amrnb,amrwb
 %{?with_amr:BuildRequires:	opencore-amr-devel}
 %{?with_opencv:BuildRequires:	opencv-devel >= 2}
@@ -353,6 +353,7 @@ Requires:	libva-drm >= 1.0.3
 Requires:	libva-x11 >= 1.0.3
 %endif
 Requires:	libvdpau >= 1.3
+%{?with_vpl:Requires:	libvpl >= 2.6}
 %{?with_vpx:Requires:	libvpx >= 1.4.0}
 %{?with_webp:Requires:	libwebp >= 0.4.0}
 %{?with_x264:Requires:	libx264 >= 0.1.3-1.20130827_2245}
@@ -361,7 +362,6 @@ Requires:	libxcb >= 1.4
 Requires:	lame-libs >= 3.98.3
 %{?with_lcms:Requires:	lcms2 >= 2.13}
 %{?with_mfx:Requires:	mfx_dispatch >= 1.28}
-%{?with_vpl:Requires:	oneVPL >= 2.6}
 %{?with_openh264:Requires:	openh264 >= 1.3}
 Requires:	openjpeg2 >= 2.1
 %{?with_rabbitmq:Requires:	rabbitmq-c >= 0.7.1}
@@ -466,6 +466,7 @@ Requires:	libv4l-devel
 %{?with_va:Requires:	libva-x11-devel >= 1.0.3}
 Requires:	libvdpau-devel >= 1.3
 Requires:	libvorbis-devel
+%{?with_vpl:Requires:	libvpl-devel >= 2.6}
 %{?with_vpx:Requires:	libvpx-devel >= 1.4.0}
 %{?with_webp:Requires:	libwebp-devel >= 0.4.0}
 %{?with_x264:Requires:	libx264-devel >= 0.1.3-1.20130827_2245}
@@ -475,7 +476,6 @@ Requires:	libxcb-devel >= 1.4
 %{?with_libxml2:Requires:	libxml2-devel >= 2}
 %{?with_lv2:Requires:	lilv-devel}
 %{?with_mfx:Requires:	mfx_dispatch-devel >= 1.28}
-%{?with_vpl:Requires:	oneVPL-devel >= 2.6}
 %{?with_amr:Requires:	opencore-amr-devel}
 %{?with_opencv:Requires:	opencv-devel >= 2}
 %{?with_openh264:Requires:	openh264-devel >= 1.3}
