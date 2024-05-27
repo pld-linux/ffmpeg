@@ -17,6 +17,7 @@
 %bcond_without	amr		# AMR-NB/WB de/encoding via libopencore-amrnb/wb
 %bcond_without	aom		# AV1 viden de/encoding via libaom
 %bcond_without	aribb24		# ARIB text and caption decoding via libaribb24
+%bcond_without	avisynth	# AviSynth scripts support
 %bcond_without	avs		# AVS encoding via xavs
 %bcond_without	avs2		# AVS2 de/encoding via libdavs2/libxavs2
 %bcond_without	bs2b		# BS2B audio filter support
@@ -146,7 +147,9 @@ Patch1:		%{name}-atadenoise.patch
 Patch2:		opencv4.patch
 Patch3:		v4l2-request-hwdec.patch
 Patch4:		%{name}-vulkan1.3.280.patch
+Patch5:		%{name}-nvenc.patch
 URL:		https://ffmpeg.org/
+%{?with_avisynth:BuildRequires:	AviSynthPlus-devel >= 3.7.3}
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.11}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
 %{?with_opencl:BuildRequires:	OpenCL-devel >= 1.2}
@@ -382,6 +385,8 @@ Requires:	twolame-libs >= 0.3.10
 %{?with_zmq:Requires:	zeromq >= 4.2.1}
 %{?with_zimg:Requires:	zimg >= 2.7.0}
 %{?with_zvbi:Requires:	zvbi >= 0.2.28}
+# dlopened
+%{?with_avisynth:Suggests:	AviSynthPlus >= 3.7.3}
 
 %description libs
 This package contains the ffmpeg shared libraries:
@@ -570,6 +575,7 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 %patch3 -p1
 %endif
 %patch4 -p1
+%patch5 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
@@ -653,6 +659,7 @@ EOF
 	--disable-stripping \
 	%{!?with_doc:--disable-doc} \
 	--enable-avfilter \
+	%{?with_avisynth:--enable-avisynth} \
 	%{?with_chromaprint:--enable-chromaprint} \
 	%{?with_cudasdk:--enable-cuda-nvcc} \
 	%{?with_decklink:--enable-decklink} \
