@@ -1,0 +1,162 @@
+--- ffmpeg-6.1.1/libavutil/hwcontext_vaapi.c.orig	2023-11-11 01:25:17.000000000 +0100
++++ ffmpeg-6.1.1/libavutil/hwcontext_vaapi.c	2024-05-30 13:40:31.574621109 +0200
+@@ -1086,7 +1086,7 @@
+     int err, i, j;
+ 
+ #if !VA_CHECK_VERSION(1, 1, 0)
+-    unsigned long buffer_handle;
++    uintptr_t buffer_handle;
+     VASurfaceAttribExternalBuffers buffer_desc;
+     VASurfaceAttrib attrs[2] = {
+         {
+@@ -1203,7 +1203,7 @@
+ 
+     if (!use_prime2 || vas != VA_STATUS_SUCCESS) {
+         int k;
+-        unsigned long buffer_handle;
++        uintptr_t buffer_handle;
+         VASurfaceAttribExternalBuffers buffer_desc;
+         VASurfaceAttrib buffer_attrs[2] = {
+             {
+From 5860a966d2fffbbda1af0014f0a4d37a21c4f2ca Mon Sep 17 00:00:00 2001
+From: Lynne <dev@lynne.ee>
+Date: Wed, 31 Jan 2024 14:15:04 +0100
+Subject: [PATCH 1/1] lavfi/vsrc_testsrc_vulkan: fix -Wint-conversion
+
+While VK_NULL_HANDLE is equivalent to NULL on 64-bit platforms, the same is not
+true across all platforms.
+
+Fixes building with gcc-14.
+---
+ libavfilter/vsrc_testsrc_vulkan.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/libavfilter/vsrc_testsrc_vulkan.c b/libavfilter/vsrc_testsrc_vulkan.c
+index 8761c21dfd..1720bfac5e 100644
+--- a/libavfilter/vsrc_testsrc_vulkan.c
++++ b/libavfilter/vsrc_testsrc_vulkan.c
+@@ -231,7 +231,7 @@ static int testsrc_vulkan_activate(AVFilterContext *ctx)
+                 return AVERROR(ENOMEM);
+ 
+             err = ff_vk_filter_process_simple(&s->vkctx, &s->e, &s->pl, s->picref, NULL,
+-                                              NULL, &s->opts, sizeof(s->opts));
++                                              VK_NULL_HANDLE, &s->opts, sizeof(s->opts));
+             if (err < 0)
+                 return err;
+         }
+@@ -250,7 +250,7 @@ static int testsrc_vulkan_activate(AVFilterContext *ctx)
+     frame->sample_aspect_ratio = s->sar;
+     if (!s->draw_once) {
+         err = ff_vk_filter_process_simple(&s->vkctx, &s->e, &s->pl, frame, NULL,
+-                                          NULL, &s->opts, sizeof(s->opts));
++                                          VK_NULL_HANDLE, &s->opts, sizeof(s->opts));
+         if (err < 0) {
+             av_frame_free(&frame);
+             return err;
+-- 
+2.25.1
+
+From 2f24f10d9cf34ddce274496c4daa73f732d370c1 Mon Sep 17 00:00:00 2001
+From: Sam James <sam@gentoo.org>
+Date: Wed, 20 Dec 2023 12:32:43 +0000
+Subject: [PATCH] libavcodec: fix -Wint-conversion in vulkan
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf8
+Content-Transfer-Encoding: 8bit
+
+FIx warnings (soon to be errors in GCC 14, already so in Clang 15):
+```
+src/libavcodec/vulkan_av1.c: In function âvk_av1_create_paramsâ:
+src/libavcodec/vulkan_av1.c:183:43: error: initialization of âlong long unsigned intâ from âvoid *â makes integer from pointer without a cast [-Wint-conversion]
+  183 |         .videoSessionParametersTemplate = NULL,
+      |                                           ^~~~
+src/libavcodec/vulkan_av1.c:183:43: note: (near initialization for â(anonymous).videoSessionParametersTemplateâ)
+```
+
+Use Vulkan's VK_NULL_HANDLE instead of bare NULL.
+
+Fix Trac ticket #10724.
+
+Was reported downstream in Gentoo at https://bugs.gentoo.org/919067.
+
+Signed-off-by: Sam James <sam@gentoo.org>
+---
+ libavcodec/vulkan_av1.c    | 2 +-
+ libavcodec/vulkan_decode.c | 6 +++---
+ libavcodec/vulkan_h264.c   | 2 +-
+ libavcodec/vulkan_hevc.c   | 2 +-
+ libavcodec/vulkan_video.c  | 2 +-
+ 5 files changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/libavcodec/vulkan_av1.c b/libavcodec/vulkan_av1.c
+index 4998bf7ebc..9730e4b08d 100644
+--- a/libavcodec/vulkan_av1.c
++++ b/libavcodec/vulkan_av1.c
+@@ -180,7 +180,7 @@ static int vk_av1_create_params(AVCodecContext *avctx, AVBufferRef **buf)
+         .sType = VK_STRUCTURE_TYPE_VIDEO_SESSION_PARAMETERS_CREATE_INFO_KHR,
+         .pNext = &av1_params,
+         .videoSession = ctx->common.session,
+-        .videoSessionParametersTemplate = NULL,
++        .videoSessionParametersTemplate = VK_NULL_HANDLE,
+     };
+ 
+     err = ff_vk_decode_create_params(buf, avctx, ctx, &session_params_create);
+diff --git a/libavcodec/vulkan_decode.c b/libavcodec/vulkan_decode.c
+index a89d84fcaa..fdbcbb450a 100644
+--- a/libavcodec/vulkan_decode.c
++++ b/libavcodec/vulkan_decode.c
+@@ -188,9 +188,9 @@ int ff_vk_decode_prepare_frame(FFVulkanDecodeContext *dec, AVFrame *pic,
+         return 0;
+ 
+     vkpic->dpb_frame     = NULL;
+-    vkpic->img_view_ref  = NULL;
+-    vkpic->img_view_out  = NULL;
+-    vkpic->img_view_dest = NULL;
++    vkpic->img_view_ref  = VK_NULL_HANDLE;
++    vkpic->img_view_out  = VK_NULL_HANDLE;
++    vkpic->img_view_dest = VK_NULL_HANDLE;
+ 
+     vkpic->destroy_image_view = vk->DestroyImageView;
+     vkpic->wait_semaphores = vk->WaitSemaphores;
+diff --git a/libavcodec/vulkan_h264.c b/libavcodec/vulkan_h264.c
+index e727aafb16..39c123ddca 100644
+--- a/libavcodec/vulkan_h264.c
++++ b/libavcodec/vulkan_h264.c
+@@ -315,7 +315,7 @@ static int vk_h264_create_params(AVCodecContext *avctx, AVBufferRef **buf)
+         .sType = VK_STRUCTURE_TYPE_VIDEO_SESSION_PARAMETERS_CREATE_INFO_KHR,
+         .pNext = &h264_params,
+         .videoSession = ctx->common.session,
+-        .videoSessionParametersTemplate = NULL,
++        .videoSessionParametersTemplate = VK_NULL_HANDLE,
+     };
+ 
+     /* SPS list */
+diff --git a/libavcodec/vulkan_hevc.c b/libavcodec/vulkan_hevc.c
+index 99fdcf3b45..033172cbd6 100644
+--- a/libavcodec/vulkan_hevc.c
++++ b/libavcodec/vulkan_hevc.c
+@@ -653,7 +653,7 @@ static int vk_hevc_create_params(AVCodecContext *avctx, AVBufferRef **buf)
+         .sType = VK_STRUCTURE_TYPE_VIDEO_SESSION_PARAMETERS_CREATE_INFO_KHR,
+         .pNext = &h265_params,
+         .videoSession = ctx->common.session,
+-        .videoSessionParametersTemplate = NULL,
++        .videoSessionParametersTemplate = VK_NULL_HANDLE,
+     };
+ 
+     HEVCHeaderSet *hdr;
+diff --git a/libavcodec/vulkan_video.c b/libavcodec/vulkan_video.c
+index 5fa8292b28..fb20315db4 100644
+--- a/libavcodec/vulkan_video.c
++++ b/libavcodec/vulkan_video.c
+@@ -287,7 +287,7 @@ av_cold void ff_vk_video_common_uninit(FFVulkanContext *s,
+     if (common->session) {
+         vk->DestroyVideoSessionKHR(s->hwctx->act_dev, common->session,
+                                    s->hwctx->alloc);
+-        common->session = NULL;
++        common->session = VK_NULL_HANDLE;
+     }
+ 
+     if (common->nb_mem && common->mem)
+-- 
+2.25.1
+
