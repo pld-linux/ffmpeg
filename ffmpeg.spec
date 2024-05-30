@@ -119,7 +119,7 @@
 %ifnarch %{ix86} %{x8664} aarch64
 %undefine	with_rav1e
 %endif
-%ifnarch %{ix86} %{x8664} %{arm}
+%ifnarch %{ix86} %{x8664} %{arm} aarch64
 %undefine	with_x265
 %endif
 %ifarch i386 i486
