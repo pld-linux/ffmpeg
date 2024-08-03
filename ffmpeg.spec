@@ -147,6 +147,7 @@ Patch1:		%{name}-atadenoise.patch
 Patch2:		opencv4.patch
 Patch3:		v4l2-request-hwdec.patch
 Patch4:		ffmpeg-vulkan1.3.280.patch
+Patch5:		gcc14.patch
 URL:		https://ffmpeg.org/
 %{?with_avisynth:BuildRequires:	AviSynthPlus-devel >= 3.7.3}
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.11}
@@ -574,6 +575,7 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 %patch3 -p1
 %endif
 %patch4 -p1
+%patch5 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
