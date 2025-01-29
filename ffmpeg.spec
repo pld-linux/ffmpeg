@@ -132,7 +132,7 @@ Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
 # NOTE: 7.0 prepared on DEVEL-7 branch, but other software is not ready (e.g. xine-lib 1.2.13, gstreamer-libav 1.24.2)
 Version:	6.1.2
-Release:	2.1
+Release:	2.2
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
 # v3 (allows *GPLv3 or Apache-licensed libs): gmp lensfun opencore-amr vmaf vo-*enc rkmpp
@@ -149,6 +149,7 @@ Patch4:		ffmpeg-vulkan1.3.280.patch
 Patch5:		gcc14.patch
 Patch6:		%{name}-x265-210.patch
 Patch7:		binutils-2.43.patch
+Patch8:		texinfo-7.2.patch
 URL:		https://ffmpeg.org/
 %{?with_avisynth:BuildRequires:	AviSynthPlus-devel >= 3.7.3}
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.11}
@@ -579,6 +580,7 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 %patch5 -p1
 %patch6 -p1
 %patch7 -p1
+%patch8 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
