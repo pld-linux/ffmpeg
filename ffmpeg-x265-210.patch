@@ -24,7 +24,7 @@ index 447e6da25f..29fc26eab4 100644
      libx265Context *ctx = avctx->priv_data;
      x265_picture x265pic;
 -    x265_picture x265pic_out = { 0 };
-+#if X265_BUILD >= 210
++#if X265_BUILD >= 210 && X265_BUILD < 215
 +    x265_picture x265pic_layers_out[MAX_SCALABLE_LAYERS];
 +    x265_picture* x265pic_lyrptr_out[MAX_SCALABLE_LAYERS];
 +#else
@@ -38,7 +38,7 @@ index 447e6da25f..29fc26eab4 100644
          }
      }
  
-+#if X265_BUILD >= 210
++#if X265_BUILD >= 210 && X265_BUILD < 215
 +    for (i = 0; i < MAX_SCALABLE_LAYERS; i++)
 +        x265pic_lyrptr_out[i] = &x265pic_layers_out[i];
 +
@@ -58,7 +58,7 @@ index 447e6da25f..29fc26eab4 100644
  
 -    pkt->pts = x265pic_out.pts;
 -    pkt->dts = x265pic_out.dts;
-+#if X265_BUILD >= 210
++#if X265_BUILD >= 210 && X265_BUILD < 215
 +    x265pic_out = x265pic_lyrptr_out[0];
 +#else
 +    x265pic_out = &x265pic_solo_out;
