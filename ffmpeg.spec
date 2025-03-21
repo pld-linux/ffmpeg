@@ -41,6 +41,8 @@
 %bcond_without	ilbc		# iLBC de/encoding via WebRTC libilbc
 %bcond_without	kvazaar		# Kvazaar HEVC encoder support
 %bcond_without	ladspa		# LADSPA audio filtering
+%bcond_without	lc3		# LC3 audio de/encoding via liblc3
+%bcond_without	lcevcdec	# LCEVC audio decoding via liblcevc_dec
 %bcond_without	lcms		# ICC profile support via lcms2
 %bcond_with	lensfun		# lensfun lens correction
 %bcond_with	libaribcaption	# ARIB text and caption decoding via libaribcaption
@@ -91,6 +93,7 @@
 %bcond_with	vpl		# libvpl instead of MFX
 %bcond_without	vpx		# VP8, a high-quality video codec
 %bcond_without	vulkan		# Vulkan code
+%bcond_without	vvenc		# H.266/VVC video encoding via vvenc
 %bcond_without	webp		# WebP encoding support
 %bcond_without	x264		# H.264 x264 encoder
 %bcond_without	x265		# H.265/HEVC x265 encoder
@@ -133,7 +136,7 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	7.0.2
+Version:	7.1.1
 Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
@@ -142,17 +145,16 @@ Release:	1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	https://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	e22725fc3738e314d71a7fb32f2336db
+# Source0-md5:	26f2bd7d20c6c616f31d7130c88d7250
 Patch0:		%{name}-omx-libnames.patch
 Patch1:		%{name}-atadenoise.patch
 Patch2:		opencv4.patch
 Patch3:		v4l2-request-hwdec.patch
-Patch6:		texinfo-7.2.patch
 Patch7:		libv4l2-1.30.patch
-Patch8:		binutils-2.43.patch
 URL:		https://ffmpeg.org/
 %{?with_avisynth:BuildRequires:	AviSynthPlus-devel >= 3.7.3}
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.11}
+%{?with_lcevcdec:BuildRequires:	LCEVCdec-devel >= 2.0.0}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
 %{?with_opencl:BuildRequires:	OpenCL-devel >= 1.2}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
@@ -162,7 +164,7 @@ BuildRequires:	SDL2-devel >= 2.0.1
 BuildRequires:	SDL2-devel < 3.0.0
 %{?with_vulkan:BuildRequires:	Vulkan-Loader-devel >= 1.3.277}
 BuildRequires:	alsa-lib-devel
-%{?with_aom:BuildRequires:	aom-devel >= 1.0.0}
+%{?with_aom:BuildRequires:	aom-devel >= 2.0.0}
 %{?with_aribb24:BuildRequires:	aribb24-devel}
 BuildRequires:	bzip2-devel
 BuildRequires:	celt-devel >= 0.11.0
@@ -206,6 +208,7 @@ BuildRequires:	libcdio-paranoia-devel >= 0.90-2
 %{?with_iec61883:BuildRequires:	libiec61883-devel}
 %{?with_libjxl:BuildRequires:	libjxl-devel >= 0.7.0}
 %{?with_libklvanc:BuildRequires:	libklvanc-devel}
+%{?with_lc3:BuildRequires:	liblc3-devel >= 1.1.0}
 %{?with_modplug:BuildRequires:	libmodplug-devel}
 %{?with_libmysofa:BuildRequires:	libmysofa-devel >= 0.7}
 %{?with_openmpt:BuildRequires: libopenmpt-devel >= 0.4.5}
@@ -286,11 +289,12 @@ BuildRequires:	twolame-devel >= 0.3.10
 %{?with_vidstab:BuildRequires:	vid.stab-devel >= 0.98}
 %{?with_vmaf:BuildRequires:	vmaf-devel >= 2.0.0}
 %{?with_voamrwbenc:BuildRequires:	vo-amrwbenc-devel}
+%{?with_vvenc:BuildRequires:	vvenc-devel >= 1.6.1}
 %{?with_ilbc:BuildRequires:	webrtc-libilbc-devel}
 %{?with_avs:BuildRequires:	xavs-devel}
 %{?with_avs2:BuildRequires:	xavs2-devel >= 1.3}
 %{?with_xevc:BuildRequires:	xevd-devel >= 0.4.1}
-%{?with_xevc:BuildRequires:	xeve-devel >= 0.4.3}
+%{?with_xevc:BuildRequires:	xeve-devel >= 0.5.1}
 BuildRequires:	xorg-lib-libX11-devel
 BuildRequires:	xorg-lib-libXext-devel
 BuildRequires:	xorg-lib-libXv-devel
@@ -334,9 +338,10 @@ telewizyjnej.
 Summary:	ffmpeg libraries
 Summary(pl.UTF-8):	Biblioteki ffmpeg
 Group:		Libraries
+%{?with_lcevcdec:Requires:	LCEVCdec >= 2.0.0}
 Requires:	SDL2 >= 2.0.1
 %{?with_vulkan:Requires:	Vulkan-Loader >= 1.3.277}
-%{?with_aom:Requires:	aom >= 1.0.0}
+%{?with_aom:Requires:	aom >= 2.0.0}
 Requires:	celt >= 0.11.0
 %{?with_dav1d:Requires:	dav1d >= 0.5.0}
 %{?with_avs2:Requires:	davs2 >= 1.6}
@@ -350,6 +355,7 @@ Requires:	libass >= 0.11.0
 %{?with_dvd:Requires:	libdvdnav >= 6.1.1}
 %{?with_dvd:Requires:	libdvdread >= 6.1.2}
 %{?with_libjxl:Requires:	libjxl >= 0.7.0}
+%{?with_lc3:Requires:	liblc3 >= 1.1.0}
 %{?with_libmysofa:Requires:	libmysofa >= 0.7}
 %{?with_openmpt:Requires: libopenmpt >= 0.4.5}
 %{?with_libplacebo:Requires:	libplacebo >= 4.192.0}
@@ -386,6 +392,7 @@ Requires:	twolame-libs >= 0.3.10
 %{?with_vapoursynth:Requires:	vapoursynth >= 42}
 %{?with_vidstab:Requires:	vid.stab >= 0.98}
 %{?with_vmaf:Requires:	vmaf-libs >= 2.0.0}
+%{?with_vvenc:Requires:	vvenc >= 1.6.1}
 %{?with_avs2:Requires:	xavs2 >= 1.3}
 %{?with_xevc:Requires:	xevd >= 0.4.1}
 %{?with_xevc:Requires:	xeve >= 0.4.3}
@@ -418,13 +425,14 @@ Summary(pl.UTF-8):	Pliki nagłówkowe ffmpeg
 Group:		Development/Libraries
 Requires:	%{name}-libs = %{version}-%{release}
 # Libs.private from *.pc
+%{?with_lcevcdec:Requires:	LCEVCdec-devel >= 2.0.0}
 %{?with_openal:Requires:	OpenAL-devel >= 1.1}
 %{?with_opencl:Requires:	OpenCL-devel >= 1.2}
 %{?with_opengl:Requires:	OpenGL-devel}
 Requires:	SDL2-devel >= 2.0.1
 %{?with_vulkan:Requires:	Vulkan-Loader-devel >= 1.3.277}
 Requires:	alsa-lib-devel
-%{?with_aom:Requires:	aom-devel >= 1.0.0}
+%{?with_aom:Requires:	aom-devel >= 2.0.0}
 %{?with_aribb24:Requires:	aribb24-devel}
 Requires:	bzip2-devel
 Requires:	celt-devel >= 0.11.0
@@ -461,6 +469,7 @@ Requires:	libcdio-paranoia-devel >= 0.90-2
 %{?with_iec61883:Requires:	libiec61883-devel}
 %{?with_libjxl:Requires:	libjxl-devel >= 0.7.0}
 %{?with_libklvanc:Requires:	libklvanc-devel}
+%{?with_lc3:Requires:	liblc3-devel >= 1.1.0}
 %{?with_modplug:Requires:	libmodplug-devel}
 %{?with_libmysofa:Requires:	libmysofa-devel >= 0.7}
 %{?with_openmpt:Requires: libopenmpt-devel >= 0.4.5}
@@ -517,6 +526,7 @@ Requires:	twolame-devel >= 0.3.10
 %{?with_vidstab:Requires:	vid.stab-devel >= 0.98}
 %{?with_voamrwbenc:Requires:	vo-amrwbenc-devel}
 %{?with_vmaf:Requires:	vmaf-devel >= 2.0.0}
+%{?with_vvenc:Requires:	vvenc-devel >= 1.6.1}
 %{?with_ilbc:Requires:	webrtc-libilbc-devel}
 %{?with_avs:Requires:	xavs-devel}
 %{?with_avs2:Requires:	xavs2-devel >= 1.3}
@@ -587,9 +597,7 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 %if %{with v4l2_request}
 %patch -P3 -p1
 %endif
-%patch -P6 -p1
 %patch -P7 -p1
-%patch -P8 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
@@ -714,6 +722,8 @@ EOF
 	%{?with_libjxl:--enable-libjxl} \
 	%{?with_kvazaar:--enable-libkvazaar} \
 	%{?with_libklvanc:--enable-libklvanc} \
+	%{?with_lc3:--enable-liblc3} \
+	%{?with_lcevcdec:--enable-liblcevc_dec} \
 	%{?with_lensfun:--enable-liblensfun} \
 	%{?with_mfx:--enable-libmfx} \
 	%{?with_modplug:--enable-libmodplug} \
@@ -755,6 +765,7 @@ EOF
 	%{?with_voamrwbenc:--enable-libvo-amrwbenc} \
 	--enable-libvorbis \
 	%{?with_vpx:--enable-libvpx} \
+	%{?with_vvenc:--enable-libvvenc} \
 	%{?with_webp:--enable-libwebp} \
 	%{?with_x264:--enable-libx264} \
 	%{?with_x265:--enable-libx265} \

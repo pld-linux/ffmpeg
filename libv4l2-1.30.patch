@@ -24,7 +24,7 @@ diff --git a/configure b/configure
 index de1b88150f..534b443f7d 100755
 --- a/configure
 +++ b/configure
-@@ -2533,6 +2533,7 @@ HAVE_LIST="
+@@ -2510,6 +2510,7 @@ HAVE_LIST="
      $TOOLCHAIN_FEATURES
      $TYPES_LIST
      gzip
@@ -32,15 +32,15 @@ index de1b88150f..534b443f7d 100755
      libdrm_getfb2
      makeinfo
      makeinfo_html
-@@ -2545,7 +2546,6 @@ HAVE_LIST="
-     opencl_vaapi_intel_media
+@@ -2522,7 +2523,6 @@ HAVE_LIST="
+     opencl_videotoolbox
      perl
      pod2man
 -    posix_ioctl
      texi2html
      xmllint
      zlib_gzip
-@@ -7275,7 +7275,7 @@ xmllint --version  > /dev/null 2>&1 && enable xmllint   || disable xmllint
+@@ -7181,7 +7181,7 @@ xmllint --version  > /dev/null 2>&1 && e
  check_headers linux/fb.h
  check_headers linux/videodev2.h
  test_code cc linux/videodev2.h "struct v4l2_frmsizeenum vfse; vfse.discrete.width = 0;" && enable_sanitized struct_v4l2_frmivalenum_discrete
