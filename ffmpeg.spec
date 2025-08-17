@@ -131,8 +131,8 @@ Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
 # NOTE: 7.x prepared on DEVEL-7.1 branch, but other software is not ready (e.g. xine-lib 1.2.13, gstreamer-libav 1.24.2)
-Version:	6.1.2
-Release:	4
+Version:	6.1.3
+Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
 # v3 (allows *GPLv3 or Apache-licensed libs): gmp lensfun opencore-amr vmaf vo-*enc rkmpp
@@ -140,16 +140,14 @@ Release:	4
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	https://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	42f9bb3aacdd5c5907d1af1811738c00
+# Source0-md5:	f1fa311d96f576f700bc830d1ed86e0c
 Patch0:		%{name}-omx-libnames.patch
 Patch1:		%{name}-atadenoise.patch
 Patch2:		opencv4.patch
 Patch3:		v4l2-request-hwdec.patch
 Patch4:		ffmpeg-vulkan1.3.280.patch
 Patch5:		gcc14.patch
-Patch6:		%{name}-x265-210.patch
-Patch7:		binutils-2.43.patch
-Patch8:		texinfo-7.2.patch
+Patch6:		texinfo-7.2.patch
 URL:		https://ffmpeg.org/
 %{?with_avisynth:BuildRequires:	AviSynthPlus-devel >= 3.7.3}
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.11}
@@ -579,8 +577,6 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 %patch -P4 -p1
 %patch -P5 -p1
 %patch -P6 -p1
-%patch -P7 -p1
-%patch -P8 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
