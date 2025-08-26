@@ -1,12 +1,12 @@
---- ffmpeg-4.3/libavfilter/x86/Makefile.orig	2020-06-15 20:54:24.000000000 +0200
-+++ ffmpeg-4.3/libavfilter/x86/Makefile	2020-06-30 11:50:18.575161000 +0200
-@@ -42,7 +42,9 @@
+--- ffmpeg-8.0/libavfilter/x86/Makefile.orig	2025-08-22 11:24:19.000000000 +0200
++++ ffmpeg-8.0/libavfilter/x86/Makefile	2025-08-25 21:57:51.232569064 +0200
+@@ -50,7 +50,9 @@ X86ASM-OBJS-$(CONFIG_SCENE_SAD)
  
  X86ASM-OBJS-$(CONFIG_AFIR_FILTER)            += x86/af_afir.o
  X86ASM-OBJS-$(CONFIG_ANLMDN_FILTER)          += x86/af_anlmdn.o
 +ifdef ARCH_X86_64
  X86ASM-OBJS-$(CONFIG_ATADENOISE_FILTER)      += x86/vf_atadenoise.o
 +endif
+ X86ASM-OBJS-$(CONFIG_BLACKDETECT_FILTER)     += x86/vf_blackdetect.o
  X86ASM-OBJS-$(CONFIG_BLEND_FILTER)           += x86/vf_blend.o
  X86ASM-OBJS-$(CONFIG_BWDIF_FILTER)           += x86/vf_bwdif.o
- X86ASM-OBJS-$(CONFIG_COLORSPACE_FILTER)      += x86/colorspacedsp.o

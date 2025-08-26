@@ -2,7 +2,8 @@
 # - libtorch (https://github.com/pytorch/pytorch) [--enable-libtorch, Torch as one DNN backend]
 # - libopenvino
 # - libtensorflow [-ltensorflow tensorflow/c/c_api.h]
-# - AMF >= 1.4.29.0 (available at https://github.com/GPUOpen-LibrariesAndSDKs/AMF, where is original source?)
+# - AMF >= 1.4.36.0 (available at https://github.com/GPUOpen-LibrariesAndSDKs/AMF, where is original source?)
+# - ohcodec (--enable-ohcodec, enable OpenHarmony Codec support; specific to OpenHarmony OS?)
 #
 # How to deal with ffmpeg/opencv/chromaprint checken-egg problem:
 #	1. make-request -r --with bootstrap ffmpeg.spec
@@ -61,6 +62,7 @@
 %bcond_with	npp		# NVIDIA Performance Primitives-based code (requires nonfree) [BR: libnppc+libnppi, npp.h]
 %bcond_without	omx		# OpenMAX IL support
 %bcond_without	openal		# OpenAL 1.1 capture support
+%bcond_without	openapv		# APV codec encoding support via OpenAPV
 %bcond_without	opencl		# OpenCL 1.2 code
 %bcond_with	opencv		# OpenCV video filtering
 %bcond_without	opengl		# OpenGL rendering support
@@ -95,6 +97,7 @@
 %bcond_without	vulkan		# Vulkan code
 %bcond_without	vvenc		# H.266/VVC video encoding via vvenc
 %bcond_without	webp		# WebP encoding support
+%bcond_with	whisper		# Whisper ASR support
 %bcond_without	x264		# H.264 x264 encoder
 %bcond_without	x265		# H.265/HEVC x265 encoder
 %bcond_without	xevc		# MPEG-5 EVC decoding/encoding via xecd/xeve
@@ -136,7 +139,7 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	7.1.1
+Version:	8.0
 Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
@@ -145,12 +148,11 @@ Release:	1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	https://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	26f2bd7d20c6c616f31d7130c88d7250
+# Source0-md5:	2c91c725fb1b393618554ff429e4ae43
 Patch0:		%{name}-omx-libnames.patch
 Patch1:		%{name}-atadenoise.patch
 Patch2:		opencv4.patch
 Patch3:		v4l2-request-hwdec.patch
-Patch7:		libv4l2-1.30.patch
 URL:		https://ffmpeg.org/
 %{?with_avisynth:BuildRequires:	AviSynthPlus-devel >= 3.7.3}
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.11}
@@ -162,7 +164,7 @@ URL:		https://ffmpeg.org/
 %{?with_omx:BuildRequires:	OpenMAX-IL-devel}
 BuildRequires:	SDL2-devel >= 2.0.1
 BuildRequires:	SDL2-devel < 3.0.0
-%{?with_vulkan:BuildRequires:	Vulkan-Loader-devel >= 1.3.277}
+%{?with_vulkan:BuildRequires:	Vulkan-Loader-devel >= 1.4.317}
 BuildRequires:	alsa-lib-devel
 %{?with_aom:BuildRequires:	aom-devel >= 2.0.0}
 %{?with_aribb24:BuildRequires:	aribb24-devel}
@@ -212,7 +214,7 @@ BuildRequires:	libcdio-paranoia-devel >= 0.90-2
 %{?with_modplug:BuildRequires:	libmodplug-devel}
 %{?with_libmysofa:BuildRequires:	libmysofa-devel >= 0.7}
 %{?with_openmpt:BuildRequires: libopenmpt-devel >= 0.4.5}
-%{?with_libplacebo:BuildRequires:	libplacebo-devel >= 4.192.0}
+%{?with_libplacebo:BuildRequires:	libplacebo-devel >= 5.229.0}
 %{?with_libquirc:BuildRequires:	libquirc-devel}
 %if %{with dc1394} || %{with iec61883}
 BuildRequires:	libraw1394-devel >= 2
@@ -252,6 +254,7 @@ BuildRequires:	nasm
 %endif
 %endif
 %{?with_ffnvcodec:BuildRequires:	nv-codec-headers >= 12.1.14.0}
+%{?with_openapv:BuildRequires:	openapv-devel >= 0.2.0.0}
 # amrnb,amrwb
 %{?with_amr:BuildRequires:	opencore-amr-devel}
 %{?with_opencv:BuildRequires:	opencv-devel >= 2}
@@ -291,6 +294,7 @@ BuildRequires:	twolame-devel >= 0.3.10
 %{?with_voamrwbenc:BuildRequires:	vo-amrwbenc-devel}
 %{?with_vvenc:BuildRequires:	vvenc-devel >= 1.6.1}
 %{?with_ilbc:BuildRequires:	webrtc-libilbc-devel}
+%{?with_whisper:BuildRequires:	whisper.cpp-devel >= 1.7.5}
 %{?with_avs:BuildRequires:	xavs-devel}
 %{?with_avs2:BuildRequires:	xavs2-devel >= 1.3}
 %{?with_xevc:BuildRequires:	xevd-devel >= 0.4.1}
@@ -340,7 +344,7 @@ Summary(pl.UTF-8):	Biblioteki ffmpeg
 Group:		Libraries
 %{?with_lcevcdec:Requires:	LCEVCdec >= 2.0.0}
 Requires:	SDL2 >= 2.0.1
-%{?with_vulkan:Requires:	Vulkan-Loader >= 1.3.277}
+%{?with_vulkan:Requires:	Vulkan-Loader >= 1.4.317}
 %{?with_aom:Requires:	aom >= 2.0.0}
 Requires:	celt >= 0.11.0
 %{?with_dav1d:Requires:	dav1d >= 0.5.0}
@@ -377,6 +381,7 @@ Requires:	libxcb >= 1.4
 Requires:	lame-libs >= 3.98.3
 %{?with_lcms:Requires:	lcms2 >= 2.13}
 %{?with_mfx:Requires:	mfx_dispatch >= 1.28}
+%{?with_openapv:Requires:	openapv >= 0.2.0.0}
 %{?with_openh264:Requires:	openh264 >= 1.3}
 Requires:	openjpeg2 >= 2.1
 %{?with_rabbitmq:Requires:	rabbitmq-c >= 0.7.1}
@@ -393,6 +398,7 @@ Requires:	twolame-libs >= 0.3.10
 %{?with_vidstab:Requires:	vid.stab >= 0.98}
 %{?with_vmaf:Requires:	vmaf-libs >= 2.0.0}
 %{?with_vvenc:Requires:	vvenc >= 1.6.1}
+%{?with_whisper:Requires:	whisper.cpp >= 1.7.5}
 %{?with_avs2:Requires:	xavs2 >= 1.3}
 %{?with_xevc:Requires:	xevd >= 0.4.1}
 %{?with_xevc:Requires:	xeve >= 0.4.3}
@@ -408,16 +414,14 @@ This package contains the ffmpeg shared libraries:
 - the codec library (libavcodec). It supports most existing encoding
   formats (MPEG, DivX, MPEG4, AC3, DV...),
 - demuxer library (libavformat). It supports most existing file
-  formats (AVI, MPEG, OGG, Matroska, ASF...),
-- video postprocessing library (libpostproc).
+  formats (AVI, MPEG, OGG, Matroska, ASF...).
 
 %description libs -l pl.UTF-8
 Ten pakiet zawiera biblioteki współdzielone ffmpeg:
 - bibliotekę kodeków (libavcodec); obsługuje większość istniejących
   formatów kodowania (MPEG, DivX, MPEG4, AC3, DV...),
 - bibliotekę demuksera (libavformat); obsługuje większość istniejących
-  formatów plików (AVI, MPEG, OGG, Matroska, ASF...),
-- bibliotekę postprocessingu (libpostproc).
+  formatów plików (AVI, MPEG, OGG, Matroska, ASF...).
 
 %package devel
 Summary:	ffmpeg header files
@@ -430,7 +434,7 @@ Requires:	%{name}-libs = %{version}-%{release}
 %{?with_opencl:Requires:	OpenCL-devel >= 1.2}
 %{?with_opengl:Requires:	OpenGL-devel}
 Requires:	SDL2-devel >= 2.0.1
-%{?with_vulkan:Requires:	Vulkan-Loader-devel >= 1.3.277}
+%{?with_vulkan:Requires:	Vulkan-Loader-devel >= 1.4.317}
 Requires:	alsa-lib-devel
 %{?with_aom:Requires:	aom-devel >= 2.0.0}
 %{?with_aribb24:Requires:	aribb24-devel}
@@ -500,6 +504,7 @@ Requires:	libxcb-devel >= 1.4
 %{?with_libxml2:Requires:	libxml2-devel >= 2}
 %{?with_lv2:Requires:	lilv-devel}
 %{?with_mfx:Requires:	mfx_dispatch-devel >= 1.28}
+%{?with_openapv:Requires:	openapv-devel >= 0.2.0.0}
 %{?with_amr:Requires:	opencore-amr-devel}
 %{?with_opencv:Requires:	opencv-devel >= 2}
 %{?with_openh264:Requires:	openh264-devel >= 1.3}
@@ -528,6 +533,7 @@ Requires:	twolame-devel >= 0.3.10
 %{?with_vmaf:Requires:	vmaf-devel >= 2.0.0}
 %{?with_vvenc:Requires:	vvenc-devel >= 1.6.1}
 %{?with_ilbc:Requires:	webrtc-libilbc-devel}
+%{?with_whisper:Requires:	whisper.cpp-devel >= 1.7.5}
 %{?with_avs:Requires:	xavs-devel}
 %{?with_avs2:Requires:	xavs2-devel >= 1.3}
 %{?with_xevc:Requires:	xevd-devel >= 0.4.1}
@@ -597,7 +603,6 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 %if %{with v4l2_request}
 %patch -P3 -p1
 %endif
-%patch -P7 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
@@ -785,7 +790,6 @@ EOF
 	%{?with_opencl:--enable-opencl} \
 	%{?with_opengl:--enable-opengl} \
 	%{?with_pocketsphinx:--enable-pocketsphinx} \
-	--enable-postproc \
 	--enable-pthreads \
 	%{?with_rkmpp:--enable-rkmpp} \
 	--enable-shared \
@@ -794,6 +798,7 @@ EOF
 	%{!?with_va:--disable-vaapi} \
 	%{?with_vapoursynth:--enable-vapoursynth} \
 	%{!?with_vulkan:--disable-vulkan} \
+	%{?with_whisper:--enable-whisper} \
 %if %{with v4l2_request}
 	--enable-libudev \
 	--enable-v4l2-request \
@@ -887,41 +892,37 @@ rm -rf $RPM_BUILD_ROOT
 %files libs
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libavcodec.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavcodec.so.61
+%ghost %{_libdir}/libavcodec.so.62
 %attr(755,root,root) %{_libdir}/libavdevice.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavdevice.so.61
+%ghost %{_libdir}/libavdevice.so.62
 %attr(755,root,root) %{_libdir}/libavfilter.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavfilter.so.10
+%ghost %{_libdir}/libavfilter.so.11
 %attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavformat.so.61
+%ghost %{_libdir}/libavformat.so.62
 %attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavutil.so.59
-%attr(755,root,root) %{_libdir}/libpostproc.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libpostproc.so.58
+%ghost %{_libdir}/libavutil.so.60
 %attr(755,root,root) %{_libdir}/libswresample.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libswresample.so.5
+%ghost %{_libdir}/libswresample.so.6
 %attr(755,root,root) %{_libdir}/libswscale.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libswscale.so.8
+%ghost %{_libdir}/libswscale.so.9
 
 %files devel
 %defattr(644,root,root,755)
 %doc doc/optimization.txt
-%attr(755,root,root) %{_bindir}/ffmpeg-avconfig
-%attr(755,root,root) %{_libdir}/libavcodec.so
-%attr(755,root,root) %{_libdir}/libavdevice.so
-%attr(755,root,root) %{_libdir}/libavfilter.so
-%attr(755,root,root) %{_libdir}/libavformat.so
-%attr(755,root,root) %{_libdir}/libavutil.so
-%attr(755,root,root) %{_libdir}/libpostproc.so
-%attr(755,root,root) %{_libdir}/libswresample.so
-%attr(755,root,root) %{_libdir}/libswscale.so
+%{_bindir}/ffmpeg-avconfig
+%{_libdir}/libavcodec.so
+%{_libdir}/libavdevice.so
+%{_libdir}/libavfilter.so
+%{_libdir}/libavformat.so
+%{_libdir}/libavutil.so
+%{_libdir}/libswresample.so
+%{_libdir}/libswscale.so
 %{_includedir}/ffmpeg
 %{_includedir}/libavcodec
 %{_includedir}/libavdevice
 %{_includedir}/libavfilter
 %{_includedir}/libavformat
 %{_includedir}/libavutil
-%{_includedir}/libpostproc
 %{_includedir}/libswresample
 %{_includedir}/libswscale
 %{_pkgconfigdir}/libavcodec.pc
@@ -929,7 +930,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_pkgconfigdir}/libavfilter.pc
 %{_pkgconfigdir}/libavformat.pc
 %{_pkgconfigdir}/libavutil.pc
-%{_pkgconfigdir}/libpostproc.pc
 %{_pkgconfigdir}/libswresample.pc
 %{_pkgconfigdir}/libswscale.pc
 %if %{with doc}
@@ -951,7 +951,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libavfilter.a
 %{_libdir}/libavformat.a
 %{_libdir}/libavutil.a
-%{_libdir}/libpostproc.a
 %{_libdir}/libswresample.a
 %{_libdir}/libswscale.a
 %endif
