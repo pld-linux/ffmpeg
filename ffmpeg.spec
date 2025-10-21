@@ -300,7 +300,7 @@ BuildRequires:	zlib-devel
 %{?with_zvbi:BuildRequires:	zvbi-devel >= 0.2.28}
 # overflows maximum hash table size
 BuildConflicts:	pdksh < 5.2.14-57
-Requires:	%{name}-libs = %{version}-%{release}
+Requires:	%{name}-libs%{?_isa} = %{version}-%{release}
 Suggests:	fontconfig
 Suggests:	fonts-TTF-Roboto
 Obsoletes:	libpostproc < 2:1.0-1
@@ -331,63 +331,63 @@ telewizyjnej.
 Summary:	ffmpeg libraries
 Summary(pl.UTF-8):	Biblioteki ffmpeg
 Group:		Libraries
-Requires:	SDL2 >= 2.0.1
-%{?with_vulkan:Requires:	Vulkan-Loader >= 1.3.277}
-%{?with_aom:Requires:	aom >= 1.0.0}
-Requires:	celt >= 0.11.0
-%{?with_dav1d:Requires:	dav1d >= 0.5.0}
-%{?with_avs2:Requires:	davs2 >= 1.6}
-%{?with_flite:Requires:	flite >= 1.4}
+Requires:	SDL2%{?_isa} >= 2.0.1
+%{?with_vulkan:Requires:	Vulkan-Loader%{?_isa} >= 1.3.277}
+%{?with_aom:Requires:	aom%{?_isa} >= 1.0.0}
+Requires:	celt%{?_isa} >= 0.11.0
+%{?with_dav1d:Requires:	dav1d%{?_isa} >= 0.5.0}
+%{?with_avs2:Requires:	davs2%{?_isa} >= 1.6}
+%{?with_flite:Requires:	flite%{?_isa} >= 1.4}
 %if "%(rpm -q --qf '%{V}' gnutls-devel)" >= "3.0.20"
 # uses gnutls_certificate_set_x509_system_trust if >= 3.0.20
-Requires:	gnutls-libs >= 3.0.20
+Requires:	gnutls-libs%{?_isa} >= 3.0.20
 %endif
-%{?with_kvazaar:Requires:	kvazaar-libs >= 2.0.0}
-Requires:	libass >= 0.11.0
-%{?with_libjxl:Requires:	libjxl >= 0.7.0}
-%{?with_libmysofa:Requires:	libmysofa >= 0.7}
-%{?with_openmpt:Requires: libopenmpt >= 0.4.5}
-%{?with_libplacebo:Requires:	libplacebo >= 4.192.0}
-%{?with_librist:Requires:	librist >= 0.2.7}
-%{?with_ssh:Requires:	libssh >= 0.6.0}
-%{?with_theora:Requires:	libtheora >= 1.0-0.beta3}
+%{?with_kvazaar:Requires:	kvazaar-libs%{?_isa} >= 2.0.0}
+Requires:	libass%{?_isa} >= 0.11.0
+%{?with_libjxl:Requires:	libjxl%{?_isa} >= 0.7.0}
+%{?with_libmysofa:Requires:	libmysofa%{?_isa} >= 0.7}
+%{?with_openmpt:Requires: libopenmpt%{?_isa} >= 0.4.5}
+%{?with_libplacebo:Requires:	libplacebo%{?_isa} >= 4.192.0}
+%{?with_librist:Requires:	librist%{?_isa} >= 0.2.7}
+%{?with_ssh:Requires:	libssh%{?_isa} >= 0.6.0}
+%{?with_theora:Requires:	libtheora%{?_isa} >= 1.0-0.beta3}
 %if %{with va}
-Requires:	libva >= 1.0.3
-Requires:	libva-drm >= 1.0.3
-Requires:	libva-x11 >= 1.0.3
+Requires:	libva%{?_isa} >= 1.0.3
+Requires:	libva-drm%{?_isa} >= 1.0.3
+Requires:	libva-x11%{?_isa} >= 1.0.3
 %endif
-Requires:	libvdpau >= 1.3
-%{?with_vpl:Requires:	libvpl >= 2.6}
-%{?with_vpx:Requires:	libvpx >= 1.4.0}
-%{?with_webp:Requires:	libwebp >= 0.4.0}
-%{?with_x264:Requires:	libx264 >= 0.1.3-1.20130827_2245}
-%{?with_x265:Requires:	libx265 >= 2.0}
-Requires:	libxcb >= 1.4
-Requires:	lame-libs >= 3.98.3
-%{?with_lcms:Requires:	lcms2 >= 2.13}
-%{?with_mfx:Requires:	mfx_dispatch >= 1.28}
-%{?with_openh264:Requires:	openh264 >= 1.3}
-Requires:	openjpeg2 >= 2.1
-%{?with_rabbitmq:Requires:	rabbitmq-c >= 0.7.1}
-%{?with_rav1e:Requires:	rav1e-libs >= 0.5.0}
-%{?with_rkmpp:Requires:	rockchip-mpp >= 1.3.7}
-%{?with_rubberband:Requires:	rubberband-libs >= 1.8.1}
-%{?with_shine:Requires:	shine >= 3.0.0}
-Requires:	speex >= 1:1.2-rc1
-%{?with_srt:Requires:	srt >= 1.3}
-%{?with_svtav1:Requires:	svt-av1 >= 0.9.0}
-Requires:	twolame-libs >= 0.3.10
-%{?with_uavs3d:Requires:	uavs3d >= 1.1.41}
-%{?with_vapoursynth:Requires:	vapoursynth >= 42}
-%{?with_vidstab:Requires:	vid.stab >= 0.98}
-%{?with_vmaf:Requires:	vmaf-libs >= 2.0.0}
-%{?with_avs2:Requires:	xavs2 >= 1.3}
-%{?with_xvid:Requires:	xvid >= 1:1.1.0}
-%{?with_zmq:Requires:	zeromq >= 4.2.1}
-%{?with_zimg:Requires:	zimg >= 2.7.0}
-%{?with_zvbi:Requires:	zvbi >= 0.2.28}
+Requires:	libvdpau%{?_isa} >= 1.3
+%{?with_vpl:Requires:	libvpl%{?_isa} >= 2.6}
+%{?with_vpx:Requires:	libvpx%{?_isa} >= 1.4.0}
+%{?with_webp:Requires:	libwebp%{?_isa} >= 0.4.0}
+%{?with_x264:Requires:	libx264%{?_isa} >= 0.1.3-1.20130827_2245}
+%{?with_x265:Requires:	libx265%{?_isa} >= 2.0}
+Requires:	libxcb%{?_isa} >= 1.4
+Requires:	lame-libs%{?_isa} >= 3.98.3
+%{?with_lcms:Requires:	lcms2%{?_isa} >= 2.13}
+%{?with_mfx:Requires:	mfx_dispatch%{?_isa} >= 1.28}
+%{?with_openh264:Requires:	openh264%{?_isa} >= 1.3}
+Requires:	openjpeg2%{?_isa} >= 2.1
+%{?with_rabbitmq:Requires:	rabbitmq-c%{?_isa} >= 0.7.1}
+%{?with_rav1e:Requires:	rav1e-libs%{?_isa} >= 0.5.0}
+%{?with_rkmpp:Requires:	rockchip-mpp%{?_isa} >= 1.3.7}
+%{?with_rubberband:Requires:	rubberband-libs%{?_isa} >= 1.8.1}
+%{?with_shine:Requires:	shine%{?_isa} >= 3.0.0}
+Requires:	speex%{?_isa} >= 1:1.2-rc1
+%{?with_srt:Requires:	srt%{?_isa} >= 1.3}
+%{?with_svtav1:Requires:	svt-av1%{?_isa} >= 0.9.0}
+Requires:	twolame-libs%{?_isa} >= 0.3.10
+%{?with_uavs3d:Requires:	uavs3d%{?_isa} >= 1.1.41}
+%{?with_vapoursynth:Requires:	vapoursynth%{?_isa} >= 42}
+%{?with_vidstab:Requires:	vid.stab%{?_isa} >= 0.98}
+%{?with_vmaf:Requires:	vmaf-libs%{?_isa} >= 2.0.0}
+%{?with_avs2:Requires:	xavs2%{?_isa} >= 1.3}
+%{?with_xvid:Requires:	xvid%{?_isa} >= 1:1.1.0}
+%{?with_zmq:Requires:	zeromq%{?_isa} >= 4.2.1}
+%{?with_zimg:Requires:	zimg%{?_isa} >= 2.7.0}
+%{?with_zvbi:Requires:	zvbi%{?_isa} >= 0.2.28}
 # dlopened
-%{?with_avisynth:Suggests:	AviSynthPlus >= 3.7.3}
+%{?with_avisynth:Suggests:	AviSynthPlus%{?_isa} >= 3.7.3}
 
 %description libs
 This package contains the ffmpeg shared libraries:
@@ -409,116 +409,116 @@ Ten pakiet zawiera biblioteki współdzielone ffmpeg:
 Summary:	ffmpeg header files
 Summary(pl.UTF-8):	Pliki nagłówkowe ffmpeg
 Group:		Development/Libraries
-Requires:	%{name}-libs = %{version}-%{release}
+Requires:	%{name}-libs%{?_isa} = %{version}-%{release}
 # Libs.private from *.pc
-%{?with_openal:Requires:	OpenAL-devel >= 1.1}
+%{?with_openal:Requires:	OpenAL-devel%{?_isa} >= 1.1}
 %{?with_opencl:Requires:	OpenCL-devel >= 1.2}
 %{?with_opengl:Requires:	OpenGL-devel}
-Requires:	SDL2-devel >= 2.0.1
-%{?with_vulkan:Requires:	Vulkan-Loader-devel >= 1.3.277}
-Requires:	alsa-lib-devel
-%{?with_aom:Requires:	aom-devel >= 1.0.0}
-%{?with_aribb24:Requires:	aribb24-devel}
-Requires:	bzip2-devel
-Requires:	celt-devel >= 0.11.0
-%{?with_codec2:Requires:	codec2-devel}
-%{?with_dav1d:Requires:	dav1d-devel >= 0.5.0}
-%{?with_avs2:Requires:	davs2-devel >= 1.6}
-%{?with_fdk_aac:Requires:	fdk-aac-devel}
-%{?with_flite:Requires:	flite-devel >= 1.4}
-Requires:	fontconfig-devel
-Requires:	freetype-devel
-%{?with_fribidi:Requires:	fribidi-devel}
-%{?with_gme:Requires:	game-music-emu-devel}
-%{?with_glslang:Requires:	glslang-devel}
-Requires:	gnutls-devel
-Requires:	harfbuzz-devel
-Requires:	jack-audio-connection-kit-devel
-%{?with_kvazaar:Requires:	kvazaar-devel >= 2.0.0}
-Requires:	lame-libs-devel >= 3.98.3
-%{?with_lcms:Requires:	lcms2-devel >= 2.13}
-%{?with_lensfun:Requires:	lensfun-devel >= 0.3.95}
-%{?with_libaribcaption:Requires:	libaribcaption-devel}
-Requires:	libass-devel >= 0.11.0
-%{?with_iec61883:Requires:	libavc1394-devel}
-Requires:	libbluray-devel
-%{?with_bs2b:Requires:	libbs2b-devel}
-%{?with_caca:Requires:	libcaca-devel}
-Requires:	libcdio-paranoia-devel >= 0.90-2
-%{?with_chromaprint:Requires:	libchromaprint-devel}
-%{?with_crystalhd:Requires:	libcrystalhd-devel}
-%{?with_dc1394:Requires:	libdc1394-devel >= 2}
-%{?with_libdrm:Requires:	libdrm-devel}
-%{?with_gsm:Requires:	libgsm-devel}
-%{?with_iec61883:Requires:	libiec61883-devel}
-%{?with_libjxl:Requires:	libjxl-devel >= 0.7.0}
-%{?with_libklvanc:Requires:	libklvanc-devel}
-%{?with_modplug:Requires:	libmodplug-devel}
-%{?with_libmysofa:Requires:	libmysofa-devel >= 0.7}
-%{?with_openmpt:Requires: libopenmpt-devel >= 0.4.5}
+Requires:	SDL2-devel%{?_isa} >= 2.0.1
+%{?with_vulkan:Requires:	Vulkan-Loader-devel%{?_isa} >= 1.3.277}
+Requires:	alsa-lib-devel%{?_isa}
+%{?with_aom:Requires:	aom-devel%{?_isa} >= 1.0.0}
+%{?with_aribb24:Requires:	aribb24-devel%{?_isa}}
+Requires:	bzip2-devel%{?_isa}
+Requires:	celt-devel%{?_isa} >= 0.11.0
+%{?with_codec2:Requires:	codec2-devel%{?_isa}}
+%{?with_dav1d:Requires:	dav1d-devel%{?_isa} >= 0.5.0}
+%{?with_avs2:Requires:	davs2-devel%{?_isa} >= 1.6}
+%{?with_fdk_aac:Requires:	fdk-aac-devel%{?_isa}}
+%{?with_flite:Requires:	flite-devel%{?_isa} >= 1.4}
+Requires:	fontconfig-devel%{?_isa}
+Requires:	freetype-devel%{?_isa}
+%{?with_fribidi:Requires:	fribidi-devel%{?_isa}}
+%{?with_gme:Requires:	game-music-emu-devel%{?_isa}}
+%{?with_glslang:Requires:	glslang-devel%{?_isa}}
+Requires:	gnutls-devel%{?_isa}
+Requires:	harfbuzz-devel%{?_isa}
+Requires:	jack-audio-connection-kit-devel%{?_isa}
+%{?with_kvazaar:Requires:	kvazaar-devel%{?_isa} >= 2.0.0}
+Requires:	lame-libs-devel%{?_isa} >= 3.98.3
+%{?with_lcms:Requires:	lcms2-devel%{?_isa} >= 2.13}
+%{?with_lensfun:Requires:	lensfun-devel%{?_isa} >= 0.3.95}
+%{?with_libaribcaption:Requires:	libaribcaption-devel%{?_isa}}
+Requires:	libass-devel%{?_isa} >= 0.11.0
+%{?with_iec61883:Requires:	libavc1394-devel%{?_isa}}
+Requires:	libbluray-devel%{?_isa}
+%{?with_bs2b:Requires:	libbs2b-devel%{?_isa}}
+%{?with_caca:Requires:	libcaca-devel%{?_isa}}
+Requires:	libcdio-paranoia-devel%{?_isa} >= 0.90-2
+%{?with_chromaprint:Requires:	libchromaprint-devel%{?_isa}}
+%{?with_crystalhd:Requires:	libcrystalhd-devel%{?_isa}}
+%{?with_dc1394:Requires:	libdc1394-devel%{?_isa} >= 2}
+%{?with_libdrm:Requires:	libdrm-devel%{?_isa}}
+%{?with_gsm:Requires:	libgsm-devel%{?_isa}}
+%{?with_iec61883:Requires:	libiec61883-devel%{?_isa}}
+%{?with_libjxl:Requires:	libjxl-devel%{?_isa} >= 0.7.0}
+%{?with_libklvanc:Requires:	libklvanc-devel%{?_isa}}
+%{?with_modplug:Requires:	libmodplug-devel%{?_isa}}
+%{?with_libmysofa:Requires:	libmysofa-devel%{?_isa} >= 0.7}
+%{?with_openmpt:Requires: libopenmpt-devel%{?_isa} >= 0.4.5}
 %if %{with dc1394} || %{with iec61883}
-Requires:	libraw1394-devel >= 2
+Requires:	libraw1394-devel%{?_isa} >= 2
 %endif
-%{?with_librist:Requires:	librist-devel >= 0.2.7}
-%{?with_librsvg:Requires:	librsvg-devel >= 2}
-Requires:	librtmp-devel
-%{?with_smb:Requires:	libsmbclient-devel}
-%{?with_ssh:Requires:	libssh-devel >= 0.6.0}
-Requires:	libstdc++-devel
-%{?with_theora:Requires:	libtheora-devel >= 1.0-0.beta3}
-Requires:	libv4l-devel
-%{?with_va:Requires:	libva-devel >= 1.0.3}
-%{?with_va:Requires:	libva-drm-devel >= 1.0.3}
-%{?with_va:Requires:	libva-x11-devel >= 1.0.3}
-Requires:	libvdpau-devel >= 1.3
-Requires:	libvorbis-devel
-%{?with_vpl:Requires:	libvpl-devel >= 2.6}
-%{?with_vpx:Requires:	libvpx-devel >= 1.4.0}
-%{?with_webp:Requires:	libwebp-devel >= 0.4.0}
-%{?with_x264:Requires:	libx264-devel >= 0.1.3-1.20130827_2245}
-%{?with_x265:Requires:	libx265-devel >= 2.0}
+%{?with_librist:Requires:	librist-devel%{?_isa} >= 0.2.7}
+%{?with_librsvg:Requires:	librsvg-devel%{?_isa} >= 2}
+Requires:	librtmp-devel%{?_isa}
+%{?with_smb:Requires:	libsmbclient-devel%{?_isa}}
+%{?with_ssh:Requires:	libssh-devel%{?_isa} >= 0.6.0}
+Requires:	libstdc++-devel%{?_isa}
+%{?with_theora:Requires:	libtheora-devel%{?_isa} >= 1.0-0.beta3}
+Requires:	libv4l-devel%{?_isa}
+%{?with_va:Requires:	libva-devel%{?_isa} >= 1.0.3}
+%{?with_va:Requires:	libva-drm-devel%{?_isa} >= 1.0.3}
+%{?with_va:Requires:	libva-x11-devel%{?_isa} >= 1.0.3}
+Requires:	libvdpau-devel%{?_isa} >= 1.3
+Requires:	libvorbis-devel%{?_isa}
+%{?with_vpl:Requires:	libvpl-devel%{?_isa} >= 2.6}
+%{?with_vpx:Requires:	libvpx-devel%{?_isa} >= 1.4.0}
+%{?with_webp:Requires:	libwebp-devel%{?_isa} >= 0.4.0}
+%{?with_x264:Requires:	libx264-devel%{?_isa} >= 0.1.3-1.20130827_2245}
+%{?with_x265:Requires:	libx265-devel%{?_isa} >= 2.0}
 # libxcb xcb-shm xcb-xfixes xcb-shape
-Requires:	libxcb-devel >= 1.4
-%{?with_libxml2:Requires:	libxml2-devel >= 2}
-%{?with_lv2:Requires:	lilv-devel}
-%{?with_mfx:Requires:	mfx_dispatch-devel >= 1.28}
-%{?with_amr:Requires:	opencore-amr-devel}
-%{?with_opencv:Requires:	opencv-devel >= 2}
-%{?with_openh264:Requires:	openh264-devel >= 1.3}
-Requires:	openjpeg2-devel >= 2.1
-Requires:	opus-devel
-%{?with_pulseaudio:Requires:	pulseaudio-devel}
-%{?with_rabbitmq:Requires:	rabbitmq-c-devel >= 0.7.1}
-%{?with_rav1e:Requires:	rav1e-devel >= 0.5.0}
-%{?with_rkmpp:Requires:	rockchip-mpp-devel >= 1.3.7}
-%{?with_rubberband:Requires:	rubberband-devel >= 1.8.1}
-%{?with_shaderc:Requires:	shaderc-devel >= 2019.1}
-%{?with_shine:Requires:	shine-devel >= 3.0.0}
-%{?with_snappy:Requires:	snappy-devel}
-%{?with_soxr:Requires:	soxr-devel}
-Requires:	speex-devel >= 1:1.2-rc1
-%{?with_glslang:Requires:	spirv-tools-devel}
-%{?with_srt:Requires:	srt-devel >= 1.3}
-%{?with_svtav1:Requires:	svt-av1-devel >= 0.9.0}
-%{?with_tesseract:Requires:	tesseract-devel}
-Requires:	twolame-devel >= 0.3.10
-%{?with_uavs3d:Requires:	uavs3d-devel >= 1.1.41}
-%{?with_vapoursynth:Requires:	vapoursynth-devel >= 42}
-%{?with_vidstab:Requires:	vid.stab-devel >= 0.98}
-%{?with_voamrwbenc:Requires:	vo-amrwbenc-devel}
-%{?with_vmaf:Requires:	vmaf-devel >= 2.0.0}
-%{?with_ilbc:Requires:	webrtc-libilbc-devel}
-%{?with_avs:Requires:	xavs-devel}
-%{?with_avs2:Requires:	xavs2-devel >= 1.3}
-Requires:	xorg-lib-libX11-devel
-Requires:	xorg-lib-libXext-devel
-Requires:	xorg-lib-libXv-devel
-%{?with_xvid:Requires:	xvid-devel >= 1:1.1.0}
+Requires:	libxcb-devel%{?_isa} >= 1.4
+%{?with_libxml2:Requires:	libxml2-devel%{?_isa} >= 2}
+%{?with_lv2:Requires:	lilv-devel%{?_isa}}
+%{?with_mfx:Requires:	mfx_dispatch-devel%{?_isa} >= 1.28}
+%{?with_amr:Requires:	opencore-amr-devel%{?_isa}}
+%{?with_opencv:Requires:	opencv-devel%{?_isa} >= 2}
+%{?with_openh264:Requires:	openh264-devel%{?_isa} >= 1.3}
+Requires:	openjpeg2-devel%{?_isa} >= 2.1
+Requires:	opus-devel%{?_isa}
+%{?with_pulseaudio:Requires:	pulseaudio-devel%{?_isa}}
+%{?with_rabbitmq:Requires:	rabbitmq-c-devel%{?_isa} >= 0.7.1}
+%{?with_rav1e:Requires:	rav1e-devel%{?_isa} >= 0.5.0}
+%{?with_rkmpp:Requires:	rockchip-mpp-devel%{?_isa} >= 1.3.7}
+%{?with_rubberband:Requires:	rubberband-devel%{?_isa} >= 1.8.1}
+%{?with_shaderc:Requires:	shaderc-devel%{?_isa} >= 2019.1}
+%{?with_shine:Requires:	shine-devel%{?_isa} >= 3.0.0}
+%{?with_snappy:Requires:	snappy-devel%{?_isa}}
+%{?with_soxr:Requires:	soxr-devel%{?_isa}}
+Requires:	speex-devel%{?_isa} >= 1:1.2-rc1
+%{?with_glslang:Requires:	spirv-tools-devel%{?_isa}}
+%{?with_srt:Requires:	srt-devel%{?_isa} >= 1.3}
+%{?with_svtav1:Requires:	svt-av1-devel%{?_isa} >= 0.9.0}
+%{?with_tesseract:Requires:	tesseract-devel%{?_isa}}
+Requires:	twolame-devel%{?_isa} >= 0.3.10
+%{?with_uavs3d:Requires:	uavs3d-devel%{?_isa} >= 1.1.41}
+%{?with_vapoursynth:Requires:	vapoursynth-devel%{?_isa} >= 42}
+%{?with_vidstab:Requires:	vid.stab-devel%{?_isa} >= 0.98}
+%{?with_voamrwbenc:Requires:	vo-amrwbenc-devel%{?_isa}}
+%{?with_vmaf:Requires:	vmaf-devel%{?_isa} >= 2.0.0}
+%{?with_ilbc:Requires:	webrtc-libilbc-devel%{?_isa}}
+%{?with_avs:Requires:	xavs-devel%{?_isa}}
+%{?with_avs2:Requires:	xavs2-devel%{?_isa} >= 1.3}
+Requires:	xorg-lib-libX11-devel%{?_isa}
+Requires:	xorg-lib-libXext-devel%{?_isa}
+Requires:	xorg-lib-libXv-devel%{?_isa}
+%{?with_xvid:Requires:	xvid-devel%{?_isa} >= 1:1.1.0}
 Requires:	xz-devel
-%{?with_zmq:Requires:	zeromq-devel >= 4.2.1}
-%{?with_zimg:Requires:	zimg-devel >= 2.7.0}
-Requires:	zlib-devel
-%{?with_zvbi:Requires:	zvbi-devel >= 0.2.28}
+%{?with_zmq:Requires:	zeromq-devel%{?_isa} >= 4.2.1}
+%{?with_zimg:Requires:	zimg-devel%{?_isa} >= 2.7.0}
+Requires:	zlib-devel%{?_isa}
+%{?with_zvbi:Requires:	zvbi-devel%{?_isa} >= 0.2.28}
 Obsoletes:	libpostproc-devel < 2:1.0-1
 
 %description devel
@@ -531,7 +531,7 @@ Pliki nagłówkowe ffmpeg.
 Summary:	ffmpeg static libraries
 Summary(pl.UTF-8):	Statyczne biblioteki ffmpeg
 Group:		Development/Libraries
-Requires:	%{name}-devel = %{version}-%{release}
+Requires:	%{name}-devel%{?_isa} = %{version}-%{release}
 
 %description static
 ffmpeg static libraries (libavcodec and libavformat).
@@ -543,7 +543,7 @@ Statyczne biblioteki ffmpeg (libavcodec i libavformat).
 Summary:	FFplay - SDL-based media player
 Summary(pl.UTF-8):	FFplay - odtwarzacz mediów oparty na SDL
 Group:		Applications/Multimedia
-Requires:	%{name}-libs = %{version}-%{release}
+Requires:	%{name}-libs%{?_isa} = %{version}-%{release}
 
 %description ffplay
 FFplay is a very simple and portable media player using the FFmpeg
