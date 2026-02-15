@@ -150,6 +150,7 @@ Patch0:		%{name}-omx-libnames.patch
 Patch1:		%{name}-atadenoise.patch
 Patch2:		opencv4.patch
 Patch3:		v4l2-request-hwdec.patch
+# Patch3-md5:	f7c3d0502927ef3358e9e5492c3e2a94
 Patch7:		libv4l2-1.30.patch
 URL:		https://ffmpeg.org/
 %{?with_avisynth:BuildRequires:	AviSynthPlus-devel >= 3.7.3}
