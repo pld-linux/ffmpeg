@@ -1,7 +1,9 @@
 # TODO:
+# - libtorch (https://github.com/pytorch/pytorch) [--enable-libtorch, Torch as one DNN backend]
 # - libopenvino
 # - libtensorflow [-ltensorflow tensorflow/c/c_api.h]
-# - AMF >= 1.4.29.0 (available at https://github.com/GPUOpen-LibrariesAndSDKs/AMF, where is original source?)
+# - AMF >= 1.4.36.0 (available at https://github.com/GPUOpen-LibrariesAndSDKs/AMF, where is original source?)
+# - ohcodec (--enable-ohcodec, enable OpenHarmony Codec support; specific to OpenHarmony OS?)
 #
 # How to deal with ffmpeg/opencv/chromaprint checken-egg problem:
 #	1. make-request -r --with bootstrap ffmpeg.spec
@@ -12,7 +14,7 @@
 #
 # Conditional build:
 %bcond_with	bootstrap	# disable features to able to build without installed ffmpeg
-%bcond_with	nonfree		# unblock non free options of package (currently: cuda_nvcc, decklib, fdk_aac, npp, openssl, libressl/libtls)
+%bcond_with	nonfree		# unblock non free options of package (currently: cuda_nvcc, decklib, fdk_aac, mpeghdec, npp, openssl, libressl/libtls)
 %bcond_without	amr		# AMR-NB/WB de/encoding via libopencore-amrnb/wb
 %bcond_without	aom		# AV1 viden de/encoding via libaom
 %bcond_without	aribb24		# ARIB text and caption decoding via libaribb24
@@ -21,13 +23,16 @@
 %bcond_without	avs2		# AVS2 de/encoding via libdavs2/libxavs2
 %bcond_without	bs2b		# BS2B audio filter support
 %bcond_without	caca		# textual display using libcaca
+%bcond_without	cairo		# drawvg filter via libcairo
 %bcond_without	codec2		# codec2 support using libcodec2
 %bcond_without	chromaprint	# audio fingerprinting with chromaprint
 %bcond_with	cudasdk		# NVIDIA CUDA code using nvcc from CUDA SDK [BR: cuda.h, non-free]
 %bcond_with	dav1d		# AV1 decoding via libdav1d
 %bcond_without	dc1394		# IIDC-1394 grabbing using libdc1394
 %bcond_with	decklink	# Blackmagic DeckLink I/O support (requires nonfree)
+%bcond_without	dvd		# DVD demuxing via libdvdnav+libdvdread
 %bcond_with	fdk_aac		# AAC de/encoding via libfdk_aac (requires nonfree)
+%bcond_with	mpeghdec	# MPEG-H 3D Audio decoding via libmpeghdec (requires nonfree)
 %bcond_without	ffnvcodec	# NVIDIA codecs support using ffnvcodec headers (covered: cuda cuvid nvdec nvenc)
 %bcond_without	flite		# flite voice synthesis support
 %bcond_without	frei0r		# frei0r video filtering
@@ -39,14 +44,17 @@
 %bcond_without	ilbc		# iLBC de/encoding via WebRTC libilbc
 %bcond_without	kvazaar		# Kvazaar HEVC encoder support
 %bcond_without	ladspa		# LADSPA audio filtering
+%bcond_without	lc3		# LC3 audio de/encoding via liblc3
+%bcond_without	lcevcdec	# LCEVC audio decoding via liblcevc_dec
 %bcond_without	lcms		# ICC profile support via lcms2
 %bcond_with	lensfun		# lensfun lens correction
 %bcond_with	libaribcaption	# ARIB text and caption decoding via libaribcaption
-%bcond_with	libdrm		# Linux Direct Rendering Manager code
+%bcond_without	libdrm		# Linux Direct Rendering Manager code
 %bcond_without	libjxl		# JPEG XL de/encoding via libjxl
 %bcond_with	libklvanc	# Kernel Labs VANC processing (in decklink driver)
 %bcond_without	libmysofa	# sofalizer filter
 %bcond_with	libplacebo	# libplacebo filters
+%bcond_without	libquirc	# QR decoding via libquirc
 %bcond_without	librist		# RIST support via librist
 %bcond_with	librsvg		# SVG rasterization via librsvg
 %bcond_with	libxml2		# XML parsing using libxml2
@@ -56,6 +64,7 @@
 %bcond_with	npp		# NVIDIA Performance Primitives-based code (requires nonfree) [BR: libnppc+libnppi, npp.h]
 %bcond_without	omx		# OpenMAX IL support
 %bcond_without	openal		# OpenAL 1.1 capture support
+%bcond_without	openapv		# APV codec encoding support via OpenAPV
 %bcond_without	opencl		# OpenCL 1.2 code
 %bcond_with	opencv		# OpenCV video filtering
 %bcond_without	opengl		# OpenGL rendering support
@@ -63,6 +72,7 @@
 %bcond_without	openmpt		# OpenMPT module decoder
 %bcond_with	pocketsphinx	# asr filter using PocketSphinx
 %bcond_without	pulseaudio	# PulseAudio input support
+%bcond_without	qrencode	# QR encoding via qrencode
 %bcond_without	rabbitmq	# RabbitMQ support
 %bcond_with	rav1e		# AV1 encoding using rav1e
 %bcond_with	rkmpp		# Rockchip Media Process Platform code [implies libdrm]
@@ -75,6 +85,7 @@
 %bcond_without	srt		# Haivision SRT protocol support
 %bcond_without	ssh		# SFTP protocol support via libssh
 %bcond_with	svtav1		# AV1 encoding via SVT-AV1
+%bcond_with	svtjpegxs	# JPEG-XS de/encoding via SVT-JPEG-XS
 %bcond_with	tesseract	# OCR filter based on Tesseract
 %bcond_without	theora		# Theora encoding via libtheora
 %bcond_with	uavs3d		# AVS3 decoding via libuavs3d (TODO: enable when 1.1.41 released)
@@ -87,9 +98,12 @@
 %bcond_with	vpl		# libvpl instead of MFX
 %bcond_without	vpx		# VP8, a high-quality video codec
 %bcond_without	vulkan		# Vulkan code
+%bcond_without	vvenc		# H.266/VVC video encoding via vvenc
 %bcond_without	webp		# WebP encoding support
+%bcond_with	whisper		# Whisper ASR support
 %bcond_without	x264		# H.264 x264 encoder
 %bcond_without	x265		# H.265/HEVC x265 encoder
+%bcond_without	xevc		# MPEG-5 EVC decoding/encoding via xecd/xeve
 %bcond_without	xvid		# vid encoding via xvidcore
 %bcond_without	zimg		# zscale filter based on z.lib
 %bcond_without	zmq		# 0MQ message passing
@@ -102,8 +116,9 @@
 %undefine	with_opencv
 %undefine	with_chromaprint
 %endif
-%if %{with rkmpp} || %{with v4l2_request}
-%define		with_libdrm	1
+%if %{without libdrm}
+%undefine	with_rkmpp
+%undefine	v4l2_request
 %endif
 %if %{with glslang}
 %undefine	with_shaderc
@@ -124,15 +139,11 @@
 %ifarch i386 i486
 %undefine	with_x265
 %endif
-%ifarch i686 pentium4 athlon %{x8664} x32
-%define		with_crystalhd	1
-%endif
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-# NOTE: 7.x/8.x prepared on DEVEL-{7.0,7.1,8.0} branches, but other software is not ready (e.g. xine-lib 1.2.13, gstreamer-libav 1.24.2)
-Version:	6.1.5
-Release:	1
+Version:	8.1.1
+Release:	0.1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
 # v3 (allows *GPLv3 or Apache-licensed libs): gmp lensfun opencore-amr vmaf vo-*enc rkmpp
@@ -140,18 +151,14 @@ Release:	1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	https://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	77a89d36871a3fcb41883cb5fac3efd3
+# Source0-md5:	f423232dd414c77008dfd85ea5523b8c
 Patch0:		%{name}-omx-libnames.patch
 Patch1:		%{name}-atadenoise.patch
-Patch2:		opencv4.patch
-Patch3:		v4l2-request-hwdec.patch
-Patch4:		ffmpeg-vulkan1.3.280.patch
-Patch5:		gcc14.patch
-Patch6:		texinfo-7.2.patch
-Patch7:		libv4l2-1.30.patch
+Patch2:		v4l2-request-hwdec.patch
 URL:		https://ffmpeg.org/
 %{?with_avisynth:BuildRequires:	AviSynthPlus-devel >= 3.7.3}
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.11}
+%{?with_lcevcdec:BuildRequires:	LCEVCdec-devel >= 2.0.0}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
 %{?with_opencl:BuildRequires:	OpenCL-devel >= 1.2}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
@@ -159,11 +166,12 @@ URL:		https://ffmpeg.org/
 %{?with_omx:BuildRequires:	OpenMAX-IL-devel}
 BuildRequires:	SDL2-devel >= 2.0.1
 BuildRequires:	SDL2-devel < 3.0.0
-%{?with_vulkan:BuildRequires:	Vulkan-Loader-devel >= 1.3.277}
+%{?with_vulkan:BuildRequires:	Vulkan-Loader-devel >= 1.4.317}
 BuildRequires:	alsa-lib-devel
-%{?with_aom:BuildRequires:	aom-devel >= 1.0.0}
+%{?with_aom:BuildRequires:	aom-devel >= 2.0.0}
 %{?with_aribb24:BuildRequires:	aribb24-devel}
 BuildRequires:	bzip2-devel
+%{?with_cairo:BuildRequires:	cairo-devel}
 BuildRequires:	celt-devel >= 0.11.0
 %{?with_codec2:BuildRequires:	codec2-devel}
 %{?with_dav1d:BuildRequires:	dav1d-devel >= 0.5.0}
@@ -175,11 +183,8 @@ BuildRequires:	freetype-devel
 %{?with_frei0r:BuildRequires:	frei0r-devel}
 %{?with_fribidi:BuildRequires:	fribidi-devel}
 %{?with_gme:BuildRequires:	game-music-emu-devel}
+BuildRequires:	gcc >= 6:4.7
 BuildRequires:	harfbuzz-devel
-%ifarch ppc
-# require version with altivec support fixed
-BuildRequires:	gcc >= 5:3.3.2-3
-%endif
 %{?with_glslang:BuildRequires:	glslang-devel >= 11}
 BuildRequires:	gmp-devel
 BuildRequires:	gnutls-devel
@@ -200,17 +205,20 @@ BuildRequires:	libbluray-devel
 %{?with_caca:BuildRequires:	libcaca-devel}
 BuildRequires:	libcdio-paranoia-devel >= 0.90-2
 %{?with_chromaprint:BuildRequires:	libchromaprint-devel}
-%{?with_crystalhd:BuildRequires:	libcrystalhd-devel}
 %{?with_dc1394:BuildRequires:	libdc1394-devel >= 2}
 %{?with_libdrm:BuildRequires:	libdrm-devel}
+%{?with_dvd:BuildRequires:	libdvdnav-devel >= 6.1.1}
+%{?with_dvd:BuildRequires:	libdvdread-devel >= 6.1.2}
 %{?with_gsm:BuildRequires:	libgsm-devel}
 %{?with_iec61883:BuildRequires:	libiec61883-devel}
 %{?with_libjxl:BuildRequires:	libjxl-devel >= 0.7.0}
 %{?with_libklvanc:BuildRequires:	libklvanc-devel}
+%{?with_lc3:BuildRequires:	liblc3-devel >= 1.1.0}
 %{?with_modplug:BuildRequires:	libmodplug-devel}
 %{?with_libmysofa:BuildRequires:	libmysofa-devel >= 0.7}
 %{?with_openmpt:BuildRequires: libopenmpt-devel >= 0.4.5}
-%{?with_libplacebo:BuildRequires:	libplacebo-devel >= 4.192.0}
+%{?with_libplacebo:BuildRequires:	libplacebo-devel >= 5.229.0}
+%{?with_libquirc:BuildRequires:	libquirc-devel}
 %if %{with dc1394} || %{with iec61883}
 BuildRequires:	libraw1394-devel >= 2
 %endif
@@ -232,7 +240,7 @@ BuildRequires:	libvorbis-devel
 %{?with_vpl:BuildRequires:	libvpl-devel >= 2.6}
 %{?with_vpx:BuildRequires:	libvpx-devel >= 1.4.0}
 %{?with_webp:BuildRequires:	libwebp-devel >= 0.4.0}
-# X264_BUILD >= 122
+# X264_BUILD >= 163
 %{?with_x264:BuildRequires:	libx264-devel >= 0.1.3-1.20130827_2245}
 # X265_BUILD >= 89
 %{?with_x265:BuildRequires:	libx265-devel >= 2.0}
@@ -243,12 +251,14 @@ BuildRequires:	libxcb-devel >= 1.4
 %{?with_v4l2_request:BuildRequires:	linux-libc-headers >= 7:5.11.0}
 %{?with_lv2:BuildRequires:	lv2-devel}
 %{?with_mfx:BuildRequires:	mfx_dispatch-devel >= 1.28}
+%{?with_mpeghdec:BuildRequires:	mpeghdec-devel >= 3.0.0}
 %ifarch %{ix86}
 %ifnarch i386 i486
 BuildRequires:	nasm
 %endif
 %endif
 %{?with_ffnvcodec:BuildRequires:	nv-codec-headers >= 12.1.14.0}
+%{?with_openapv:BuildRequires:	openapv-devel >= 0.2.0.0}
 # amrnb,amrwb
 %{?with_amr:BuildRequires:	opencore-amr-devel}
 %{?with_opencv:BuildRequires:	opencv-devel >= 2}
@@ -260,6 +270,7 @@ BuildRequires:	perl-tools-pod
 %{?with_pocketsphinx:BuildRequires:	pocketsphinx-devel > 0.8}
 BuildRequires:	pkgconfig
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
+%{?with_qrencode:BuildRequires:	qrencode-devel}
 %{?with_rabbitmq:BuildRequires:	rabbitmq-c-devel >= 0.7.1}
 %{?with_rav1e:BuildRequires:	rav1e-devel >= 0.5.0}
 %{?with_rkmpp:BuildRequires:	rockchip-mpp-devel >= 1.3.7}
@@ -273,6 +284,7 @@ BuildRequires:	speex-devel >= 1:1.2-rc1
 %{?with_glslang:BuildRequires:	spirv-tools-devel}
 %{?with_srt:BuildRequires:	srt-devel >= 1.3}
 %{?with_svtav1:BuildRequires:	svt-av1-devel >= 0.9.0}
+%{?with_svtjpegxs:BuildRequires:	svt-jpegxs-devel >= 0.10.0}
 BuildRequires:	tar >= 1:1.22
 %{?with_tesseract:BuildRequires:	tesseract-devel}
 %{?with_doc:BuildRequires:	tetex}
@@ -285,9 +297,13 @@ BuildRequires:	twolame-devel >= 0.3.10
 %{?with_vidstab:BuildRequires:	vid.stab-devel >= 0.98}
 %{?with_vmaf:BuildRequires:	vmaf-devel >= 2.0.0}
 %{?with_voamrwbenc:BuildRequires:	vo-amrwbenc-devel}
+%{?with_vvenc:BuildRequires:	vvenc-devel >= 1.6.1}
 %{?with_ilbc:BuildRequires:	webrtc-libilbc-devel}
+%{?with_whisper:BuildRequires:	whisper.cpp-devel >= 1.7.5}
 %{?with_avs:BuildRequires:	xavs-devel}
 %{?with_avs2:BuildRequires:	xavs2-devel >= 1.3}
+%{?with_xevc:BuildRequires:	xevd-devel >= 0.4.1}
+%{?with_xevc:BuildRequires:	xeve-devel >= 0.5.1}
 BuildRequires:	xorg-lib-libX11-devel
 BuildRequires:	xorg-lib-libXext-devel
 BuildRequires:	xorg-lib-libXv-devel
@@ -331,9 +347,11 @@ telewizyjnej.
 Summary:	ffmpeg libraries
 Summary(pl.UTF-8):	Biblioteki ffmpeg
 Group:		Libraries
+%{?with_lcevcdec:Requires:	LCEVCdec%{?_isa} >= 2.0.0}
 Requires:	SDL2%{?_isa} >= 2.0.1
-%{?with_vulkan:Requires:	Vulkan-Loader%{?_isa} >= 1.3.277}
-%{?with_aom:Requires:	aom%{?_isa} >= 1.0.0}
+%{?with_vulkan:Requires:	Vulkan-Loader%{?_isa} >= 1.4.317}
+%{?with_aom:Requires:	aom%{?_isa} >= 2.0.0}
+%{?with_cairo:Requires:	cairo%{?_isa}}
 Requires:	celt%{?_isa} >= 0.11.0
 %{?with_dav1d:Requires:	dav1d%{?_isa} >= 0.5.0}
 %{?with_avs2:Requires:	davs2%{?_isa} >= 1.6}
@@ -344,7 +362,10 @@ Requires:	gnutls-libs%{?_isa} >= 3.0.20
 %endif
 %{?with_kvazaar:Requires:	kvazaar-libs%{?_isa} >= 2.0.0}
 Requires:	libass%{?_isa} >= 0.11.0
+%{?with_dvd:Requires:	libdvdnav%{?_isa} >= 6.1.1}
+%{?with_dvd:Requires:	libdvdread%{?_isa} >= 6.1.2}
 %{?with_libjxl:Requires:	libjxl%{?_isa} >= 0.7.0}
+%{?with_lc3:Requires:	liblc3%{?_isa} >= 1.1.0}
 %{?with_libmysofa:Requires:	libmysofa%{?_isa} >= 0.7}
 %{?with_openmpt:Requires: libopenmpt%{?_isa} >= 0.4.5}
 %{?with_libplacebo:Requires:	libplacebo%{?_isa} >= 4.192.0}
@@ -366,6 +387,7 @@ Requires:	libxcb%{?_isa} >= 1.4
 Requires:	lame-libs%{?_isa} >= 3.98.3
 %{?with_lcms:Requires:	lcms2%{?_isa} >= 2.13}
 %{?with_mfx:Requires:	mfx_dispatch%{?_isa} >= 1.28}
+%{?with_openapv:Requires:	openapv%{?_isa} >= 0.2.0.0}
 %{?with_openh264:Requires:	openh264%{?_isa} >= 1.3}
 Requires:	openjpeg2%{?_isa} >= 2.1
 %{?with_rabbitmq:Requires:	rabbitmq-c%{?_isa} >= 0.7.1}
@@ -376,12 +398,17 @@ Requires:	openjpeg2%{?_isa} >= 2.1
 Requires:	speex%{?_isa} >= 1:1.2-rc1
 %{?with_srt:Requires:	srt%{?_isa} >= 1.3}
 %{?with_svtav1:Requires:	svt-av1%{?_isa} >= 0.9.0}
+%{?with_svtjpegxs:Requires:	svt-jpegxs%{?_isa} >= 0.10.0}
 Requires:	twolame-libs%{?_isa} >= 0.3.10
 %{?with_uavs3d:Requires:	uavs3d%{?_isa} >= 1.1.41}
 %{?with_vapoursynth:Requires:	vapoursynth%{?_isa} >= 42}
 %{?with_vidstab:Requires:	vid.stab%{?_isa} >= 0.98}
 %{?with_vmaf:Requires:	vmaf-libs%{?_isa} >= 2.0.0}
+%{?with_vvenc:Requires:	vvenc%{?_isa} >= 1.6.1}
+%{?with_whisper:Requires:	whisper.cpp%{?_isa} >= 1.7.5}
 %{?with_avs2:Requires:	xavs2%{?_isa} >= 1.3}
+%{?with_xevc:Requires:	xevd%{?_isa} >= 0.4.1}
+%{?with_xevc:Requires:	xeve%{?_isa} >= 0.4.3}
 %{?with_xvid:Requires:	xvid%{?_isa} >= 1:1.1.0}
 %{?with_zmq:Requires:	zeromq%{?_isa} >= 4.2.1}
 %{?with_zimg:Requires:	zimg%{?_isa} >= 2.7.0}
@@ -394,16 +421,14 @@ This package contains the ffmpeg shared libraries:
 - the codec library (libavcodec). It supports most existing encoding
   formats (MPEG, DivX, MPEG4, AC3, DV...),
 - demuxer library (libavformat). It supports most existing file
-  formats (AVI, MPEG, OGG, Matroska, ASF...),
-- video postprocessing library (libpostproc).
+  formats (AVI, MPEG, OGG, Matroska, ASF...).
 
 %description libs -l pl.UTF-8
 Ten pakiet zawiera biblioteki współdzielone ffmpeg:
 - bibliotekę kodeków (libavcodec); obsługuje większość istniejących
   formatów kodowania (MPEG, DivX, MPEG4, AC3, DV...),
 - bibliotekę demuksera (libavformat); obsługuje większość istniejących
-  formatów plików (AVI, MPEG, OGG, Matroska, ASF...),
-- bibliotekę postprocessingu (libpostproc).
+  formatów plików (AVI, MPEG, OGG, Matroska, ASF...).
 
 %package devel
 Summary:	ffmpeg header files
@@ -411,15 +436,17 @@ Summary(pl.UTF-8):	Pliki nagłówkowe ffmpeg
 Group:		Development/Libraries
 Requires:	%{name}-libs%{?_isa} = %{version}-%{release}
 # Libs.private from *.pc
+%{?with_lcevcdec:Requires:	LCEVCdec-devel%{?_isa} >= 2.0.0}
 %{?with_openal:Requires:	OpenAL-devel%{?_isa} >= 1.1}
 %{?with_opencl:Requires:	OpenCL-devel >= 1.2}
 %{?with_opengl:Requires:	OpenGL-devel}
 Requires:	SDL2-devel%{?_isa} >= 2.0.1
-%{?with_vulkan:Requires:	Vulkan-Loader-devel%{?_isa} >= 1.3.277}
+%{?with_vulkan:Requires:	Vulkan-Loader-devel%{?_isa} >= 1.4.317}
 Requires:	alsa-lib-devel%{?_isa}
-%{?with_aom:Requires:	aom-devel%{?_isa} >= 1.0.0}
+%{?with_aom:Requires:	aom-devel%{?_isa} >= 2.0.0}
 %{?with_aribb24:Requires:	aribb24-devel%{?_isa}}
 Requires:	bzip2-devel%{?_isa}
+%{?with_cairo:Requires:	cairo-devel%{?_isa}}
 Requires:	celt-devel%{?_isa} >= 0.11.0
 %{?with_codec2:Requires:	codec2-devel%{?_isa}}
 %{?with_dav1d:Requires:	dav1d-devel%{?_isa} >= 0.5.0}
@@ -446,16 +473,19 @@ Requires:	libbluray-devel%{?_isa}
 %{?with_caca:Requires:	libcaca-devel%{?_isa}}
 Requires:	libcdio-paranoia-devel%{?_isa} >= 0.90-2
 %{?with_chromaprint:Requires:	libchromaprint-devel%{?_isa}}
-%{?with_crystalhd:Requires:	libcrystalhd-devel%{?_isa}}
 %{?with_dc1394:Requires:	libdc1394-devel%{?_isa} >= 2}
 %{?with_libdrm:Requires:	libdrm-devel%{?_isa}}
+%{?with_dvd:Requires:	libdvdnav-devel%{?_isa} >= 6.1.1}
+%{?with_dvd:Requires:	libdvdread-devel%{?_isa} >= 6.1.2}
 %{?with_gsm:Requires:	libgsm-devel%{?_isa}}
 %{?with_iec61883:Requires:	libiec61883-devel%{?_isa}}
 %{?with_libjxl:Requires:	libjxl-devel%{?_isa} >= 0.7.0}
 %{?with_libklvanc:Requires:	libklvanc-devel%{?_isa}}
+%{?with_lc3:Requires:	liblc3-devel%{?_isa} >= 1.1.0}
 %{?with_modplug:Requires:	libmodplug-devel%{?_isa}}
 %{?with_libmysofa:Requires:	libmysofa-devel%{?_isa} >= 0.7}
 %{?with_openmpt:Requires: libopenmpt-devel%{?_isa} >= 0.4.5}
+%{?with_libquirc:Requires:	libquirc-devel%{?_isa}}
 %if %{with dc1394} || %{with iec61883}
 Requires:	libraw1394-devel%{?_isa} >= 2
 %endif
@@ -482,12 +512,15 @@ Requires:	libxcb-devel%{?_isa} >= 1.4
 %{?with_libxml2:Requires:	libxml2-devel%{?_isa} >= 2}
 %{?with_lv2:Requires:	lilv-devel%{?_isa}}
 %{?with_mfx:Requires:	mfx_dispatch-devel%{?_isa} >= 1.28}
+%{?with_mpeghdec:Requires:	mpeghdec-devel%{?_isa} >= 3.0.0}
+%{?with_openapv:Requires:	openapv-devel%{?_isa} >= 0.2.0.0}
 %{?with_amr:Requires:	opencore-amr-devel%{?_isa}}
 %{?with_opencv:Requires:	opencv-devel%{?_isa} >= 2}
 %{?with_openh264:Requires:	openh264-devel%{?_isa} >= 1.3}
 Requires:	openjpeg2-devel%{?_isa} >= 2.1
 Requires:	opus-devel%{?_isa}
 %{?with_pulseaudio:Requires:	pulseaudio-devel%{?_isa}}
+%{?with_qrencode:Requires:	qrencode-devel%{?_isa}}
 %{?with_rabbitmq:Requires:	rabbitmq-c-devel%{?_isa} >= 0.7.1}
 %{?with_rav1e:Requires:	rav1e-devel%{?_isa} >= 0.5.0}
 %{?with_rkmpp:Requires:	rockchip-mpp-devel%{?_isa} >= 1.3.7}
@@ -500,6 +533,7 @@ Requires:	speex-devel%{?_isa} >= 1:1.2-rc1
 %{?with_glslang:Requires:	spirv-tools-devel%{?_isa}}
 %{?with_srt:Requires:	srt-devel%{?_isa} >= 1.3}
 %{?with_svtav1:Requires:	svt-av1-devel%{?_isa} >= 0.9.0}
+%{?with_svtjpegxs:Requires:	svt-jpegxs-devel%{?_isa} >= 0.10.0}
 %{?with_tesseract:Requires:	tesseract-devel%{?_isa}}
 Requires:	twolame-devel%{?_isa} >= 0.3.10
 %{?with_uavs3d:Requires:	uavs3d-devel%{?_isa} >= 1.1.41}
@@ -507,9 +541,13 @@ Requires:	twolame-devel%{?_isa} >= 0.3.10
 %{?with_vidstab:Requires:	vid.stab-devel%{?_isa} >= 0.98}
 %{?with_voamrwbenc:Requires:	vo-amrwbenc-devel%{?_isa}}
 %{?with_vmaf:Requires:	vmaf-devel%{?_isa} >= 2.0.0}
+%{?with_vvenc:Requires:	vvenc-devel%{?_isa} >= 1.6.1}
 %{?with_ilbc:Requires:	webrtc-libilbc-devel%{?_isa}}
+%{?with_whisper:Requires:	whisper.cpp-devel%{?_isa} >= 1.7.5}
 %{?with_avs:Requires:	xavs-devel%{?_isa}}
 %{?with_avs2:Requires:	xavs2-devel%{?_isa} >= 1.3}
+%{?with_xevc:Requires:	xevd-devel%{?_isa} >= 0.4.1}
+%{?with_xevc:Requires:	xeve-devel%{?_isa} >= 0.4.3}
 Requires:	xorg-lib-libX11-devel%{?_isa}
 Requires:	xorg-lib-libXext-devel%{?_isa}
 Requires:	xorg-lib-libXv-devel%{?_isa}
@@ -571,14 +609,9 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 %setup -q
 %patch -P0 -p1
 %patch -P1 -p1
-%patch -P2 -p1
 %if %{with v4l2_request}
-%patch -P3 -p1
+%patch -P2 -p1
 %endif
-%patch -P4 -p1
-%patch -P5 -p1
-%patch -P6 -p1
-%patch -P7 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
@@ -663,6 +696,7 @@ EOF
 	%{!?with_doc:--disable-doc} \
 	--enable-avfilter \
 	%{?with_avisynth:--enable-avisynth} \
+	%{?with_cairo:--enable-cairo} \
 	%{?with_chromaprint:--enable-chromaprint} \
 	%{?with_cudasdk:--enable-cuda-nvcc} \
 	%{?with_decklink:--enable-decklink} \
@@ -686,7 +720,9 @@ EOF
 	%{?with_dav1d:--enable-libdav1d} \
 	%{?with_avs2:--enable-libdavs2} \
 	%{?with_dc1394:--enable-libdc1394} \
-	%{?with_libdrm:--enable-libdrm} \
+	%{!?with_libdrm:--disable-libdrm} \
+	%{?with_dvd:--enable-libdvdnav} \
+	%{?with_dvd:--enable-libdvdread} \
 	%{?with_flite:--enable-libflite} \
 	--enable-libfontconfig \
 	--enable-libfreetype \
@@ -701,11 +737,14 @@ EOF
 	%{?with_libjxl:--enable-libjxl} \
 	%{?with_kvazaar:--enable-libkvazaar} \
 	%{?with_libklvanc:--enable-libklvanc} \
+	%{?with_lc3:--enable-liblc3} \
+	%{?with_lcevcdec:--enable-liblcevc_dec} \
 	%{?with_lensfun:--enable-liblensfun} \
 	%{?with_mfx:--enable-libmfx} \
 	%{?with_modplug:--enable-libmodplug} \
 	--enable-libmp3lame \
 	%{?with_libmysofa:--enable-libmysofa} \
+	%{?with_openapv:--enable-liboapv} \
 	%{?with_amr:--enable-libopencore-amrnb} \
 	%{?with_amr:--enable-libopencore-amrwb} \
 	%{?with_opencv:--enable-libopencv} \
@@ -715,6 +754,8 @@ EOF
 	--enable-libopus \
 	%{?with_libplacebo:--enable-libplacebo} \
 	%{?with_pulseaudio:--enable-libpulse} \
+	%{?with_qrencode:--enable-libqrencode} \
+	%{?with_libquirc:--enable-libquirc} \
 	%{?with_rabbitmq:--enable-librabbitmq} \
 	%{?with_rav1e:--enable-librav1e} \
 	%{?with_librist:--enable-librist} \
@@ -730,6 +771,7 @@ EOF
 	%{?with_srt:--enable-libsrt} \
 	%{?with_ssh:--enable-libssh} \
 	%{?with_svtav1:--enable-libsvtav1} \
+	%{?with_svtjpegxs:--enable-libsvtjpegxs} \
 	%{?with_tesseract:--enable-libtesseract} \
 	%{?with_theora:--enable-libtheora} \
 	--enable-libtwolame \
@@ -740,12 +782,15 @@ EOF
 	%{?with_voamrwbenc:--enable-libvo-amrwbenc} \
 	--enable-libvorbis \
 	%{?with_vpx:--enable-libvpx} \
+	%{?with_vvenc:--enable-libvvenc} \
 	%{?with_webp:--enable-libwebp} \
 	%{?with_x264:--enable-libx264} \
 	%{?with_x265:--enable-libx265} \
 	%{?with_avs:--enable-libxavs} \
 	%{?with_avs2:--enable-libxavs2} \
 	--enable-libxcb \
+	%{?with_xevc:--enable-libxevd} \
+	%{?with_xevc:--enable-libxeve} \
 	%{?with_libxml2:--enable-libxml2} \
 	%{?with_xvid:--enable-libxvid} \
 	%{?with_zimg:--enable-libzimg} \
@@ -757,7 +802,6 @@ EOF
 	%{?with_opencl:--enable-opencl} \
 	%{?with_opengl:--enable-opengl} \
 	%{?with_pocketsphinx:--enable-pocketsphinx} \
-	--enable-postproc \
 	--enable-pthreads \
 	%{?with_rkmpp:--enable-rkmpp} \
 	--enable-shared \
@@ -766,6 +810,7 @@ EOF
 	%{!?with_va:--disable-vaapi} \
 	%{?with_vapoursynth:--enable-vapoursynth} \
 	%{!?with_vulkan:--disable-vulkan} \
+	%{?with_whisper:--enable-whisper} \
 %if %{with v4l2_request}
 	--enable-libudev \
 	--enable-v4l2-request \
@@ -782,6 +827,7 @@ EOF
 %if %{with nonfree}
 	--enable-nonfree \
 	%{?with_fdk_aac:--enable-libfdk-aac} \
+	%{?with_mpeghdec:--enable-libmpeghdec} \
 	%{?with_npp:--enable-libnpp} \
 %endif
 	--enable-runtime-cpudetect
@@ -859,41 +905,37 @@ rm -rf $RPM_BUILD_ROOT
 %files libs
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libavcodec.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavcodec.so.60
+%ghost %{_libdir}/libavcodec.so.62
 %attr(755,root,root) %{_libdir}/libavdevice.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavdevice.so.60
+%ghost %{_libdir}/libavdevice.so.62
 %attr(755,root,root) %{_libdir}/libavfilter.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavfilter.so.9
+%ghost %{_libdir}/libavfilter.so.11
 %attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavformat.so.60
+%ghost %{_libdir}/libavformat.so.62
 %attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavutil.so.58
-%attr(755,root,root) %{_libdir}/libpostproc.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libpostproc.so.57
+%ghost %{_libdir}/libavutil.so.60
 %attr(755,root,root) %{_libdir}/libswresample.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libswresample.so.4
+%ghost %{_libdir}/libswresample.so.6
 %attr(755,root,root) %{_libdir}/libswscale.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libswscale.so.7
+%ghost %{_libdir}/libswscale.so.9
 
 %files devel
 %defattr(644,root,root,755)
 %doc doc/optimization.txt
-%attr(755,root,root) %{_bindir}/ffmpeg-avconfig
-%attr(755,root,root) %{_libdir}/libavcodec.so
-%attr(755,root,root) %{_libdir}/libavdevice.so
-%attr(755,root,root) %{_libdir}/libavfilter.so
-%attr(755,root,root) %{_libdir}/libavformat.so
-%attr(755,root,root) %{_libdir}/libavutil.so
-%attr(755,root,root) %{_libdir}/libpostproc.so
-%attr(755,root,root) %{_libdir}/libswresample.so
-%attr(755,root,root) %{_libdir}/libswscale.so
+%{_bindir}/ffmpeg-avconfig
+%{_libdir}/libavcodec.so
+%{_libdir}/libavdevice.so
+%{_libdir}/libavfilter.so
+%{_libdir}/libavformat.so
+%{_libdir}/libavutil.so
+%{_libdir}/libswresample.so
+%{_libdir}/libswscale.so
 %{_includedir}/ffmpeg
 %{_includedir}/libavcodec
 %{_includedir}/libavdevice
 %{_includedir}/libavfilter
 %{_includedir}/libavformat
 %{_includedir}/libavutil
-%{_includedir}/libpostproc
 %{_includedir}/libswresample
 %{_includedir}/libswscale
 %{_pkgconfigdir}/libavcodec.pc
@@ -901,7 +943,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_pkgconfigdir}/libavfilter.pc
 %{_pkgconfigdir}/libavformat.pc
 %{_pkgconfigdir}/libavutil.pc
-%{_pkgconfigdir}/libpostproc.pc
 %{_pkgconfigdir}/libswresample.pc
 %{_pkgconfigdir}/libswscale.pc
 %if %{with doc}
@@ -923,7 +964,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libavfilter.a
 %{_libdir}/libavformat.a
 %{_libdir}/libavutil.a
-%{_libdir}/libpostproc.a
 %{_libdir}/libswresample.a
 %{_libdir}/libswscale.a
 %endif
