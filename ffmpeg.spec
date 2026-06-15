@@ -284,7 +284,7 @@ BuildRequires:	speex-devel >= 1:1.2-rc1
 %{?with_glslang:BuildRequires:	spirv-tools-devel}
 %{?with_srt:BuildRequires:	srt-devel >= 1.3}
 %{?with_svtav1:BuildRequires:	svt-av1-devel >= 0.9.0}
-%{?with_svtjpegxs:BuildRequires:	svt-jpegxs-devel >= 0.10.0}
+%{?with_svtjpegxs:BuildRequires:	svt-jpeg-xs-devel >= 0.10.0}
 BuildRequires:	tar >= 1:1.22
 %{?with_tesseract:BuildRequires:	tesseract-devel}
 %{?with_doc:BuildRequires:	tetex}
@@ -398,7 +398,7 @@ Requires:	openjpeg2%{?_isa} >= 2.1
 Requires:	speex%{?_isa} >= 1:1.2-rc1
 %{?with_srt:Requires:	srt%{?_isa} >= 1.3}
 %{?with_svtav1:Requires:	svt-av1%{?_isa} >= 0.9.0}
-%{?with_svtjpegxs:Requires:	svt-jpegxs%{?_isa} >= 0.10.0}
+%{?with_svtjpegxs:Requires:	svt-jpeg-xs%{?_isa} >= 0.10.0}
 Requires:	twolame-libs%{?_isa} >= 0.3.10
 %{?with_uavs3d:Requires:	uavs3d%{?_isa} >= 1.1.41}
 %{?with_vapoursynth:Requires:	vapoursynth%{?_isa} >= 42}
@@ -533,7 +533,7 @@ Requires:	speex-devel%{?_isa} >= 1:1.2-rc1
 %{?with_glslang:Requires:	spirv-tools-devel%{?_isa}}
 %{?with_srt:Requires:	srt-devel%{?_isa} >= 1.3}
 %{?with_svtav1:Requires:	svt-av1-devel%{?_isa} >= 0.9.0}
-%{?with_svtjpegxs:Requires:	svt-jpegxs-devel%{?_isa} >= 0.10.0}
+%{?with_svtjpegxs:Requires:	svt-jpeg-xs-devel%{?_isa} >= 0.10.0}
 %{?with_tesseract:Requires:	tesseract-devel%{?_isa}}
 Requires:	twolame-devel%{?_isa} >= 0.3.10
 %{?with_uavs3d:Requires:	uavs3d-devel%{?_isa} >= 1.1.41}
