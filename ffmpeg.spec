@@ -131,7 +131,7 @@ Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
 # NOTE: 7.x/8.x prepared on DEVEL-{7.0,7.1,8.0} branches, but other software is not ready (e.g. xine-lib 1.2.13, gstreamer-libav 1.24.2)
-Version:	6.1.5
+Version:	6.1.6
 Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
@@ -140,7 +140,7 @@ Release:	1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	https://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	77a89d36871a3fcb41883cb5fac3efd3
+# Source0-md5:	6c13719e8f4bc3605a463ac3be4602d2
 Patch0:		%{name}-omx-libnames.patch
 Patch1:		%{name}-atadenoise.patch
 Patch2:		opencv4.patch
