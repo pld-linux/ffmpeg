@@ -858,35 +858,35 @@ rm -rf $RPM_BUILD_ROOT
 
 %files libs
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libavcodec.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavcodec.so.60
-%attr(755,root,root) %{_libdir}/libavdevice.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavdevice.so.60
-%attr(755,root,root) %{_libdir}/libavfilter.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavfilter.so.9
-%attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavformat.so.60
-%attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavutil.so.58
-%attr(755,root,root) %{_libdir}/libpostproc.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libpostproc.so.57
-%attr(755,root,root) %{_libdir}/libswresample.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libswresample.so.4
-%attr(755,root,root) %{_libdir}/libswscale.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libswscale.so.7
+%{_libdir}/libavcodec.so.*.*.*
+%ghost %{_libdir}/libavcodec.so.60
+%{_libdir}/libavdevice.so.*.*.*
+%ghost %{_libdir}/libavdevice.so.60
+%{_libdir}/libavfilter.so.*.*.*
+%ghost %{_libdir}/libavfilter.so.9
+%{_libdir}/libavformat.so.*.*.*
+%ghost %{_libdir}/libavformat.so.60
+%{_libdir}/libavutil.so.*.*.*
+%ghost %{_libdir}/libavutil.so.58
+%{_libdir}/libpostproc.so.*.*.*
+%ghost %{_libdir}/libpostproc.so.57
+%{_libdir}/libswresample.so.*.*.*
+%ghost %{_libdir}/libswresample.so.4
+%{_libdir}/libswscale.so.*.*.*
+%ghost %{_libdir}/libswscale.so.7
 
 %files devel
 %defattr(644,root,root,755)
 %doc doc/optimization.txt
 %attr(755,root,root) %{_bindir}/ffmpeg-avconfig
-%attr(755,root,root) %{_libdir}/libavcodec.so
-%attr(755,root,root) %{_libdir}/libavdevice.so
-%attr(755,root,root) %{_libdir}/libavfilter.so
-%attr(755,root,root) %{_libdir}/libavformat.so
-%attr(755,root,root) %{_libdir}/libavutil.so
-%attr(755,root,root) %{_libdir}/libpostproc.so
-%attr(755,root,root) %{_libdir}/libswresample.so
-%attr(755,root,root) %{_libdir}/libswscale.so
+%{_libdir}/libavcodec.so
+%{_libdir}/libavdevice.so
+%{_libdir}/libavfilter.so
+%{_libdir}/libavformat.so
+%{_libdir}/libavutil.so
+%{_libdir}/libpostproc.so
+%{_libdir}/libswresample.so
+%{_libdir}/libswscale.so
 %{_includedir}/ffmpeg
 %{_includedir}/libavcodec
 %{_includedir}/libavdevice
