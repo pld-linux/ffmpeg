@@ -282,6 +282,7 @@ BuildRequires:	twolame-devel >= 0.3.10
 %{?with_uavs3d:BuildRequires:	uavs3d-devel >= 1.1.41}
 %{?with_v4l2_request:BuildRequires:	udev-devel}
 %{?with_vapoursynth:BuildRequires:	vapoursynth-devel >= 42}
+%{?with_vapoursynth:BuildRequires:	vapoursynth-devel < 73}
 %{?with_vidstab:BuildRequires:	vid.stab-devel >= 0.98}
 %{?with_vmaf:BuildRequires:	vmaf-devel >= 2.0.0}
 %{?with_voamrwbenc:BuildRequires:	vo-amrwbenc-devel}
