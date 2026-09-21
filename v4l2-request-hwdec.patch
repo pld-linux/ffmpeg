@@ -4,13 +4,14 @@ Out-of-tree series maintained by Jonas Karlman (Kwiboo); not merged upstream.
 Source: https://github.com/Kwiboo/FFmpeg branch v4l2-request-n8.1
   combined diff: git diff n8.1..v4l2-request-n8.1
 Regenerate on ffmpeg bump from the matching v4l2-request-nX.Y branch.
+(No n9.x branch yet: n8.1 series with the configure --help context refreshed for 9.0.2.)
 
 diff --git a/configure b/configure
 index 17596942749ab..3d4009f3480de 100755
 --- a/configure
 +++ b/configure
-@@ -368,6 +368,7 @@ External library support:
-   --enable-omx-rpi         enable OpenMAX IL code for Raspberry Pi [no]
+@@ -364,6 +364,7 @@ External library support:
+   --disable-nvenc          disable Nvidia video encoding code [autodetect]
    --enable-rkmpp           enable Rockchip Media Process Platform code [no]
    --disable-v4l2-m2m       disable V4L2 mem2mem code [autodetect]
 +  --disable-v4l2-request   disable V4L2 Request API code [autodetect]

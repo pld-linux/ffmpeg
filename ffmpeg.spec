@@ -2,8 +2,6 @@
 # - libtorch (https://github.com/pytorch/pytorch) [--enable-libtorch, Torch as one DNN backend]
 # - libopenvino
 # - libtensorflow [-ltensorflow tensorflow/c/c_api.h]
-# - AMF >= 1.4.36.0 (available at https://github.com/GPUOpen-LibrariesAndSDKs/AMF, where is original source?)
-# - ohcodec (--enable-ohcodec, enable OpenHarmony Codec support; specific to OpenHarmony OS?)
 #
 # How to deal with ffmpeg/opencv/chromaprint checken-egg problem:
 #	1. make-request -r --with bootstrap ffmpeg.spec
@@ -14,7 +12,8 @@
 #
 # Conditional build:
 %bcond_with	bootstrap	# disable features to able to build without installed ffmpeg
-%bcond_with	nonfree		# unblock non free options of package (currently: cuda_nvcc, decklib, fdk_aac, mpeghdec, npp, openssl, libressl/libtls)
+%bcond_with	nonfree		# unblock non free options of package (currently: cuda_nvcc, decklib, fdk_aac, mpeghdec, openssl, libressl/libtls)
+%bcond_without	amf		# AMD AMF de/encoders and filters (runtime library comes with AMD driver, dlopened)
 %bcond_without	amr		# AMR-NB/WB de/encoding via libopencore-amrnb/wb
 %bcond_without	aom		# AV1 viden de/encoding via libaom
 %bcond_without	aribb24		# ARIB text and caption decoding via libaribb24
@@ -37,7 +36,7 @@
 %bcond_without	flite		# flite voice synthesis support
 %bcond_without	frei0r		# frei0r video filtering
 %bcond_without	fribidi		# fribidi support in drawtext filter
-%bcond_with	glslang		# GLSL->SPIRV compilation via libglslang
+%bcond_with	glslang		# compile Vulkan shaders with glslangValidator (glslang) instead of glslc
 %bcond_without	gme		# Game Music Emu support
 %bcond_without	gsm		# GSM de/encoding via libgsm
 %bcond_without	iec61883	# ec61883 via libiec61883
@@ -61,8 +60,7 @@
 %bcond_without	lv2		# LV2 audio filtering
 %bcond_with	mfx		# MFX hardware acceleration support
 %bcond_without	modplug		# ModPlug via libmodplug
-%bcond_with	npp		# NVIDIA Performance Primitives-based code (requires nonfree) [BR: libnppc+libnppi, npp.h]
-%bcond_without	omx		# OpenMAX IL support
+%bcond_without	onnxruntime	# DNN filters backend via ONNX Runtime
 %bcond_without	openal		# OpenAL 1.1 capture support
 %bcond_without	openapv		# APV codec encoding support via OpenAPV
 %bcond_without	opencl		# OpenCL 1.2 code
@@ -77,7 +75,7 @@
 %bcond_with	rav1e		# AV1 encoding using rav1e
 %bcond_with	rkmpp		# Rockchip Media Process Platform code [implies libdrm]
 %bcond_without	rubberband	# rubberband filter
-%bcond_without	shaderc		# GLSL->SPIRV compilation via libshaderc
+%bcond_without	shaderc		# compile Vulkan shaders with glslc (shaderc)
 %bcond_without	shine		# shine fixed-point MP3 encoder
 %bcond_with	smb		# SMB support via libsmbclient
 %bcond_without	snappy		# Snappy compression support (needed for hap encoding)
@@ -142,8 +140,8 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	8.1.1
-Release:	0.1
+Version:	9.0.2
+Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
 # v3 (allows *GPLv3 or Apache-licensed libs): gmp lensfun opencore-amr vmaf vo-*enc rkmpp
@@ -151,19 +149,17 @@ Release:	0.1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	https://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	f423232dd414c77008dfd85ea5523b8c
-Patch0:		%{name}-omx-libnames.patch
-Patch1:		%{name}-atadenoise.patch
-Patch2:		v4l2-request-hwdec.patch
+# Source0-md5:	4c47fa111bd791da246ec07748ba5e04
+Patch0:		%{name}-atadenoise.patch
+Patch1:		v4l2-request-hwdec.patch
 URL:		https://ffmpeg.org/
 %{?with_avisynth:BuildRequires:	AviSynthPlus-devel >= 3.7.3}
+%{?with_amf:BuildRequires:	amf-headers >= 1.5.2}
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.11}
 %{?with_lcevcdec:BuildRequires:	LCEVCdec-devel >= 2.0.0}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
 %{?with_opencl:BuildRequires:	OpenCL-devel >= 1.2}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
-# libomxil-bellagio-devel or limoi-core-devel (just headers, library is dlopened at runtime)
-%{?with_omx:BuildRequires:	OpenMAX-IL-devel}
 BuildRequires:	SDL2-devel >= 2.0.1
 BuildRequires:	SDL2-devel < 3.0.0
 %{?with_vulkan:BuildRequires:	Vulkan-Loader-devel >= 1.4.317}
@@ -172,7 +168,6 @@ BuildRequires:	alsa-lib-devel
 %{?with_aribb24:BuildRequires:	aribb24-devel}
 BuildRequires:	bzip2-devel
 %{?with_cairo:BuildRequires:	cairo-devel}
-BuildRequires:	celt-devel >= 0.11.0
 %{?with_codec2:BuildRequires:	codec2-devel}
 %{?with_dav1d:BuildRequires:	dav1d-devel >= 0.5.0}
 %{?with_avs2:BuildRequires:	davs2-devel >= 1.6}
@@ -185,7 +180,7 @@ BuildRequires:	freetype-devel
 %{?with_gme:BuildRequires:	game-music-emu-devel}
 BuildRequires:	gcc >= 6:4.7
 BuildRequires:	harfbuzz-devel
-%{?with_glslang:BuildRequires:	glslang-devel >= 11}
+%{?with_glslang:BuildRequires:	glslang >= 11.9.0}
 BuildRequires:	gmp-devel
 BuildRequires:	gnutls-devel
 BuildRequires:	jack-audio-connection-kit-devel
@@ -258,6 +253,7 @@ BuildRequires:	nasm
 %endif
 %endif
 %{?with_ffnvcodec:BuildRequires:	nv-codec-headers >= 12.1.14.0}
+%{?with_onnxruntime:BuildRequires:	onnxruntime-devel}
 %{?with_openapv:BuildRequires:	openapv-devel >= 0.2.0.0}
 # amrnb,amrwb
 %{?with_amr:BuildRequires:	opencore-amr-devel}
@@ -276,12 +272,13 @@ BuildRequires:	pkgconfig
 %{?with_rkmpp:BuildRequires:	rockchip-mpp-devel >= 1.3.7}
 BuildRequires:	rpmbuild(macros) >= 2.025
 %{?with_rubberband:BuildRequires:	rubberband-devel >= 1.8.1}
-%{?with_shaderc:BuildRequires:	shaderc-devel >= 2019.1}
+%{?with_shaderc:BuildRequires:	shaderc >= 2024.4}
 %{?with_shine:BuildRequires:	shine-devel >= 3.0.0}
 %{?with_snappy:BuildRequires:	snappy-devel}
 %{?with_soxr:BuildRequires:	soxr-devel}
 BuildRequires:	speex-devel >= 1:1.2-rc1
-%{?with_glslang:BuildRequires:	spirv-tools-devel}
+# swscale SPIR-V backend
+%{?with_vulkan:BuildRequires:	spirv-headers}
 %{?with_srt:BuildRequires:	srt-devel >= 1.3}
 %{?with_svtav1:BuildRequires:	svt-av1-devel >= 0.9.0}
 %{?with_svtjpegxs:BuildRequires:	svt-jpeg-xs-devel >= 0.10.0}
@@ -352,7 +349,6 @@ Requires:	SDL2%{?_isa} >= 2.0.1
 %{?with_vulkan:Requires:	Vulkan-Loader%{?_isa} >= 1.4.317}
 %{?with_aom:Requires:	aom%{?_isa} >= 2.0.0}
 %{?with_cairo:Requires:	cairo%{?_isa}}
-Requires:	celt%{?_isa} >= 0.11.0
 %{?with_dav1d:Requires:	dav1d%{?_isa} >= 0.5.0}
 %{?with_avs2:Requires:	davs2%{?_isa} >= 1.6}
 %{?with_flite:Requires:	flite%{?_isa} >= 1.4}
@@ -387,6 +383,7 @@ Requires:	libxcb%{?_isa} >= 1.4
 Requires:	lame-libs%{?_isa} >= 3.98.3
 %{?with_lcms:Requires:	lcms2%{?_isa} >= 2.13}
 %{?with_mfx:Requires:	mfx_dispatch%{?_isa} >= 1.28}
+%{?with_onnxruntime:Requires:	onnxruntime%{?_isa}}
 %{?with_openapv:Requires:	openapv%{?_isa} >= 0.2.0.0}
 %{?with_openh264:Requires:	openh264%{?_isa} >= 1.3}
 Requires:	openjpeg2%{?_isa} >= 2.1
@@ -447,7 +444,6 @@ Requires:	alsa-lib-devel%{?_isa}
 %{?with_aribb24:Requires:	aribb24-devel%{?_isa}}
 Requires:	bzip2-devel%{?_isa}
 %{?with_cairo:Requires:	cairo-devel%{?_isa}}
-Requires:	celt-devel%{?_isa} >= 0.11.0
 %{?with_codec2:Requires:	codec2-devel%{?_isa}}
 %{?with_dav1d:Requires:	dav1d-devel%{?_isa} >= 0.5.0}
 %{?with_avs2:Requires:	davs2-devel%{?_isa} >= 1.6}
@@ -457,7 +453,6 @@ Requires:	fontconfig-devel%{?_isa}
 Requires:	freetype-devel%{?_isa}
 %{?with_fribidi:Requires:	fribidi-devel%{?_isa}}
 %{?with_gme:Requires:	game-music-emu-devel%{?_isa}}
-%{?with_glslang:Requires:	glslang-devel%{?_isa}}
 Requires:	gnutls-devel%{?_isa}
 Requires:	harfbuzz-devel%{?_isa}
 Requires:	jack-audio-connection-kit-devel%{?_isa}
@@ -513,6 +508,7 @@ Requires:	libxcb-devel%{?_isa} >= 1.4
 %{?with_lv2:Requires:	lilv-devel%{?_isa}}
 %{?with_mfx:Requires:	mfx_dispatch-devel%{?_isa} >= 1.28}
 %{?with_mpeghdec:Requires:	mpeghdec-devel%{?_isa} >= 3.0.0}
+%{?with_onnxruntime:Requires:	onnxruntime-devel%{?_isa}}
 %{?with_openapv:Requires:	openapv-devel%{?_isa} >= 0.2.0.0}
 %{?with_amr:Requires:	opencore-amr-devel%{?_isa}}
 %{?with_opencv:Requires:	opencv-devel%{?_isa} >= 2}
@@ -525,12 +521,10 @@ Requires:	opus-devel%{?_isa}
 %{?with_rav1e:Requires:	rav1e-devel%{?_isa} >= 0.5.0}
 %{?with_rkmpp:Requires:	rockchip-mpp-devel%{?_isa} >= 1.3.7}
 %{?with_rubberband:Requires:	rubberband-devel%{?_isa} >= 1.8.1}
-%{?with_shaderc:Requires:	shaderc-devel%{?_isa} >= 2019.1}
 %{?with_shine:Requires:	shine-devel%{?_isa} >= 3.0.0}
 %{?with_snappy:Requires:	snappy-devel%{?_isa}}
 %{?with_soxr:Requires:	soxr-devel%{?_isa}}
 Requires:	speex-devel%{?_isa} >= 1:1.2-rc1
-%{?with_glslang:Requires:	spirv-tools-devel%{?_isa}}
 %{?with_srt:Requires:	srt-devel%{?_isa} >= 1.3}
 %{?with_svtav1:Requires:	svt-av1-devel%{?_isa} >= 0.9.0}
 %{?with_svtjpegxs:Requires:	svt-jpeg-xs-devel%{?_isa} >= 0.10.0}
@@ -608,9 +602,8 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 %prep
 %setup -q
 %patch -P0 -p1
-%patch -P1 -p1
 %if %{with v4l2_request}
-%patch -P2 -p1
+%patch -P1 -p1
 %endif
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
@@ -686,14 +679,15 @@ EOF
 	--libdir=%{_libdir} \
 	--shlibdir=%{_libdir} \
 	--mandir=%{_mandir} \
-	--extra-cflags="-D_GNU_SOURCE=1 %{rpmcppflags} %{rpmcflags}%{?with_decklink: -I/usr/include/decklink}%{?with_opencv: -I/usr/include/opencv4}" \
-	--extra-cxxflags="-D_GNU_SOURCE=1 %{rpmcppflags} %{rpmcxxflags}%{?with_decklink: -I/usr/include/decklink}%{?with_opencv: -I/usr/include/opencv4}" \
+	--extra-cflags="-D_GNU_SOURCE=1 %{rpmcppflags} %{rpmcflags}%{?with_decklink: -I/usr/include/decklink}%{?with_opencv: -I/usr/include/opencv4}%{?with_onnxruntime: -I%{_includedir}/onnxruntime}" \
+	--extra-cxxflags="-D_GNU_SOURCE=1 %{rpmcppflags} %{rpmcxxflags}%{?with_decklink: -I/usr/include/decklink}%{?with_opencv: -I/usr/include/opencv4}%{?with_onnxruntime: -I%{_includedir}/onnxruntime}" \
 	--extra-ldflags="%{rpmcflags} %{rpmldflags}" \
 	--cc="%{__cc}" \
 	--disable-debug \
 	--disable-optimizations \
 	--disable-stripping \
 	%{!?with_doc:--disable-doc} \
+	%{?with_amf:--enable-amf}%{!?with_amf:--disable-amf} \
 	--enable-avfilter \
 	%{?with_avisynth:--enable-avisynth} \
 	%{?with_cairo:--enable-cairo} \
@@ -701,6 +695,8 @@ EOF
 	%{?with_cudasdk:--enable-cuda-nvcc} \
 	%{?with_decklink:--enable-decklink} \
 	%{!?with_ffnvcodec:--disable-ffnvcodec} \
+	%{?with_glslang:--glslc=glslangValidator} \
+	%{?with_shaderc:--glslc=glslc} \
 	--enable-gnutls \
 	--enable-gpl \
 	--enable-version3 \
@@ -714,7 +710,6 @@ EOF
 	--enable-libbluray \
 	%{?with_bs2b:--enable-libbs2b} \
 	%{?with_caca:--enable-libcaca} \
-	--enable-libcelt \
 	--enable-libcdio \
 	%{?with_codec2:--enable-libcodec2} \
 	%{?with_dav1d:--enable-libdav1d} \
@@ -727,7 +722,6 @@ EOF
 	--enable-libfontconfig \
 	--enable-libfreetype \
 	%{?with_fribidi:--enable-libfribidi} \
-	%{?with_glslang:--enable-libglslang} \
 	%{?with_gme:--enable-libgme} \
 	%{?with_gsm:--enable-libgsm} \
 	--enable-libharfbuzz \
@@ -744,6 +738,7 @@ EOF
 	%{?with_modplug:--enable-libmodplug} \
 	--enable-libmp3lame \
 	%{?with_libmysofa:--enable-libmysofa} \
+	%{?with_onnxruntime:--enable-libonnxruntime} \
 	%{?with_openapv:--enable-liboapv} \
 	%{?with_amr:--enable-libopencore-amrnb} \
 	%{?with_amr:--enable-libopencore-amrwb} \
@@ -762,7 +757,6 @@ EOF
 	%{?with_librsvg:--enable-librsvg} \
 	--enable-librtmp \
 	%{?with_rubberband:--enable-librubberband} \
-	%{?with_shaderc:--enable-libshaderc} \
 	%{?with_shine:--enable-libshine} \
 	%{?with_smb:--enable-libsmbclient} \
 	%{?with_snappy:--enable-libsnappy} \
@@ -797,7 +791,6 @@ EOF
 	%{?with_zmq:--enable-libzmq} \
 	%{?with_zvbi:--enable-libzvbi} \
 	%{?with_lv2:--enable-lv2} \
-	%{?with_omx:--enable-omx} \
 	%{?with_openal:--enable-openal} \
 	%{?with_opencl:--enable-opencl} \
 	%{?with_opengl:--enable-opengl} \
@@ -828,7 +821,6 @@ EOF
 	--enable-nonfree \
 	%{?with_fdk_aac:--enable-libfdk-aac} \
 	%{?with_mpeghdec:--enable-libmpeghdec} \
-	%{?with_npp:--enable-libnpp} \
 %endif
 	--enable-runtime-cpudetect
 
@@ -905,19 +897,19 @@ rm -rf $RPM_BUILD_ROOT
 %files libs
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libavcodec.so.*.*.*
-%ghost %{_libdir}/libavcodec.so.62
+%ghost %{_libdir}/libavcodec.so.63
 %attr(755,root,root) %{_libdir}/libavdevice.so.*.*.*
-%ghost %{_libdir}/libavdevice.so.62
+%ghost %{_libdir}/libavdevice.so.63
 %attr(755,root,root) %{_libdir}/libavfilter.so.*.*.*
-%ghost %{_libdir}/libavfilter.so.11
+%ghost %{_libdir}/libavfilter.so.12
 %attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
-%ghost %{_libdir}/libavformat.so.62
+%ghost %{_libdir}/libavformat.so.63
 %attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
-%ghost %{_libdir}/libavutil.so.60
+%ghost %{_libdir}/libavutil.so.61
 %attr(755,root,root) %{_libdir}/libswresample.so.*.*.*
-%ghost %{_libdir}/libswresample.so.6
+%ghost %{_libdir}/libswresample.so.7
 %attr(755,root,root) %{_libdir}/libswscale.so.*.*.*
-%ghost %{_libdir}/libswscale.so.9
+%ghost %{_libdir}/libswscale.so.10
 
 %files devel
 %defattr(644,root,root,755)
