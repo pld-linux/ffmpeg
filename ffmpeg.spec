@@ -139,7 +139,7 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	8.0
+Version:	8.0.3
 Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
@@ -148,7 +148,7 @@ Release:	1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	https://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	2c91c725fb1b393618554ff429e4ae43
+# Source0-md5:	31a353a3f5c225098002c3817af5d24f
 Patch0:		%{name}-omx-libnames.patch
 Patch1:		%{name}-atadenoise.patch
 Patch2:		opencv4.patch
@@ -891,19 +891,19 @@ rm -rf $RPM_BUILD_ROOT
 
 %files libs
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libavcodec.so.*.*.*
+%{_libdir}/libavcodec.so.*.*.*
 %ghost %{_libdir}/libavcodec.so.62
-%attr(755,root,root) %{_libdir}/libavdevice.so.*.*.*
+%{_libdir}/libavdevice.so.*.*.*
 %ghost %{_libdir}/libavdevice.so.62
-%attr(755,root,root) %{_libdir}/libavfilter.so.*.*.*
+%{_libdir}/libavfilter.so.*.*.*
 %ghost %{_libdir}/libavfilter.so.11
-%attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
+%{_libdir}/libavformat.so.*.*.*
 %ghost %{_libdir}/libavformat.so.62
-%attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
+%{_libdir}/libavutil.so.*.*.*
 %ghost %{_libdir}/libavutil.so.60
-%attr(755,root,root) %{_libdir}/libswresample.so.*.*.*
+%{_libdir}/libswresample.so.*.*.*
 %ghost %{_libdir}/libswresample.so.6
-%attr(755,root,root) %{_libdir}/libswscale.so.*.*.*
+%{_libdir}/libswscale.so.*.*.*
 %ghost %{_libdir}/libswscale.so.9
 
 %files devel
