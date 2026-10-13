@@ -133,7 +133,7 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	7.0.2
+Version:	7.0.3
 Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
@@ -142,14 +142,12 @@ Release:	1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	https://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	e22725fc3738e314d71a7fb32f2336db
+# Source0-md5:	fd48a094415174af114c7fcdbd9e0e5a
 Patch0:		%{name}-omx-libnames.patch
 Patch1:		%{name}-atadenoise.patch
 Patch2:		opencv4.patch
 Patch3:		v4l2-request-hwdec.patch
-Patch6:		texinfo-7.2.patch
 Patch7:		libv4l2-1.30.patch
-Patch8:		binutils-2.43.patch
 URL:		https://ffmpeg.org/
 %{?with_avisynth:BuildRequires:	AviSynthPlus-devel >= 3.7.3}
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.11}
@@ -290,7 +288,9 @@ BuildRequires:	twolame-devel >= 0.3.10
 %{?with_avs:BuildRequires:	xavs-devel}
 %{?with_avs2:BuildRequires:	xavs2-devel >= 1.3}
 %{?with_xevc:BuildRequires:	xevd-devel >= 0.4.1}
+%{?with_xevc:BuildRequires:	xevd-devel < 0.5}
 %{?with_xevc:BuildRequires:	xeve-devel >= 0.4.3}
+%{?with_xevc:BuildRequires:	xeve-devel < 0.5}
 BuildRequires:	xorg-lib-libX11-devel
 BuildRequires:	xorg-lib-libXext-devel
 BuildRequires:	xorg-lib-libXv-devel
@@ -587,9 +587,7 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 %if %{with v4l2_request}
 %patch -P3 -p1
 %endif
-%patch -P6 -p1
 %patch -P7 -p1
-%patch -P8 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
@@ -875,35 +873,35 @@ rm -rf $RPM_BUILD_ROOT
 
 %files libs
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libavcodec.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavcodec.so.61
-%attr(755,root,root) %{_libdir}/libavdevice.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavdevice.so.61
-%attr(755,root,root) %{_libdir}/libavfilter.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavfilter.so.10
-%attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavformat.so.61
-%attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libavutil.so.59
-%attr(755,root,root) %{_libdir}/libpostproc.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libpostproc.so.58
-%attr(755,root,root) %{_libdir}/libswresample.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libswresample.so.5
-%attr(755,root,root) %{_libdir}/libswscale.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libswscale.so.8
+%{_libdir}/libavcodec.so.*.*.*
+%ghost %{_libdir}/libavcodec.so.61
+%{_libdir}/libavdevice.so.*.*.*
+%ghost %{_libdir}/libavdevice.so.61
+%{_libdir}/libavfilter.so.*.*.*
+%ghost %{_libdir}/libavfilter.so.10
+%{_libdir}/libavformat.so.*.*.*
+%ghost %{_libdir}/libavformat.so.61
+%{_libdir}/libavutil.so.*.*.*
+%ghost %{_libdir}/libavutil.so.59
+%{_libdir}/libpostproc.so.*.*.*
+%ghost %{_libdir}/libpostproc.so.58
+%{_libdir}/libswresample.so.*.*.*
+%ghost %{_libdir}/libswresample.so.5
+%{_libdir}/libswscale.so.*.*.*
+%ghost %{_libdir}/libswscale.so.8
 
 %files devel
 %defattr(644,root,root,755)
 %doc doc/optimization.txt
 %attr(755,root,root) %{_bindir}/ffmpeg-avconfig
-%attr(755,root,root) %{_libdir}/libavcodec.so
-%attr(755,root,root) %{_libdir}/libavdevice.so
-%attr(755,root,root) %{_libdir}/libavfilter.so
-%attr(755,root,root) %{_libdir}/libavformat.so
-%attr(755,root,root) %{_libdir}/libavutil.so
-%attr(755,root,root) %{_libdir}/libpostproc.so
-%attr(755,root,root) %{_libdir}/libswresample.so
-%attr(755,root,root) %{_libdir}/libswscale.so
+%{_libdir}/libavcodec.so
+%{_libdir}/libavdevice.so
+%{_libdir}/libavfilter.so
+%{_libdir}/libavformat.so
+%{_libdir}/libavutil.so
+%{_libdir}/libpostproc.so
+%{_libdir}/libswresample.so
+%{_libdir}/libswscale.so
 %{_includedir}/ffmpeg
 %{_includedir}/libavcodec
 %{_includedir}/libavdevice
