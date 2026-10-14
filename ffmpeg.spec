@@ -62,6 +62,7 @@
 %bcond_with	mfx		# MFX hardware acceleration support
 %bcond_without	modplug		# ModPlug via libmodplug
 %bcond_with	npp		# NVIDIA Performance Primitives-based code (requires nonfree) [BR: libnppc+libnppi, npp.h]
+%bcond_with	ocio		# OpenColorIO for color management
 %bcond_without	omx		# OpenMAX IL support
 %bcond_without	openal		# OpenAL 1.1 capture support
 %bcond_without	openapv		# APV codec encoding support via OpenAPV
@@ -104,6 +105,7 @@
 %bcond_without	x264		# H.264 x264 encoder
 %bcond_without	x265		# H.265/HEVC x265 encoder
 %bcond_without	xevc		# MPEG-5 EVC decoding/encoding via xecd/xeve
+%bcond_with	xevcb		# MPEG-5 EVC Base Profile decoding/encoding via xecdb/xeveb (disabled xevc)
 %bcond_without	xvid		# vid encoding via xvidcore
 %bcond_without	zimg		# zscale filter based on z.lib
 %bcond_without	zmq		# 0MQ message passing
@@ -126,6 +128,9 @@
 %if %{with vpl}
 %undefine	with_mfx
 %endif
+%if %{with xevcb}
+%undefine	with_xevc
+%endif
 
 %ifnarch %{ix86} %{x8664}
 %undefine	with_ffnvcodec
@@ -142,7 +147,7 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	8.1.1
+Version:	8.1.3
 Release:	0.1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
@@ -151,16 +156,17 @@ Release:	0.1
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	https://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	f423232dd414c77008dfd85ea5523b8c
+# Source0-md5:	cd9773741f58bf6517cef5cc9b5ab0c5
 Patch0:		%{name}-omx-libnames.patch
 Patch1:		%{name}-atadenoise.patch
 Patch2:		v4l2-request-hwdec.patch
 URL:		https://ffmpeg.org/
 %{?with_avisynth:BuildRequires:	AviSynthPlus-devel >= 3.7.3}
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.11}
-%{?with_lcevcdec:BuildRequires:	LCEVCdec-devel >= 2.0.0}
+%{?with_lcevcdec:BuildRequires:	LCEVCdec-devel >= 4.0.0}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
 %{?with_opencl:BuildRequires:	OpenCL-devel >= 1.2}
+%{?with_ocio:BuildRequires:	OpenColorIO-devel}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
 # libomxil-bellagio-devel or limoi-core-devel (just headers, library is dlopened at runtime)
 %{?with_omx:BuildRequires:	OpenMAX-IL-devel}
@@ -174,7 +180,7 @@ BuildRequires:	bzip2-devel
 %{?with_cairo:BuildRequires:	cairo-devel}
 BuildRequires:	celt-devel >= 0.11.0
 %{?with_codec2:BuildRequires:	codec2-devel}
-%{?with_dav1d:BuildRequires:	dav1d-devel >= 0.5.0}
+%{?with_dav1d:BuildRequires:	dav1d-devel >= 1.0.0}
 %{?with_avs2:BuildRequires:	davs2-devel >= 1.6}
 %{?with_fdk_aac:BuildRequires:	fdk-aac-devel}
 %{?with_flite:BuildRequires:	flite-devel >= 1.4}
@@ -227,6 +233,8 @@ BuildRequires:	libraw1394-devel >= 2
 BuildRequires:	librtmp-devel
 %{?with_ssh:BuildRequires:	libssh-devel >= 0.6.0}
 %{?with_smb:BuildRequires:	libsmbclient-devel}
+# TODO: C++11 for nvcc, C++17 for libtorch
+BuildRequires:	libstdc++-devel
 %{?with_theora:BuildRequires:	libtheora-devel >= 1.0-0.beta3}
 BuildRequires:	libtool >= 2:1.4d-3
 BuildRequires:	libv4l-devel
@@ -259,6 +267,7 @@ BuildRequires:	nasm
 %endif
 %{?with_ffnvcodec:BuildRequires:	nv-codec-headers >= 12.1.14.0}
 %{?with_openapv:BuildRequires:	openapv-devel >= 0.2.0.0}
+%{?with_openapv:BuildRequires:	openapv-devel < 1}
 # amrnb,amrwb
 %{?with_amr:BuildRequires:	opencore-amr-devel}
 %{?with_opencv:BuildRequires:	opencv-devel >= 2}
@@ -302,8 +311,10 @@ BuildRequires:	twolame-devel >= 0.3.10
 %{?with_whisper:BuildRequires:	whisper.cpp-devel >= 1.7.5}
 %{?with_avs:BuildRequires:	xavs-devel}
 %{?with_avs2:BuildRequires:	xavs2-devel >= 1.3}
-%{?with_xevc:BuildRequires:	xevd-devel >= 0.4.1}
-%{?with_xevc:BuildRequires:	xeve-devel >= 0.5.1}
+%if %{with xevc} || %{with xevcb}
+BuildRequires:	xevd-devel >= 0.4.1
+BuildRequires:	xeve-devel >= 0.5.1
+%endif
 BuildRequires:	xorg-lib-libX11-devel
 BuildRequires:	xorg-lib-libXext-devel
 BuildRequires:	xorg-lib-libXv-devel
@@ -347,13 +358,13 @@ telewizyjnej.
 Summary:	ffmpeg libraries
 Summary(pl.UTF-8):	Biblioteki ffmpeg
 Group:		Libraries
-%{?with_lcevcdec:Requires:	LCEVCdec%{?_isa} >= 2.0.0}
+%{?with_lcevcdec:Requires:	LCEVCdec%{?_isa} >= 4.0.0}
 Requires:	SDL2%{?_isa} >= 2.0.1
 %{?with_vulkan:Requires:	Vulkan-Loader%{?_isa} >= 1.4.317}
 %{?with_aom:Requires:	aom%{?_isa} >= 2.0.0}
 %{?with_cairo:Requires:	cairo%{?_isa}}
 Requires:	celt%{?_isa} >= 0.11.0
-%{?with_dav1d:Requires:	dav1d%{?_isa} >= 0.5.0}
+%{?with_dav1d:Requires:	dav1d%{?_isa} >= 1.0.0}
 %{?with_avs2:Requires:	davs2%{?_isa} >= 1.6}
 %{?with_flite:Requires:	flite%{?_isa} >= 1.4}
 %if "%(rpm -q --qf '%{V}' gnutls-devel)" >= "3.0.20"
@@ -407,8 +418,10 @@ Requires:	twolame-libs%{?_isa} >= 0.3.10
 %{?with_vvenc:Requires:	vvenc%{?_isa} >= 1.6.1}
 %{?with_whisper:Requires:	whisper.cpp%{?_isa} >= 1.7.5}
 %{?with_avs2:Requires:	xavs2%{?_isa} >= 1.3}
-%{?with_xevc:Requires:	xevd%{?_isa} >= 0.4.1}
-%{?with_xevc:Requires:	xeve%{?_isa} >= 0.4.3}
+%if %{with xevc} || %{with xevcb}
+Requires:	xevd%{?_isa} >= 0.4.1
+Requires:	xeve%{?_isa} >= 0.4.3
+%endif
 %{?with_xvid:Requires:	xvid%{?_isa} >= 1:1.1.0}
 %{?with_zmq:Requires:	zeromq%{?_isa} >= 4.2.1}
 %{?with_zimg:Requires:	zimg%{?_isa} >= 2.7.0}
@@ -436,9 +449,10 @@ Summary(pl.UTF-8):	Pliki nagłówkowe ffmpeg
 Group:		Development/Libraries
 Requires:	%{name}-libs%{?_isa} = %{version}-%{release}
 # Libs.private from *.pc
-%{?with_lcevcdec:Requires:	LCEVCdec-devel%{?_isa} >= 2.0.0}
+%{?with_lcevcdec:Requires:	LCEVCdec-devel%{?_isa} >= 4.0.0}
 %{?with_openal:Requires:	OpenAL-devel%{?_isa} >= 1.1}
 %{?with_opencl:Requires:	OpenCL-devel >= 1.2}
+%{?with_ocio:BuildRequires:	OpenColorIO-devel%{?_isa}}
 %{?with_opengl:Requires:	OpenGL-devel}
 Requires:	SDL2-devel%{?_isa} >= 2.0.1
 %{?with_vulkan:Requires:	Vulkan-Loader-devel%{?_isa} >= 1.4.317}
@@ -449,7 +463,7 @@ Requires:	bzip2-devel%{?_isa}
 %{?with_cairo:Requires:	cairo-devel%{?_isa}}
 Requires:	celt-devel%{?_isa} >= 0.11.0
 %{?with_codec2:Requires:	codec2-devel%{?_isa}}
-%{?with_dav1d:Requires:	dav1d-devel%{?_isa} >= 0.5.0}
+%{?with_dav1d:Requires:	dav1d-devel%{?_isa} >= 1.0.0}
 %{?with_avs2:Requires:	davs2-devel%{?_isa} >= 1.6}
 %{?with_fdk_aac:Requires:	fdk-aac-devel%{?_isa}}
 %{?with_flite:Requires:	flite-devel%{?_isa} >= 1.4}
@@ -546,8 +560,10 @@ Requires:	twolame-devel%{?_isa} >= 0.3.10
 %{?with_whisper:Requires:	whisper.cpp-devel%{?_isa} >= 1.7.5}
 %{?with_avs:Requires:	xavs-devel%{?_isa}}
 %{?with_avs2:Requires:	xavs2-devel%{?_isa} >= 1.3}
-%{?with_xevc:Requires:	xevd-devel%{?_isa} >= 0.4.1}
-%{?with_xevc:Requires:	xeve-devel%{?_isa} >= 0.4.3}
+%if %{with xevc} || %{with xevcb}
+Requires:	xevd-devel%{?_isa} >= 0.4.1
+Requires:	xeve-devel%{?_isa} >= 0.4.3
+%endif
 Requires:	xorg-lib-libX11-devel%{?_isa}
 Requires:	xorg-lib-libXext-devel%{?_isa}
 Requires:	xorg-lib-libXv-devel%{?_isa}
@@ -745,6 +761,7 @@ EOF
 	--enable-libmp3lame \
 	%{?with_libmysofa:--enable-libmysofa} \
 	%{?with_openapv:--enable-liboapv} \
+	%{?with_libopencolorio:--enable-libopencolorio} \
 	%{?with_amr:--enable-libopencore-amrnb} \
 	%{?with_amr:--enable-libopencore-amrwb} \
 	%{?with_opencv:--enable-libopencv} \
@@ -790,7 +807,9 @@ EOF
 	%{?with_avs2:--enable-libxavs2} \
 	--enable-libxcb \
 	%{?with_xevc:--enable-libxevd} \
+	%{?with_xevcb:--enable-libxevdb} \
 	%{?with_xevc:--enable-libxeve} \
+	%{?with_xevcb:--enable-libxeveb} \
 	%{?with_libxml2:--enable-libxml2} \
 	%{?with_xvid:--enable-libxvid} \
 	%{?with_zimg:--enable-libzimg} \
@@ -904,19 +923,19 @@ rm -rf $RPM_BUILD_ROOT
 
 %files libs
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libavcodec.so.*.*.*
+%{_libdir}/libavcodec.so.*.*.*
 %ghost %{_libdir}/libavcodec.so.62
-%attr(755,root,root) %{_libdir}/libavdevice.so.*.*.*
+%{_libdir}/libavdevice.so.*.*.*
 %ghost %{_libdir}/libavdevice.so.62
-%attr(755,root,root) %{_libdir}/libavfilter.so.*.*.*
+%{_libdir}/libavfilter.so.*.*.*
 %ghost %{_libdir}/libavfilter.so.11
-%attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
+%{_libdir}/libavformat.so.*.*.*
 %ghost %{_libdir}/libavformat.so.62
-%attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
+%{_libdir}/libavutil.so.*.*.*
 %ghost %{_libdir}/libavutil.so.60
-%attr(755,root,root) %{_libdir}/libswresample.so.*.*.*
+%{_libdir}/libswresample.so.*.*.*
 %ghost %{_libdir}/libswresample.so.6
-%attr(755,root,root) %{_libdir}/libswscale.so.*.*.*
+%{_libdir}/libswscale.so.*.*.*
 %ghost %{_libdir}/libswscale.so.9
 
 %files devel
