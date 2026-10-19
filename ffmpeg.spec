@@ -141,7 +141,7 @@ Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
 Version:	9.0.2
-Release:	1
+Release:	2
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
 # v3 (allows *GPLv3 or Apache-licensed libs): gmp lensfun opencore-amr vmaf vo-*enc rkmpp
@@ -152,6 +152,7 @@ Source0:	https://ffmpeg.org/releases/%{name}-%{version}.tar.xz
 # Source0-md5:	4c47fa111bd791da246ec07748ba5e04
 Patch0:		%{name}-atadenoise.patch
 Patch1:		v4l2-request-hwdec.patch
+Patch2:		%{name}-openapv-1.1.patch
 URL:		https://ffmpeg.org/
 %{?with_avisynth:BuildRequires:	AviSynthPlus-devel >= 3.7.3}
 %{?with_amf:BuildRequires:	amf-headers >= 1.5.2}
@@ -605,6 +606,7 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 %if %{with v4l2_request}
 %patch -P1 -p1
 %endif
+%patch -P2 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
