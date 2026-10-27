@@ -64,6 +64,7 @@
 %bcond_without	openal		# OpenAL 1.1 capture support
 %bcond_without	openapv		# APV codec encoding support via OpenAPV
 %bcond_without	opencl		# OpenCL 1.2 code
+%bcond_without	opencolorio	# color management via OpenColorIO
 %bcond_with	opencv		# OpenCV video filtering
 %bcond_without	opengl		# OpenGL rendering support
 %bcond_with	openh264	# OpenH264 H.264 encoder
@@ -157,9 +158,10 @@ URL:		https://ffmpeg.org/
 %{?with_avisynth:BuildRequires:	AviSynthPlus-devel >= 3.7.3}
 %{?with_amf:BuildRequires:	amf-headers >= 1.5.2}
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.11}
-%{?with_lcevcdec:BuildRequires:	LCEVCdec-devel >= 2.0.0}
+%{?with_lcevcdec:BuildRequires:	LCEVCdec-devel >= 4.0.0}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
 %{?with_opencl:BuildRequires:	OpenCL-devel >= 1.2}
+%{?with_opencolorio:BuildRequires:	OpenColorIO-devel}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
 BuildRequires:	SDL2-devel >= 2.0.1
 BuildRequires:	SDL2-devel < 3.0.0
@@ -170,7 +172,7 @@ BuildRequires:	alsa-lib-devel
 BuildRequires:	bzip2-devel
 %{?with_cairo:BuildRequires:	cairo-devel}
 %{?with_codec2:BuildRequires:	codec2-devel}
-%{?with_dav1d:BuildRequires:	dav1d-devel >= 0.5.0}
+%{?with_dav1d:BuildRequires:	dav1d-devel >= 1.0.0}
 %{?with_avs2:BuildRequires:	davs2-devel >= 1.6}
 %{?with_fdk_aac:BuildRequires:	fdk-aac-devel}
 %{?with_flite:BuildRequires:	flite-devel >= 1.4}
@@ -213,7 +215,7 @@ BuildRequires:	libcdio-paranoia-devel >= 0.90-2
 %{?with_modplug:BuildRequires:	libmodplug-devel}
 %{?with_libmysofa:BuildRequires:	libmysofa-devel >= 0.7}
 %{?with_openmpt:BuildRequires: libopenmpt-devel >= 0.4.5}
-%{?with_libplacebo:BuildRequires:	libplacebo-devel >= 5.229.0}
+%{?with_libplacebo:BuildRequires:	libplacebo-devel >= 7.351.0}
 %{?with_libquirc:BuildRequires:	libquirc-devel}
 %if %{with dc1394} || %{with iec61883}
 BuildRequires:	libraw1394-devel >= 2
@@ -345,12 +347,12 @@ telewizyjnej.
 Summary:	ffmpeg libraries
 Summary(pl.UTF-8):	Biblioteki ffmpeg
 Group:		Libraries
-%{?with_lcevcdec:Requires:	LCEVCdec%{?_isa} >= 2.0.0}
+%{?with_lcevcdec:Requires:	LCEVCdec%{?_isa} >= 4.0.0}
 Requires:	SDL2%{?_isa} >= 2.0.1
 %{?with_vulkan:Requires:	Vulkan-Loader%{?_isa} >= 1.4.317}
 %{?with_aom:Requires:	aom%{?_isa} >= 2.0.0}
 %{?with_cairo:Requires:	cairo%{?_isa}}
-%{?with_dav1d:Requires:	dav1d%{?_isa} >= 0.5.0}
+%{?with_dav1d:Requires:	dav1d%{?_isa} >= 1.0.0}
 %{?with_avs2:Requires:	davs2%{?_isa} >= 1.6}
 %{?with_flite:Requires:	flite%{?_isa} >= 1.4}
 %if "%(rpm -q --qf '%{V}' gnutls-devel)" >= "3.0.20"
@@ -365,7 +367,7 @@ Requires:	libass%{?_isa} >= 0.11.0
 %{?with_lc3:Requires:	liblc3%{?_isa} >= 1.1.0}
 %{?with_libmysofa:Requires:	libmysofa%{?_isa} >= 0.7}
 %{?with_openmpt:Requires: libopenmpt%{?_isa} >= 0.4.5}
-%{?with_libplacebo:Requires:	libplacebo%{?_isa} >= 4.192.0}
+%{?with_libplacebo:Requires:	libplacebo%{?_isa} >= 7.351.0}
 %{?with_librist:Requires:	librist%{?_isa} >= 0.2.7}
 %{?with_ssh:Requires:	libssh%{?_isa} >= 0.6.0}
 %{?with_theora:Requires:	libtheora%{?_isa} >= 1.0-0.beta3}
@@ -390,7 +392,7 @@ Requires:	lame-libs%{?_isa} >= 3.98.3
 Requires:	openjpeg2%{?_isa} >= 2.1
 %{?with_rabbitmq:Requires:	rabbitmq-c%{?_isa} >= 0.7.1}
 %{?with_rav1e:Requires:	rav1e-libs%{?_isa} >= 0.5.0}
-%{?with_rkmpp:Requires:	rockchip-mpp%{?_isa} >= 1.3.7}
+%{?with_rkmpp:Requires:	rockchip-mpp%{?_isa} >= 1.3.8}
 %{?with_rubberband:Requires:	rubberband-libs%{?_isa} >= 1.8.1}
 %{?with_shine:Requires:	shine%{?_isa} >= 3.0.0}
 Requires:	speex%{?_isa} >= 1:1.2-rc1
@@ -434,7 +436,7 @@ Summary(pl.UTF-8):	Pliki nagłówkowe ffmpeg
 Group:		Development/Libraries
 Requires:	%{name}-libs%{?_isa} = %{version}-%{release}
 # Libs.private from *.pc
-%{?with_lcevcdec:Requires:	LCEVCdec-devel%{?_isa} >= 2.0.0}
+%{?with_lcevcdec:Requires:	LCEVCdec-devel%{?_isa} >= 4.0.0}
 %{?with_openal:Requires:	OpenAL-devel%{?_isa} >= 1.1}
 %{?with_opencl:Requires:	OpenCL-devel >= 1.2}
 %{?with_opengl:Requires:	OpenGL-devel}
@@ -446,7 +448,7 @@ Requires:	alsa-lib-devel%{?_isa}
 Requires:	bzip2-devel%{?_isa}
 %{?with_cairo:Requires:	cairo-devel%{?_isa}}
 %{?with_codec2:Requires:	codec2-devel%{?_isa}}
-%{?with_dav1d:Requires:	dav1d-devel%{?_isa} >= 0.5.0}
+%{?with_dav1d:Requires:	dav1d-devel%{?_isa} >= 1.0.0}
 %{?with_avs2:Requires:	davs2-devel%{?_isa} >= 1.6}
 %{?with_fdk_aac:Requires:	fdk-aac-devel%{?_isa}}
 %{?with_flite:Requires:	flite-devel%{?_isa} >= 1.4}
@@ -520,7 +522,7 @@ Requires:	opus-devel%{?_isa}
 %{?with_qrencode:Requires:	qrencode-devel%{?_isa}}
 %{?with_rabbitmq:Requires:	rabbitmq-c-devel%{?_isa} >= 0.7.1}
 %{?with_rav1e:Requires:	rav1e-devel%{?_isa} >= 0.5.0}
-%{?with_rkmpp:Requires:	rockchip-mpp-devel%{?_isa} >= 1.3.7}
+%{?with_rkmpp:Requires:	rockchip-mpp-devel%{?_isa} >= 1.3.8}
 %{?with_rubberband:Requires:	rubberband-devel%{?_isa} >= 1.8.1}
 %{?with_shine:Requires:	shine-devel%{?_isa} >= 3.0.0}
 %{?with_snappy:Requires:	snappy-devel%{?_isa}}
@@ -742,6 +744,7 @@ EOF
 	%{?with_libmysofa:--enable-libmysofa} \
 	%{?with_onnxruntime:--enable-libonnxruntime} \
 	%{?with_openapv:--enable-liboapv} \
+	%{?with_opencolorio:--enable-libopencolorio} \
 	%{?with_amr:--enable-libopencore-amrnb} \
 	%{?with_amr:--enable-libopencore-amrwb} \
 	%{?with_opencv:--enable-libopencv} \
