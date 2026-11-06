@@ -60,7 +60,7 @@
 %bcond_without	lv2		# LV2 audio filtering
 %bcond_with	mfx		# MFX hardware acceleration support
 %bcond_without	modplug		# ModPlug via libmodplug
-%bcond_without	onnxruntime	# DNN filters backend via ONNX Runtime
+%bcond_with	onnxruntime	# DNN filters backend via ONNX Runtime
 %bcond_without	openal		# OpenAL 1.1 capture support
 %bcond_without	openapv		# APV codec encoding support via OpenAPV
 %bcond_without	opencl		# OpenCL 1.2 code
@@ -142,7 +142,7 @@ Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
 Version:	9.0.2
-Release:	2
+Release:	3
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
 # v3 (allows *GPLv3 or Apache-licensed libs): gmp lensfun opencore-amr vmaf vo-*enc rkmpp
