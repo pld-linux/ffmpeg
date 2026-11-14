@@ -60,11 +60,11 @@
 %bcond_without	lv2		# LV2 audio filtering
 %bcond_with	mfx		# MFX hardware acceleration support
 %bcond_without	modplug		# ModPlug via libmodplug
+%bcond_without	ocio		# color management via OpenColorIO
 %bcond_with	onnxruntime	# DNN filters backend via ONNX Runtime
 %bcond_without	openal		# OpenAL 1.1 capture support
 %bcond_without	openapv		# APV codec encoding support via OpenAPV
 %bcond_without	opencl		# OpenCL 1.2 code
-%bcond_without	opencolorio	# color management via OpenColorIO
 %bcond_with	opencv		# OpenCV video filtering
 %bcond_without	opengl		# OpenGL rendering support
 %bcond_with	openh264	# OpenH264 H.264 encoder
@@ -112,6 +112,7 @@
 %bcond_with	tests		# "make check" (some tests fail as of 2.5)
 
 %if %{with bootstrap}
+%undefine	with_ocio
 %undefine	with_opencv
 %undefine	with_chromaprint
 %endif
@@ -142,7 +143,7 @@ Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
 Version:	9.0.2
-Release:	3.1
+Release:	3.2
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
 # v3 (allows *GPLv3 or Apache-licensed libs): gmp lensfun opencore-amr vmaf vo-*enc rkmpp
@@ -161,7 +162,7 @@ URL:		https://ffmpeg.org/
 %{?with_lcevcdec:BuildRequires:	LCEVCdec-devel >= 4.0.0}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
 %{?with_opencl:BuildRequires:	OpenCL-devel >= 1.2}
-%{?with_opencolorio:BuildRequires:	OpenColorIO-devel}
+%{?with_ocio:BuildRequires:	OpenColorIO-devel}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
 BuildRequires:	SDL2-devel >= 2.0.1
 BuildRequires:	SDL2-devel < 3.0.0
@@ -744,7 +745,7 @@ EOF
 	%{?with_libmysofa:--enable-libmysofa} \
 	%{?with_onnxruntime:--enable-libonnxruntime} \
 	%{?with_openapv:--enable-liboapv} \
-	%{?with_opencolorio:--enable-libopencolorio} \
+	%{?with_ocio:--enable-libopencolorio} \
 	%{?with_amr:--enable-libopencore-amrnb} \
 	%{?with_amr:--enable-libopencore-amrwb} \
 	%{?with_opencv:--enable-libopencv} \
