@@ -275,7 +275,8 @@ BuildRequires:	pkgconfig
 %{?with_qrencode:BuildRequires:	qrencode-devel}
 %{?with_rabbitmq:BuildRequires:	rabbitmq-c-devel >= 0.7.1}
 %{?with_rav1e:BuildRequires:	rav1e-devel >= 0.5.0}
-%{?with_rkmpp:BuildRequires:	rockchip-mpp-devel >= 1.3.7}
+# pkgconfig(rockchip_mpp) >= 1.3.8
+%{?with_rkmpp:BuildRequires:	rockchip-mpp-devel >= 1:1.0.0}
 BuildRequires:	rpmbuild(macros) >= 2.025
 %{?with_rubberband:BuildRequires:	rubberband-devel >= 1.8.1}
 %{?with_shaderc:BuildRequires:	shaderc >= 2024.4}
@@ -395,7 +396,7 @@ Requires:	lame-libs%{?_isa} >= 3.98.3
 Requires:	openjpeg2%{?_isa} >= 2.1
 %{?with_rabbitmq:Requires:	rabbitmq-c%{?_isa} >= 0.7.1}
 %{?with_rav1e:Requires:	rav1e-libs%{?_isa} >= 0.5.0}
-%{?with_rkmpp:Requires:	rockchip-mpp%{?_isa} >= 1.3.8}
+%{?with_rkmpp:Requires:	rockchip-mpp%{?_isa} >= 1:1.0.0}
 %{?with_rubberband:Requires:	rubberband-libs%{?_isa} >= 1.8.1}
 %{?with_shine:Requires:	shine%{?_isa} >= 3.0.0}
 Requires:	speex%{?_isa} >= 1:1.2-rc1
@@ -525,7 +526,7 @@ Requires:	opus-devel%{?_isa}
 %{?with_qrencode:Requires:	qrencode-devel%{?_isa}}
 %{?with_rabbitmq:Requires:	rabbitmq-c-devel%{?_isa} >= 0.7.1}
 %{?with_rav1e:Requires:	rav1e-devel%{?_isa} >= 0.5.0}
-%{?with_rkmpp:Requires:	rockchip-mpp-devel%{?_isa} >= 1.3.8}
+%{?with_rkmpp:Requires:	rockchip-mpp-devel%{?_isa} >= 1:1.0.0}
 %{?with_rubberband:Requires:	rubberband-devel%{?_isa} >= 1.8.1}
 %{?with_shine:Requires:	shine-devel%{?_isa} >= 3.0.0}
 %{?with_snappy:Requires:	snappy-devel%{?_isa}}
@@ -838,7 +839,10 @@ EOF
 # CC_O to add -c to commandline. makefile should be patched
 %{__make} tools/qt-faststart V=1 CC_O='-c -o $@'
 
-%{?with_tests:%{__make} check V=1}
+%if %{with tests}
+%{__make} check \
+	V=1
+%endif
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -904,19 +908,19 @@ rm -rf $RPM_BUILD_ROOT
 
 %files libs
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libavcodec.so.*.*.*
+%{_libdir}/libavcodec.so.*.*.*
 %ghost %{_libdir}/libavcodec.so.63
-%attr(755,root,root) %{_libdir}/libavdevice.so.*.*.*
+%{_libdir}/libavdevice.so.*.*.*
 %ghost %{_libdir}/libavdevice.so.63
-%attr(755,root,root) %{_libdir}/libavfilter.so.*.*.*
+%{_libdir}/libavfilter.so.*.*.*
 %ghost %{_libdir}/libavfilter.so.12
-%attr(755,root,root) %{_libdir}/libavformat.so.*.*.*
+%{_libdir}/libavformat.so.*.*.*
 %ghost %{_libdir}/libavformat.so.63
-%attr(755,root,root) %{_libdir}/libavutil.so.*.*.*
+%{_libdir}/libavutil.so.*.*.*
 %ghost %{_libdir}/libavutil.so.61
-%attr(755,root,root) %{_libdir}/libswresample.so.*.*.*
+%{_libdir}/libswresample.so.*.*.*
 %ghost %{_libdir}/libswresample.so.7
-%attr(755,root,root) %{_libdir}/libswscale.so.*.*.*
+%{_libdir}/libswscale.so.*.*.*
 %ghost %{_libdir}/libswscale.so.10
 
 %files devel
