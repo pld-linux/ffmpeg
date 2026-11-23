@@ -25,6 +25,7 @@
 %bcond_without	cairo		# drawvg filter via libcairo
 %bcond_without	codec2		# codec2 support using libcodec2
 %bcond_without	chromaprint	# audio fingerprinting with chromaprint
+%bcond_without	curl		# HTTP(S) protocol via libcurl
 %bcond_with	cudasdk		# NVIDIA CUDA code using nvcc from CUDA SDK [BR: cuda.h, non-free]
 %bcond_with	dav1d		# AV1 decoding via libdav1d
 %bcond_without	dc1394		# IIDC-1394 grabbing using libdc1394
@@ -66,7 +67,6 @@
 %bcond_without	openapv		# APV codec encoding support via OpenAPV
 %bcond_without	opencl		# OpenCL 1.2 code
 %bcond_with	opencv		# OpenCV video filtering
-%bcond_without	opengl		# OpenGL rendering support
 %bcond_with	openh264	# OpenH264 H.264 encoder
 %bcond_without	openmpt		# OpenMPT module decoder
 %bcond_with	pocketsphinx	# asr filter using PocketSphinx
@@ -120,7 +120,7 @@
 %endif
 %if %{without libdrm}
 %undefine	with_rkmpp
-%undefine	v4l2_request
+%undefine	with_v4l2_request
 %endif
 %if %{with glslang}
 %undefine	with_shaderc
@@ -144,8 +144,8 @@
 Summary:	FFmpeg - a very fast video and audio converter
 Summary(pl.UTF-8):	FFmpeg - szybki konwerter audio/wideo
 Name:		ffmpeg
-Version:	9.0.2
-Release:	4
+Version:	9.1
+Release:	1
 # LGPL or GPL, chosen at configure time (GPL version is more featured)
 # GPL: frei0r libcdio libdavs2 rubberband vidstab x264 x265 xavs xavs2 xvid
 # v3 (allows *GPLv3 or Apache-licensed libs): gmp lensfun opencore-amr vmaf vo-*enc rkmpp
@@ -153,19 +153,20 @@ Release:	4
 License:	GPL v3+ with LGPL v3+ parts
 Group:		Applications/Multimedia
 Source0:	https://ffmpeg.org/releases/%{name}-%{version}.tar.xz
-# Source0-md5:	4c47fa111bd791da246ec07748ba5e04
+# Source0-md5:	2fcd80b8786b144de3952e57209a3a0d
 Patch0:		%{name}-atadenoise.patch
 Patch1:		v4l2-request-hwdec.patch
-Patch2:		%{name}-openapv-1.1.patch
+Patch2:		%{name}-CVE-2026-125243.patch
+Patch3:		%{name}-CVE-2026-125208-125270.patch
+Patch4:		%{name}-v4l2-mplane-copy.patch
 URL:		https://ffmpeg.org/
 %{?with_avisynth:BuildRequires:	AviSynthPlus-devel >= 3.7.3}
 %{?with_amf:BuildRequires:	amf-headers >= 1.5.2}
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.11}
-%{?with_lcevcdec:BuildRequires:	LCEVCdec-devel >= 4.0.0}
+%{?with_lcevcdec:BuildRequires:	LCEVCdec-devel >= 4.2.0}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
 %{?with_opencl:BuildRequires:	OpenCL-devel >= 1.2}
 %{?with_ocio:BuildRequires:	OpenColorIO-devel}
-%{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
 BuildRequires:	SDL2-devel >= 2.0.1
 BuildRequires:	SDL2-devel < 3.0.0
 %{?with_vulkan:BuildRequires:	Vulkan-Loader-devel >= 1.4.317}
@@ -175,6 +176,7 @@ BuildRequires:	alsa-lib-devel
 BuildRequires:	bzip2-devel
 %{?with_cairo:BuildRequires:	cairo-devel}
 %{?with_codec2:BuildRequires:	codec2-devel}
+%{?with_curl:BuildRequires:	curl-devel >= 7.88.0}
 %{?with_dav1d:BuildRequires:	dav1d-devel >= 1.0.0}
 %{?with_avs2:BuildRequires:	davs2-devel >= 1.6}
 %{?with_fdk_aac:BuildRequires:	fdk-aac-devel}
@@ -182,6 +184,10 @@ BuildRequires:	bzip2-devel
 BuildRequires:	fontconfig-devel
 BuildRequires:	freetype-devel
 %{?with_frei0r:BuildRequires:	frei0r-devel}
+%if %{with frei0r} && %{with tests}
+# FATE frei0r tests load distort0r and onecol0r
+BuildRequires:	frei0r-plugins
+%endif
 %{?with_fribidi:BuildRequires:	fribidi-devel}
 %{?with_gme:BuildRequires:	game-music-emu-devel}
 BuildRequires:	gcc >= 6:4.7
@@ -195,7 +201,7 @@ BuildRequires:	jack-audio-connection-kit-devel
 BuildRequires:	lame-libs-devel >= 3.98.3
 %{?with_lcms:BuildRequires:	lcms2-devel >= 2.13}
 %{?with_lensfun:BuildRequires:	lensfun-devel >= 0.3.95}
-%{?with_aribcaption:BuildRequires:	libaribcaption-devel}
+%{?with_libaribcaption:BuildRequires:	libaribcaption-devel}
 BuildRequires:	libass-devel >= 0.11.0
 %ifnarch %arch_with_atomics64
 BuildRequires:	libatomic-devel
@@ -351,11 +357,12 @@ telewizyjnej.
 Summary:	ffmpeg libraries
 Summary(pl.UTF-8):	Biblioteki ffmpeg
 Group:		Libraries
-%{?with_lcevcdec:Requires:	LCEVCdec%{?_isa} >= 4.0.0}
+%{?with_lcevcdec:Requires:	LCEVCdec%{?_isa} >= 4.2.0}
 Requires:	SDL2%{?_isa} >= 2.0.1
 %{?with_vulkan:Requires:	Vulkan-Loader%{?_isa} >= 1.4.317}
 %{?with_aom:Requires:	aom%{?_isa} >= 2.0.0}
 %{?with_cairo:Requires:	cairo%{?_isa}}
+%{?with_curl:Requires:	curl-libs%{?_isa} >= 7.88.0}
 %{?with_dav1d:Requires:	dav1d%{?_isa} >= 1.0.0}
 %{?with_avs2:Requires:	davs2%{?_isa} >= 1.6}
 %{?with_flite:Requires:	flite%{?_isa} >= 1.4}
@@ -412,7 +419,7 @@ Requires:	twolame-libs%{?_isa} >= 0.3.10
 %{?with_whisper:Requires:	whisper.cpp%{?_isa} >= 1.7.5}
 %{?with_avs2:Requires:	xavs2%{?_isa} >= 1.3}
 %{?with_xevc:Requires:	xevd%{?_isa} >= 0.4.1}
-%{?with_xevc:Requires:	xeve%{?_isa} >= 0.4.3}
+%{?with_xevc:Requires:	xeve%{?_isa} >= 0.5.1}
 %{?with_xvid:Requires:	xvid%{?_isa} >= 1:1.1.0}
 %{?with_zmq:Requires:	zeromq%{?_isa} >= 4.2.1}
 %{?with_zimg:Requires:	zimg%{?_isa} >= 2.7.0}
@@ -440,10 +447,9 @@ Summary(pl.UTF-8):	Pliki nagłówkowe ffmpeg
 Group:		Development/Libraries
 Requires:	%{name}-libs%{?_isa} = %{version}-%{release}
 # Libs.private from *.pc
-%{?with_lcevcdec:Requires:	LCEVCdec-devel%{?_isa} >= 4.0.0}
+%{?with_lcevcdec:Requires:	LCEVCdec-devel%{?_isa} >= 4.2.0}
 %{?with_openal:Requires:	OpenAL-devel%{?_isa} >= 1.1}
 %{?with_opencl:Requires:	OpenCL-devel >= 1.2}
-%{?with_opengl:Requires:	OpenGL-devel}
 Requires:	SDL2-devel%{?_isa} >= 2.0.1
 %{?with_vulkan:Requires:	Vulkan-Loader-devel%{?_isa} >= 1.4.317}
 Requires:	alsa-lib-devel%{?_isa}
@@ -452,6 +458,7 @@ Requires:	alsa-lib-devel%{?_isa}
 Requires:	bzip2-devel%{?_isa}
 %{?with_cairo:Requires:	cairo-devel%{?_isa}}
 %{?with_codec2:Requires:	codec2-devel%{?_isa}}
+%{?with_curl:Requires:	curl-devel%{?_isa} >= 7.88.0}
 %{?with_dav1d:Requires:	dav1d-devel%{?_isa} >= 1.0.0}
 %{?with_avs2:Requires:	davs2-devel%{?_isa} >= 1.6}
 %{?with_fdk_aac:Requires:	fdk-aac-devel%{?_isa}}
@@ -548,7 +555,7 @@ Requires:	twolame-devel%{?_isa} >= 0.3.10
 %{?with_avs:Requires:	xavs-devel%{?_isa}}
 %{?with_avs2:Requires:	xavs2-devel%{?_isa} >= 1.3}
 %{?with_xevc:Requires:	xevd-devel%{?_isa} >= 0.4.1}
-%{?with_xevc:Requires:	xeve-devel%{?_isa} >= 0.4.3}
+%{?with_xevc:Requires:	xeve-devel%{?_isa} >= 0.5.1}
 Requires:	xorg-lib-libX11-devel%{?_isa}
 Requires:	xorg-lib-libXext-devel%{?_isa}
 Requires:	xorg-lib-libXv-devel%{?_isa}
@@ -613,6 +620,8 @@ Dokumentacja pakietu FFmpeg w formacie HTML.
 %patch -P1 -p1
 %endif
 %patch -P2 -p1
+%patch -P3 -p1
+%patch -P4 -p1
 
 # package the grep result for mplayer, the result formatted as ./mplayer/configure
 cat <<EOF > ffmpeg-avconfig
@@ -720,6 +729,7 @@ EOF
 	%{?with_caca:--enable-libcaca} \
 	--enable-libcdio \
 	%{?with_codec2:--enable-libcodec2} \
+	%{?with_curl:--enable-libcurl}%{!?with_curl:--disable-libcurl} \
 	%{?with_dav1d:--enable-libdav1d} \
 	%{?with_avs2:--enable-libdavs2} \
 	%{?with_dc1394:--enable-libdc1394} \
@@ -802,7 +812,6 @@ EOF
 	%{?with_lv2:--enable-lv2} \
 	%{?with_openal:--enable-openal} \
 	%{?with_opencl:--enable-opencl} \
-	%{?with_opengl:--enable-opengl} \
 	%{?with_pocketsphinx:--enable-pocketsphinx} \
 	--enable-pthreads \
 	%{?with_rkmpp:--enable-rkmpp} \
@@ -840,6 +849,8 @@ EOF
 %{__make} tools/qt-faststart V=1 CC_O='-c -o $@'
 
 %if %{with tests}
+# FATE runs ./ffmpeg directly; without this it loads the installed libav* of the same soname
+LD_LIBRARY_PATH=$(for d in libavcodec libavdevice libavfilter libavformat libavutil libswresample libswscale; do printf '%s:' "$(pwd)/$d"; done) \
 %{__make} check \
 	V=1
 %endif
