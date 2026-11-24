@@ -1,5 +1,4 @@
 # TODO:
-# - libastcenc (libastcenc >= 5.4, https://github.com/ARM-software/astc-encoder ?)
 # - libtorch (https://github.com/pytorch/pytorch) [--enable-libtorch, Torch as one DNN backend]
 # - libopenvino
 # - libtensorflow [-ltensorflow tensorflow/c/c_api.h]
@@ -19,6 +18,7 @@
 %bcond_without	aom		# AV1 viden de/encoding via libaom
 %bcond_without	aribb24		# ARIB text and caption decoding via libaribb24
 %bcond_without	avisynth	# AviSynth scripts support
+%bcond_with	astc		# ASTC image encoding/decoding astc-encoder
 %bcond_without	avs		# AVS encoding via xavs
 %bcond_without	avs2		# AVS2 de/encoding via libdavs2/libxavs2
 %bcond_without	bs2b		# BS2B audio filter support
@@ -162,7 +162,6 @@ Patch3:		%{name}-CVE-2026-125208-125270.patch
 Patch4:		%{name}-v4l2-mplane-copy.patch
 URL:		https://ffmpeg.org/
 %{?with_avisynth:BuildRequires:	AviSynthPlus-devel >= 3.7.3}
-%{?with_amf:BuildRequires:	amf-headers >= 1.5.2}
 %{?with_decklink:BuildRequires:	Blackmagic_DeckLink_SDK >= 10.11}
 %{?with_lcevcdec:BuildRequires:	LCEVCdec-devel >= 4.2.0}
 %{?with_openal:BuildRequires:	OpenAL-devel >= 1.1}
@@ -172,8 +171,10 @@ BuildRequires:	SDL2-devel >= 2.0.1
 BuildRequires:	SDL2-devel < 3.0.0
 %{?with_vulkan:BuildRequires:	Vulkan-Loader-devel >= 1.4.317}
 BuildRequires:	alsa-lib-devel
+%{?with_amf:BuildRequires:	amf-headers >= 1.5.2}
 %{?with_aom:BuildRequires:	aom-devel >= 2.0.0}
 %{?with_aribb24:BuildRequires:	aribb24-devel}
+%{?with_astc:BuildRequires:	astc-encoder-devel >= 5.4}
 BuildRequires:	bzip2-devel
 %{?with_cairo:BuildRequires:	cairo-devel}
 %{?with_codec2:BuildRequires:	codec2-devel}
@@ -362,6 +363,7 @@ Group:		Libraries
 Requires:	SDL2%{?_isa} >= 2.0.1
 %{?with_vulkan:Requires:	Vulkan-Loader%{?_isa} >= 1.4.317}
 %{?with_aom:Requires:	aom%{?_isa} >= 2.0.0}
+%{?with_astc:Requires:	astc-encoder%{?_isa} >= 5.4}
 %{?with_cairo:Requires:	cairo%{?_isa}}
 %{?with_curl:Requires:	curl-libs%{?_isa} >= 7.88.0}
 %{?with_dav1d:Requires:	dav1d%{?_isa} >= 1.0.0}
@@ -456,6 +458,7 @@ Requires:	SDL2-devel%{?_isa} >= 2.0.1
 Requires:	alsa-lib-devel%{?_isa}
 %{?with_aom:Requires:	aom-devel%{?_isa} >= 2.0.0}
 %{?with_aribb24:Requires:	aribb24-devel%{?_isa}}
+%{?with_astc:Requires:	astc-encoder-devel%{?_isa} >= 5.4}
 Requires:	bzip2-devel%{?_isa}
 %{?with_cairo:Requires:	cairo-devel%{?_isa}}
 %{?with_codec2:Requires:	codec2-devel%{?_isa}}
@@ -725,6 +728,7 @@ EOF
 	%{?with_aribb24:--enable-libaribb24} \
 	%{?with_libaribcaption:--enable-libaribcaption} \
 	--enable-libass \
+	%{?with_astc:--enable-libastcenc} \
 	--enable-libbluray \
 	%{?with_bs2b:--enable-libbs2b} \
 	%{?with_caca:--enable-libcaca} \
