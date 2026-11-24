@@ -1,4 +1,5 @@
 # TODO:
+# - libastcenc (libastcenc >= 5.4, https://github.com/ARM-software/astc-encoder ?)
 # - libtorch (https://github.com/pytorch/pytorch) [--enable-libtorch, Torch as one DNN backend]
 # - libopenvino
 # - libtensorflow [-ltensorflow tensorflow/c/c_api.h]
@@ -31,7 +32,7 @@
 %bcond_without	dc1394		# IIDC-1394 grabbing using libdc1394
 %bcond_with	decklink	# Blackmagic DeckLink I/O support (requires nonfree)
 %bcond_without	dvd		# DVD demuxing via libdvdnav+libdvdread
-%bcond_with	fdk_aac		# AAC de/encoding via libfdk_aac (requires nonfree)
+%bcond_with	fdk_aac		# AAC/xHE-AAC de/encoding via libfdk_aac/libfdk_xhe_aac (requires nonfree)
 %bcond_with	mpeghdec	# MPEG-H 3D Audio decoding via libmpeghdec (requires nonfree)
 %bcond_without	ffnvcodec	# NVIDIA codecs support using ffnvcodec headers (covered: cuda cuvid nvdec nvenc)
 %bcond_without	flite		# flite voice synthesis support
@@ -179,7 +180,7 @@ BuildRequires:	bzip2-devel
 %{?with_curl:BuildRequires:	curl-devel >= 7.88.0}
 %{?with_dav1d:BuildRequires:	dav1d-devel >= 1.0.0}
 %{?with_avs2:BuildRequires:	davs2-devel >= 1.6}
-%{?with_fdk_aac:BuildRequires:	fdk-aac-devel}
+%{?with_fdk_aac:BuildRequires:	fdk-aac-devel >= 3.0.0}
 %{?with_flite:BuildRequires:	flite-devel >= 1.4}
 BuildRequires:	fontconfig-devel
 BuildRequires:	freetype-devel
@@ -461,7 +462,7 @@ Requires:	bzip2-devel%{?_isa}
 %{?with_curl:Requires:	curl-devel%{?_isa} >= 7.88.0}
 %{?with_dav1d:Requires:	dav1d-devel%{?_isa} >= 1.0.0}
 %{?with_avs2:Requires:	davs2-devel%{?_isa} >= 1.6}
-%{?with_fdk_aac:Requires:	fdk-aac-devel%{?_isa}}
+%{?with_fdk_aac:Requires:	fdk-aac-devel%{?_isa} >= 3.0.0}
 %{?with_flite:Requires:	flite-devel%{?_isa} >= 1.4}
 Requires:	fontconfig-devel%{?_isa}
 Requires:	freetype-devel%{?_isa}
@@ -838,6 +839,7 @@ EOF
 %if %{with nonfree}
 	--enable-nonfree \
 	%{?with_fdk_aac:--enable-libfdk-aac} \
+	%{?with_fdk_aac:--enable-libfdk-xhe-aac} \
 	%{?with_mpeghdec:--enable-libmpeghdec} \
 %endif
 	--enable-runtime-cpudetect
